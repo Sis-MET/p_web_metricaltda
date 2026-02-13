@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Scale, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import Image from "next/image";
+import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 
 export function Footer() {
   return (
@@ -9,10 +10,14 @@ export function Footer() {
           
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white">
-                    <Scale className="w-5 h-5" />
+                <div className="relative w-32 h-10">
+                    <Image 
+                        src="/images/logo/logoMetrica2.png" 
+                        alt="Metrica Logo" 
+                        fill
+                        className="object-contain brightness-0 invert" 
+                    />
                 </div>
-                <span className="text-xl font-bold text-white">Metrica</span>
             </div>
             <p className="text-slate-400 text-sm">
               Líderes en soluciones de pesaje industrial y servicios de calibración con más de 20 años de experiencia.

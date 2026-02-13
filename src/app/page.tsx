@@ -3,7 +3,6 @@ import { Products } from "@/components/sections/Products";
 import { Services } from "@/components/sections/Services";
 import { Certifications } from "@/components/sections/Certifications";
 import { Contact } from "@/components/sections/Contact";
-import { Footer } from "@/components/layout/Footer";
 
 export default function Home() {
   return (
@@ -13,7 +12,6 @@ export default function Home() {
       <Services />
       <Certifications />
       <Contact />
-      <Footer />
     </main>
   );
 }

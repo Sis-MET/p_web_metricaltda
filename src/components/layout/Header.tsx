@@ -2,18 +2,19 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Scale } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { name: "Inicio", href: "/" },
-  { name: "Productos", href: "#productos" },
-  { name: "Servicios", href: "#servicios" },
-  { name: "Certificaciones", href: "#certificaciones" },
-  { name: "Contacto", href: "#contacto" },
+  { name: "Productos", href: "/productos" },
+  { name: "Servicios", href: "/servicios" },
+  { name: "Certificaciones", href: "/certificaciones" },
+  { name: "Contacto", href: "/contacto" },
 ];
 
 export function Header() {
@@ -40,13 +41,17 @@ export function Header() {
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         {/* Logo */}
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-lg flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
-            <Scale className="w-6 h-6" />
+          <div className="relative w-40 h-12">
+             <Image 
+              src="/images/logo/logoMetrica2.png" 
+              alt="Metrica Logo" 
+              fill
+              className="object-contain"
+              priority
+             />
           </div>
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-600 dark:from-blue-400 dark:to-cyan-300">
-            Metrica
-          </span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -65,9 +70,11 @@ export function Header() {
               {item.name}
             </Link>
           ))}
-          <Button variant="default" className="shadow-lg shadow-blue-500/20">
-            Solicitar Cotización
-          </Button>
+          <Link href="/contacto">
+            <Button variant="default" className="shadow-lg shadow-blue-500/20">
+              Solicitar Cotización
+            </Button>
+          </Link>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -99,7 +106,9 @@ export function Header() {
                   {item.name}
                 </Link>
               ))}
-              <Button className="w-full mt-2">Solicitar Cotización</Button>
+              <Link href="/contacto" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button className="w-full mt-2">Solicitar Cotización</Button>
+              </Link>
             </nav>
           </motion.div>
         )}
