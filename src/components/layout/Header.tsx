@@ -19,13 +19,26 @@ const navItems = [
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isPastHero, setIsPastHero] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const scrollY = window.scrollY;
+      const heroHeight = window.innerHeight;
+
+      // 1. Glass effect triggers early (e.g. > 50px)
+      setIsScrolled(scrollY > 50);
+
+      // 2. Text color changes ONLY after passing the Hero section
+      // Subtracting 100px so it transitions just before the white section starts
+      setIsPastHero(scrollY > (heroHeight - 100));
     };
+    
+    // Initial check
+    handleScroll();
+    
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -35,15 +48,14 @@ export function Header() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
-          ? "glass py-3"
+          ? "glass py-3" // Glass border/background triggers early
           : "bg-transparent py-5"
       )}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         {/* Logo */}
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="relative w-40 h-12">
+          <div className="relative w-40 h-14">
              <Image 
               src="/images/logo/logoMetrica2.png" 
               alt="Metrica Logo" 
@@ -55,23 +67,47 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400",
-                pathname === item.href
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-slate-600 dark:text-slate-300"
-              )}
+        <nav className="hidden md:flex items-center gap-1">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={cn(
+                  "relative px-4 py-2 text-sm font-medium transition-colors rounded-full",
+                  // Hover effects
+                  !isActive && (isPastHero 
+                    ? "hover:bg-slate-100 dark:hover:bg-slate-800"
+                    : "hover:bg-white/10"),
+                  // Text Color
+                  isActive 
+                    ? (isPastHero ? "text-slate-900 dark:text-white" : "text-white")
+                    : (isPastHero ? "text-slate-600 dark:text-slate-300" : "text-white/80")
+                )}
+              >
+                {/* Active Pill Background */}
+                {isActive && (
+                  <motion.span
+                    layoutId="active-nav-pill"
+                    className={cn(
+                      "absolute inset-0 rounded-full -z-10 backdrop-blur-sm",
+                      isPastHero 
+                        ? "bg-slate-200/50 dark:bg-slate-700/50" 
+                        : "bg-white/20"
+                    )}
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                {item.name}
+              </Link>
+            );
+          })}
+          <Link href="/contacto" className="ml-4">
+            <Button 
+              className="bg-[#f9e300] hover:bg-[#f9e300]/90 text-slate-900 font-bold shadow-lg shadow-yellow-500/20 transition-all hover:scale-105"
             >
-              {item.name}
-            </Link>
-          ))}
-          <Link href="/contacto">
-            <Button variant="default" className="shadow-lg shadow-blue-500/20">
               Solicitar Cotización
             </Button>
           </Link>
@@ -79,7 +115,10 @@ export function Header() {
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden text-slate-700 dark:text-slate-200"
+          className={cn(
+            "md:hidden transition-colors",
+            isPastHero ? "text-slate-700 dark:text-slate-200" : "text-white"
+          )}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <X /> : <Menu />}
@@ -100,14 +139,21 @@ export function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-lg font-medium text-slate-700 dark:text-slate-200 py-2 border-b border-slate-100 dark:border-slate-800 last:border-0"
+                  className={cn(
+                    "text-lg font-medium py-2 border-b border-slate-100 dark:border-slate-800 last:border-0",
+                    pathname === item.href
+                      ? "text-blue-600 dark:text-blue-400"
+                      : "text-slate-700 dark:text-slate-200"
+                  )}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.name}
                 </Link>
               ))}
               <Link href="/contacto" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button className="w-full mt-2">Solicitar Cotización</Button>
+                <Button className="w-full mt-2 bg-[#f9e300] hover:bg-[#f9e300]/90 text-slate-900 font-bold">
+                  Solicitar Cotización
+                </Button>
               </Link>
             </nav>
           </motion.div>
