@@ -96,7 +96,7 @@ export function Hero() {
   const slide = SLIDES[currentSlide];
 
   return (
-    <section className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-slate-900">
+    <section id="hero-section" className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-slate-900">
       {/* Background Images with Transitions */}
       <AnimatePresence mode="popLayout">
         <motion.div
@@ -131,21 +131,21 @@ export function Hero() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="space-y-6"
             >
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white leading-tight">
+              <h1 className="font-heading text-5xl md:text-7xl font-bold tracking-tight text-white leading-tight">
                 {slide.title}
               </h1>
-              <p className="text-xl md:text-2xl text-slate-200 leading-relaxed max-w-2xl">
+              <p className="font-body text-xl md:text-2xl text-slate-200 leading-relaxed max-w-2xl">
                 {slide.description}
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button size="lg" className="rounded-full text-base px-8 py-6 bg-[#f9e300] text-slate-900 font-bold hover:bg-[#f9e300]/90 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(249,227,0,0.3)]">
+                <Button size="lg" className="font-body rounded-full text-base px-8 py-6 bg-[#f9e300] text-slate-900 font-bold hover:bg-[#f9e300]/90 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(249,227,0,0.3)]">
                   {slide.ctaPrimary} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="rounded-full text-base px-8 py-6 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 backdrop-blur-sm transform-gpu"
+                  className="font-body rounded-full text-base px-8 py-6 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 backdrop-blur-sm transform-gpu"
                 >
                   {slide.ctaSecondary} <Phone className="ml-2 w-5 h-5" />
                 </Button>
