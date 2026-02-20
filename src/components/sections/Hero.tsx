@@ -131,10 +131,10 @@ export function Hero() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="space-y-6"
             >
-              <h1 className="font-heading text-5xl md:text-7xl font-bold tracking-tight text-white leading-tight">
+              <h1 className="font-heading text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
                 {slide.title}
               </h1>
-              <p className="font-body text-xl md:text-2xl text-slate-200 leading-relaxed max-w-2xl">
+              <p className="font-body text-base md:text-lg text-slate-200 leading-relaxed max-w-2xl">
                 {slide.description}
               </p>
               

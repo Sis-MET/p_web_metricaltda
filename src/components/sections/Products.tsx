@@ -21,6 +21,7 @@ const CAMION_DURATION = 6000; // stays 6 s
 export function Products() {
   const sectionRef = useRef<HTMLElement>(null);
   const [slide, setSlide] = useState<0 | 1>(0);
+  const isFirstRender = useRef(true); // skip transition on mount
 
   // Image refs
   const pisoRef   = useRef<HTMLDivElement>(null);
@@ -78,63 +79,50 @@ export function Products() {
 
   /* ── GSAP transition when slide changes ── */
   useEffect(() => {
-    const piso   = pisoRef.current;
-    const camion = camionRef.current;
+    // Skip on initial mount — entrance animation handles the first state
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    const piso    = pisoRef.current;
+    const camion  = camionRef.current;
     const tPiso   = textPisoRef.current;
     const tCamion = textCamionRef.current;
     if (!piso || !camion || !tPiso || !tCamion) return;
 
+    // Kill ALL in-flight animations on these elements before starting a new transition
+    gsap.killTweensOf([piso, camion, tPiso, tCamion]);
+
     if (slide === 1) {
-      // Piso + text-piso fade out
-      gsap.to(tPiso,  { opacity: 0, y: -20, duration: 0.5, ease: "power2.in" });
-      gsap.to(piso,   { opacity: 0, x: "60%", duration: 0.7, ease: "power2.in" });
+      // Hard-reset camion to off-screen left immediately
+      gsap.set(camion,  { x: "-110%", opacity: 0 });
+      gsap.set(tCamion, { opacity: 0, y: 30 });
 
-      // Camion slides in from left
-      gsap.fromTo(camion,
-        { x: "-110%", opacity: 0 },
-        { x: "0%", opacity: 1, duration: 0.9, ease: "power3.out", delay: 0.3 }
-      );
-      // Text-camion fades in
-      gsap.fromTo(tCamion,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", delay: 0.5 }
-      );
+      const tl = gsap.timeline();
+      // Phase 1 (0 – 0.55s): piso exits
+      tl.to(tPiso, { opacity: 0, y: -20, duration: 0.45, ease: "power2.in" }, 0);
+      tl.to(piso,  { opacity: 0, x: "60%", duration: 0.55, ease: "power2.in" }, 0);
+      // Phase 2 (0.55s+): camion enters
+      tl.to(camion,  { x: "0%", opacity: 1, duration: 0.85, ease: "power3.out" }, 0.55);
+      tl.to(tCamion, { opacity: 1, y: 0,   duration: 0.7,  ease: "power3.out" }, 0.7);
+
     } else {
-      // Camion slides out left, text-camion fades out
-      gsap.to(tCamion, { opacity: 0, y: -20, duration: 0.45, ease: "power2.in" });
-      gsap.to(camion,  { x: "-110%", opacity: 0, duration: 0.7, ease: "power2.in" });
+      // Hard-reset piso to off-screen right immediately
+      gsap.set(piso,  { x: "60%", opacity: 0 });
+      gsap.set(tPiso, { opacity: 0, y: 30 });
 
-      // Piso slides back in from right
-      gsap.fromTo(piso,
-        { x: "60%", opacity: 0 },
-        { x: "0%", opacity: 1, duration: 0.9, ease: "power3.out", delay: 0.35 }
-      );
-      gsap.fromTo(tPiso,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", delay: 0.5 }
-      );
+      const tl = gsap.timeline();
+      // Phase 1 (0 – 0.55s): camion exits
+      tl.to(tCamion, { opacity: 0, y: -20,   duration: 0.4,  ease: "power2.in" }, 0);
+      tl.to(camion,  { x: "-110%", opacity: 0, duration: 0.55, ease: "power2.in" }, 0);
+      // Phase 2 (0.55s+): piso enters
+      tl.to(piso,  { x: "0%", opacity: 1, duration: 0.85, ease: "power3.out" }, 0.55);
+      tl.to(tPiso, { opacity: 1, y: 0,   duration: 0.7,  ease: "power3.out" }, 0.7);
     }
   }, [slide]);
 
-  /* ── Mouse-tilt on whichever image is active ── */
-  useEffect(() => {
-    const makeInteractive = (el: HTMLDivElement | null) => {
-      if (!el) return () => {};
-      const onMove = (e: MouseEvent) => {
-        const r  = el.getBoundingClientRect();
-        const dx = (e.clientX - (r.left + r.width  / 2)) / (r.width  / 2);
-        const dy = (e.clientY - (r.top  + r.height / 2)) / (r.height / 2);
-        gsap.to(el, { rotateY: dx * 10, rotateX: -dy * 10, duration: 0.4, ease: "power2.out", transformPerspective: 800 });
-      };
-      const onLeave = () => gsap.to(el, { rotateY: 0, rotateX: 0, duration: 0.6, ease: "power3.out" });
-      el.addEventListener("mousemove", onMove);
-      el.addEventListener("mouseleave", onLeave);
-      return () => { el.removeEventListener("mousemove", onMove); el.removeEventListener("mouseleave", onLeave); };
-    };
-    const c1 = makeInteractive(pisoRef.current);
-    const c2 = makeInteractive(camionRef.current);
-    return () => { c1(); c2(); };
-  }, []);
+  // Mouse-tilt removed — hover effect handled via CSS (see className below)
 
   return (
     <section
@@ -142,9 +130,6 @@ export function Products() {
       id="productos"
       className="relative min-h-[500px] lg:min-h-[540px] bg-slate-50 dark:bg-slate-900 overflow-hidden"
     >
-      {/* Background decoratives */}
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-50/50 dark:bg-blue-900/10 skew-x-12 translate-x-32 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-1/3 h-full bg-cyan-50/50 dark:bg-cyan-900/10 -skew-x-12 -translate-x-32 pointer-events-none" />
 
       {/* ── Ghost grid: both text panels share the same container/grid ── */}
       <div className="absolute inset-0 z-10 pointer-events-none">
@@ -226,7 +211,7 @@ export function Products() {
       {/* ── IMAGE: Balanza de Piso (bottom-right, bleeds down) ── */}
       <div
         ref={pisoRef}
-        className="absolute bottom-[-120px] right-0 lg:right-[4%] w-[20rem] sm:w-[28rem] lg:w-[40rem] cursor-pointer z-20"
+        className="absolute bottom-[-120px] right-0 lg:right-[4%] w-[20rem] sm:w-[28rem] lg:w-[40rem] z-20 transition-transform duration-500 ease-out hover:scale-[1.03]"
         style={{ willChange: "transform" }}
       >
         <Image
@@ -242,7 +227,7 @@ export function Products() {
       {/* ── IMAGE: Báscula de Camión (bottom-left, bleeds down, enters from left) ── */}
       <div
         ref={camionRef}
-        className="absolute bottom-[-100px] left-[-4%] lg:left-[-10%] w-[28rem] sm:w-[42rem] lg:w-[68rem] cursor-pointer z-20"
+        className="absolute bottom-[-100px] left-[-4%] lg:left-[-10%] w-[28rem] sm:w-[42rem] lg:w-[68rem] z-20 transition-transform duration-500 ease-out hover:scale-[1.02]"
         style={{ willChange: "transform", opacity: 0 }}
       >
         <Image

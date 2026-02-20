@@ -1,50 +1,79 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Award, ShieldCheck, FileCheck } from "lucide-react";
-
-const certifications = [
-  { name: "ISO 9001:2015", icon: Award, color: "text-blue-500" },
-  { name: "ISO/IEC 17025", icon: ShieldCheck, color: "text-emerald-500" },
-  { name: "Metrología Legal", icon: FileCheck, color: "text-purple-500" },
-  { name: "Certificación ONAC", icon: Award, color: "text-amber-500" },
-];
+import { ExternalLink } from "lucide-react";
 
 export function Certifications() {
   return (
-    <section id="certificaciones" className="py-20 bg-slate-50 dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-3xl font-bold text-slate-900 dark:text-white mb-4"
-          >
-            Calidad Certificada
-          </motion.h2>
-          <p className="text-slate-600 dark:text-slate-400">
-             Cumplimos con los más altos estándares nacionales e internacionales.
-          </p>
-        </div>
+    <section
+      id="certificaciones"
+      className="py-20 bg-white dark:bg-slate-950 border-y border-slate-200 dark:border-slate-800"
+    >
+      <div className="container mx-auto px-6 lg:px-16">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16"
+        >
+          {/* ── Logos ── */}
+          <div className="flex items-center gap-4 shrink-0">
+            <img
+              src="/images/logo/logo_metrica.svg"
+              alt="Logo Métrica"
+              className="h-20 lg:h-24 w-auto object-contain"
+              draggable={false}
+            />
+            <div className="w-px h-16 bg-slate-200 dark:bg-slate-700" />
+            <img
+              src="/images/logo/ibmetro_logo_acreditado.svg"
+              alt="Acreditado IBMETRO DTA-CET-041"
+              className="h-20 lg:h-24 w-auto object-contain"
+              draggable={false}
+            />
+          </div>
 
-        <div className="flex flex-wrap justify-center gap-8 lg:gap-16 items-center opacity-80 hover:opacity-100 transition-opacity">
-          {certifications.map((cert, index) => (
-            <motion.div
-              key={cert.name}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="group flex flex-col items-center gap-3 p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-slate-100 dark:border-slate-700 w-40 h-40 justify-center"
-            >
-              <cert.icon className={`w-12 h-12 ${cert.color} group-hover:scale-110 transition-transform duration-300`} />
-              <span className="font-semibold text-sm text-center text-slate-700 dark:text-slate-300">
-                {cert.name}
+          {/* ── Text ── */}
+          <div className="flex flex-col gap-4 text-center lg:text-left">
+            <p className="font-body text-slate-600 dark:text-slate-300 text-sm lg:text-base leading-relaxed">
+              Nuestro laboratorio de calibración está acreditado por la{" "}
+              <span className="font-semibold text-slate-800 dark:text-white">
+                Dirección Técnica de Acreditación (DTA)
+              </span>{" "}
+              del{" "}
+              <span className="font-semibold text-slate-800 dark:text-white">
+                Instituto Boliviano de Metrología (IBMETRO)
+              </span>{" "}
+              según{" "}
+              <span className="font-semibold text-slate-800 dark:text-white">
+                NB/ISO/IEC 17025:2018
               </span>
-            </motion.div>
-          ))}
-        </div>
+              . Revise el alcance de nuestra acreditación para calibración de
+              instrumentos de pesaje de pesar de funcionamiento no automático
+              (balanzas) y pesas patrón, en el anexo del certificado de
+              acreditación{" "}
+              <span className="font-semibold text-slate-800 dark:text-white">
+                DTA-CET-041
+              </span>
+              .
+            </p>
+
+            <p className="font-body text-slate-600 dark:text-slate-300 text-sm lg:text-base leading-relaxed">
+              También puede verificar el alcance de acreditación en la página
+              web de IBMETRO:{" "}
+              <a
+                href="https://ibmetro.gob.bo/dta/catalogo-oec?oec=M%C3%A9trica&tramite=&tipo=&norma=&sector=&estado=%C3%A7&pag=1"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400 hover:underline underline-offset-2 transition-colors"
+              >
+                www.ibmetro.gob.bo
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </p>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
