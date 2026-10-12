@@ -1,153 +1,181 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Phone, ChevronRight, ChevronLeft } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { SectionLink } from "@/components/navigation/SectionLink";
+import type { Consulta, SectionId } from "@/lib/navigation";
+import { EASE_IN, EASE_OUT } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
-// Slide Data
-const SLIDES = [
+const SLIDE_MS = 6500;
+
+type Slide = {
+  id: string;
+  label: string;
+  title: [string, string];
+  description: string;
+  image: string;
+  primary: { label: string; section: SectionId };
+  secondary: { label: string; consulta: Consulta };
+};
+
+const SLIDES: Slide[] = [
   {
     id: "industrial",
-    title: (
-      <>
-        Precisión en <br />
-        <span className="text-[#f9e300]">
-          Balanzas Industriales
-        </span>
-      </>
-    ),
+    label: "Balanzas industriales",
+    title: ["Precisión en", "Balanzas Industriales"],
     description:
       "Robustez, Confiabilidad, Precisión y Ergonomía: Las balanzas METTLER TOLEDO están diseñadas para enfrentar los procesos de pesaje más exigentes en entornos industriales desafiantes. Garantizamos la máxima precisión y confiabilidad en cada medición, sin comprometer la facilidad de uso y ergonomía para los operadores.",
-    image: "/images/hero/balanzas_industriales.svg",
-    ctaPrimary: "Ver Catálogo",
-    ctaSecondary: "Cotizar",
+    image: "/images/hero/balanzas-industriales.jpg",
+    primary: { label: "Ver catálogo", section: "productos" },
+    secondary: { label: "Cotizar", consulta: "cotizacion" },
   },
   {
     id: "trucks",
-    title: (
-      <>
-        Control Total con <br />
-        <span className="text-[#f9e300]">
-          Básculas de Camiones
-        </span>
-      </>
-    ),
+    label: "Básculas de camiones",
+    title: ["Control Total con", "Básculas de Camiones"],
     description:
       "La tecnología avanzada, durabilidad y exactitud de las básculas de camiones Powercell PDX de Mettler Toledo permiten controlar grandes volúmenes transportados por los camiones con la más alta precisión.",
-    image: "/images/hero/basculas_camion.svg",
-    ctaPrimary: "Ver Modelos",
-    ctaSecondary: "Asesoría",
+    image: "/images/hero/basculas-camion.jpg",
+    primary: { label: "Ver cómo funciona", section: "demo-camion" },
+    secondary: { label: "Asesoría", consulta: "cotizacion" },
   },
   {
     id: "calibration",
-    title: (
-      <>
-        Confianza en su <br />
-        <span className="text-[#f9e300]">
-          Laboratorio de Calibración
-        </span>
-      </>
-    ),
+    label: "Laboratorio de calibración",
+    title: ["Confianza en su", "Laboratorio de Calibración"],
     description:
       "Garantice la precisión y confiabilidad de sus balanzas y pesas con nuestro servicio de calibración, consulte sobre nuestros alcances.",
-    image: "/images/hero/calibracion.svg",
-    ctaPrimary: "Nuestros Servicios",
-    ctaSecondary: "Agendar",
+    image: "/images/hero/calibracion.jpg",
+    primary: { label: "Nuestros servicios", section: "servicios" },
+    secondary: { label: "Agendar", consulta: "calibracion" },
   },
   {
     id: "support",
-    title: (
-      <>
-        Respaldo con <br />
-        <span className="text-[#f9e300]">
-          Soporte Técnico
-        </span>
-      </>
-    ),
+    label: "Soporte técnico",
+    title: ["Respaldo con", "Soporte Técnico"],
     description:
       "Servicio para balanzas industriales y básculas de camiones. Profesionalismo, experiencia y compromiso para asegurar la precisión y fiabilidad de tus equipos.",
-    image: "/images/hero/soporte_tecnico.svg",
-    ctaPrimary: "Soporte",
-    ctaSecondary: "Contacto",
+    image: "/images/hero/soporte-tecnico.jpg",
+    primary: { label: "Ver soporte", section: "servicios" },
+    secondary: { label: "Contacto", consulta: "soporte" },
   },
 ];
 
-export function Hero() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+/** Barra que se llena durante el slide; al terminar avanza al siguiente. */
+function Progress({ paused, onDone }: { paused: boolean; onDone: () => void }) {
+  return (
+    <span
+      aria-hidden
+      onAnimationEnd={onDone}
+      className="absolute inset-0 origin-left rounded-full bg-sun-400"
+      style={{
+        animation: `hero-progress ${SLIDE_MS}ms linear forwards`,
+        animationPlayState: paused ? "paused" : "running",
+      }}
+    />
+  );
+}
 
-  // Auto-play
+export function Hero() {
+  const [index, setIndex] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+
+  const slide = SLIDES[index];
+  const paused = isHovering || isHidden;
+  const goTo = (next: number) => setIndex((next + SLIDES.length) % SLIDES.length);
+  const next = () => goTo(index + 1);
+  const prev = () => goTo(index - 1);
+
+  // Pausar cuando la pestaña no está visible
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
-    }, 5000);
-    return () => clearInterval(timer);
+    const onVisibility = () => setIsHidden(document.hidden);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
+  const hoverHandlers = {
+    onMouseEnter: () => setIsHovering(true),
+    onMouseLeave: () => setIsHovering(false),
   };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
-  };
-
-  const slide = SLIDES[currentSlide];
 
   return (
-    <section id="hero-section" className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-slate-900">
-      {/* Background Images with Transitions */}
-      <AnimatePresence mode="popLayout">
-        <motion.div
-          key={slide.id}
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1, ease: "easeInOut" }}
-          className="absolute inset-0 z-0"
-        >
-          <Image
-            src={slide.image}
-            alt={slide.id}
-            fill
-            className="object-cover object-center opacity-60"
-            priority
-          />
-          {/* Dark Overlay Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/30" />
-        </motion.div>
-      </AnimatePresence>
+    <section
+      id="inicio"
+      data-header-theme="dark"
+      aria-roledescription="carrusel"
+      aria-label="Destacados"
+      className="relative isolate overflow-hidden bg-navy-950"
+      onTouchStart={(e) => (touchStartX.current = e.touches[0].clientX)}
+      onTouchEnd={(e) => {
+        if (touchStartX.current === null) return;
+        const dx = e.changedTouches[0].clientX - touchStartX.current;
+        if (Math.abs(dx) > 50) (dx < 0 ? next : prev)();
+        touchStartX.current = null;
+      }}
+    >
+      {/* Fondos: todos montados, solo cambia la opacidad (sin parpadeos) */}
+      <div aria-hidden className="absolute inset-0 -z-10">
+        {SLIDES.map((s, i) => (
+          <div
+            key={s.id}
+            className={cn(
+              "absolute inset-0 transition-opacity duration-700 ease-out",
+              i === index ? "opacity-100" : "opacity-0"
+            )}
+          >
+            <Image
+              src={s.image}
+              alt=""
+              fill
+              sizes="100vw"
+              preload={i === 0}
+              loading="eager"
+              className={cn("object-cover", i === index && "animate-hero-zoom")}
+            />
+          </div>
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-r from-navy-950/95 via-navy-950/75 to-navy-950/25" />
+        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-navy-950/90 to-transparent" />
+      </div>
 
-      {/* Content Container */}
-      <div className="container mx-auto px-4 relative z-10 flex flex-col justify-center h-full">
-        <div className="max-w-3xl space-y-8">
-          <AnimatePresence mode="wait">
+      <div className="mx-auto flex min-h-svh max-w-7xl flex-col justify-center px-4 pb-32 pt-28 sm:px-6 lg:px-8 lg:pb-40">
+        <div className="min-h-[29rem] max-w-2xl sm:min-h-[26rem]" {...hoverHandlers}>
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={slide.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="space-y-6"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE_OUT } }}
+              exit={{ opacity: 0, y: -8, transition: { duration: 0.16, ease: EASE_IN } }}
             >
-              <h1 className="font-heading text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
-                {slide.title}
+              <p className="flex items-center gap-3 font-heading text-xs font-bold uppercase tracking-[0.18em] text-navy-200">
+                <span className="tabular-nums">0{index + 1}</span>
+                <span aria-hidden className="h-0.5 w-8 rounded-full bg-navy-300" />
+                {slide.label}
+              </p>
+              <h1 className="mt-5 font-heading text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+                {slide.title[0]}
+                <br />
+                <span className="text-navy-300">{slide.title[1]}</span>
               </h1>
-              <p className="font-body text-base md:text-lg text-slate-200 leading-relaxed max-w-2xl">
+              <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-white/75 sm:text-lg">
                 {slide.description}
               </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button size="lg" className="font-body rounded-full text-base px-8 py-6 bg-[#f9e300] text-slate-900 font-bold hover:bg-[#f9e300]/90 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(249,227,0,0.3)]">
-                  {slide.ctaPrimary} <ArrowRight className="ml-2 w-5 h-5" />
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button asChild size="lg" variant="light">
+                  <SectionLink section={slide.primary.section}>
+                    {slide.primary.label} <ArrowRight />
+                  </SectionLink>
                 </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="font-body rounded-full text-base px-8 py-6 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/40 backdrop-blur-sm transform-gpu"
-                >
-                  {slide.ctaSecondary} <Phone className="ml-2 w-5 h-5" />
+                <Button asChild size="lg" variant="glass">
+                  <SectionLink section="contacto" consulta={slide.secondary.consulta}>
+                    {slide.secondary.label}
+                  </SectionLink>
                 </Button>
               </div>
             </motion.div>
@@ -155,38 +183,75 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Navigation Controls */}
-      <div className="absolute bottom-10 right-10 flex gap-4 z-20">
-        <button
-          onClick={prevSlide}
-          className="p-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 backdrop-blur-md transition-all group"
-          aria-label="Previous slide"
-        >
-          <ChevronLeft className="w-6 h-6 text-white group-hover:-translate-x-0.5 transition-transform" />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="p-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 backdrop-blur-md transition-all group"
-          aria-label="Next slide"
-        >
-          <ChevronRight className="w-6 h-6 text-white group-hover:translate-x-0.5 transition-transform" />
-        </button>
-      </div>
+      {/* Controles */}
+      <div className="absolute inset-x-0 bottom-0" {...hoverHandlers}>
+        <div className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 lg:pb-10">
+          {/* Escritorio: pestañas con progreso */}
+          <div className="hidden grid-cols-4 gap-6 lg:grid">
+            {SLIDES.map((s, i) => {
+              const isActive = i === index;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => goTo(i)}
+                  aria-current={isActive}
+                  aria-label={`Ver: ${s.label}`}
+                  className="group py-2 text-left"
+                >
+                  <span className="relative block h-0.5 overflow-hidden rounded-full bg-white/20">
+                    {isActive && <Progress key={index} paused={paused} onDone={next} />}
+                  </span>
+                  <span
+                    className={cn(
+                      "mt-3 flex items-center gap-2 text-sm font-medium transition-colors duration-200",
+                      isActive ? "text-white" : "text-white/50 group-hover:text-white/80"
+                    )}
+                  >
+                    <span className="tabular-nums text-white/40">0{i + 1}</span>
+                    {s.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-      {/* Slide Indicators */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-        {SLIDES.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentSlide(index)}
-            className={`h-1.5 rounded-full transition-all duration-500 ${
-              index === currentSlide
-                ? "bg-[#f9e300] w-12 shadow-[0_0_10px_rgba(249,227,0,0.5)]"
-                : "bg-white/30 w-6 hover:bg-white/50"
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
+          {/* Móvil: indicadores y flechas */}
+          <div className="flex items-center justify-between lg:hidden">
+            <div className="flex items-center gap-2">
+              {SLIDES.map((s, i) => {
+                const isActive = i === index;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => goTo(i)}
+                    aria-current={isActive}
+                    aria-label={`Ver: ${s.label}`}
+                    className="flex h-8 items-center"
+                  >
+                    <span
+                      className={cn(
+                        "relative block h-1 overflow-hidden rounded-full bg-white/25 transition-[width] duration-300",
+                        isActive ? "w-10" : "w-5"
+                      )}
+                    >
+                      {isActive && <Progress key={index} paused={paused} onDone={next} />}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="glass" size="icon" onClick={prev} aria-label="Slide anterior">
+                <ChevronLeft />
+              </Button>
+              <Button variant="glass" size="icon" onClick={next} aria-label="Slide siguiente">
+                <ChevronRight />
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

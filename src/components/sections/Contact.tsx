@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/Button";
 import {
   Mail,
   Phone,
@@ -11,10 +10,18 @@ import {
   Send,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   ClipboardCheck,
   Wrench,
   Loader2,
+  CircleCheck,
+  CalendarDays,
 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Reveal } from "@/components/animations/Reveal";
+import { CONSULTA_EVENT, type Consulta } from "@/lib/navigation";
+import { EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
@@ -61,6 +68,15 @@ const MOCK_EVENTS: Record<string, ServiceEvent[]> = {
   "2026-03-25": [{ type: "soporte",     location: "Sucre",      description: "Revisión técnica" }],
 };
 
+/* ─── Contact data ──────────────────────────────────────────────────────── */
+
+const CONTACT_LINKS = [
+  { icon: Phone, label: "Teléfono La Paz", value: "+591 2 2422060", href: "tel:+59122422060" },
+  { icon: Phone, label: "Área comercial", value: "+591 71538792", href: "tel:+59171538792" },
+  { icon: Mail, label: "Correo", value: "info@metrica.com.bo", href: "mailto:info@metrica.com.bo" },
+  { icon: MapPin, label: "Oficinas", value: "La Paz · Santa Cruz, Bolivia" },
+];
+
 /* ─── Calendar constants ────────────────────────────────────────────────── */
 
 const MONTH_NAMES = [
@@ -69,62 +85,62 @@ const MONTH_NAMES = [
 ];
 const DAY_NAMES = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"];
 
+const toKey = (y: number, m: number, d: number) =>
+  `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
 /* ─── ServiceCalendar ───────────────────────────────────────────────────── */
 
 function ServiceCalendar() {
   const today = new Date();
-  const [viewDate, setViewDate] = useState(
-    new Date(today.getFullYear(), today.getMonth(), 1)
-  );
+  const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
-  const year  = viewDate.getFullYear();
+  const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
-
-  const firstDow    = new Date(year, month, 1).getDay();
-  const startOffset = (firstDow + 6) % 7;
+  const startOffset = (new Date(year, month, 1).getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayKey = toKey(today.getFullYear(), today.getMonth(), today.getDate());
 
-  const cells = useMemo<(number | null)[]>(() => {
-    const arr: (number | null)[] = Array(startOffset).fill(null);
-    for (let d = 1; d <= daysInMonth; d++) arr.push(d);
-    return arr;
-  }, [startOffset, daysInMonth]);
+  const cells: (number | null)[] = Array(startOffset).fill(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
-  const getKey = (d: number) =>
-    `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-
-  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const monthHasEvents = cells.some((d) => d !== null && MOCK_EVENTS[toKey(year, month, d)]);
   const selectedEvents = selectedKey ? (MOCK_EVENTS[selectedKey] ?? []) : [];
 
-  return (
-    /* layout en el contenedor raíz hace que framer-motion anime
-       suavemente la altura cuando el resumen aparece/desaparece */
-    <motion.div layout className="flex flex-col gap-4" transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+  const changeMonth = (delta: number) => {
+    setViewDate(new Date(year, month + delta, 1));
+    setSelectedKey(null);
+  };
 
+  return (
+    <div>
       {/* Month nav */}
       <div className="flex items-center justify-between">
         <button
-          onClick={() => { setViewDate(new Date(year, month - 1, 1)); setSelectedKey(null); }}
-          className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          type="button"
+          onClick={() => changeMonth(-1)}
+          aria-label="Mes anterior"
+          className="flex size-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-navy-900"
         >
-          <ChevronLeft className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+          <ChevronLeft className="size-4" />
         </button>
-        <span className="font-heading font-bold text-slate-900 dark:text-white">
+        <span className="font-heading text-sm font-bold text-navy-950" aria-live="polite">
           {MONTH_NAMES[month]} {year}
         </span>
         <button
-          onClick={() => { setViewDate(new Date(year, month + 1, 1)); setSelectedKey(null); }}
-          className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          type="button"
+          onClick={() => changeMonth(1)}
+          aria-label="Mes siguiente"
+          className="flex size-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-navy-900"
         >
-          <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+          <ChevronRight className="size-4" />
         </button>
       </div>
 
       {/* Day-name header */}
-      <div className="grid grid-cols-7">
+      <div className="mt-3 grid grid-cols-7">
         {DAY_NAMES.map((d) => (
-          <div key={d} className="text-center text-xs font-semibold text-slate-400 dark:text-slate-500 py-1">
+          <div key={d} className="py-1 text-center text-[11px] font-semibold uppercase text-slate-400">
             {d}
           </div>
         ))}
@@ -135,139 +151,161 @@ function ServiceCalendar() {
         {cells.map((day, i) => {
           if (day === null) return <div key={`e-${i}`} />;
 
-          const key     = getKey(day);
-          const events  = MOCK_EVENTS[key] ?? [];
-          const hasCal  = events.some((e) => e.type === "calibracion");
-          const hasSop  = events.some((e) => e.type === "soporte");
-          const isToday    = key === todayKey;
+          const key = toKey(year, month, day);
+          const events = MOCK_EVENTS[key] ?? [];
+          const hasCal = events.some((e) => e.type === "calibracion");
+          const hasSop = events.some((e) => e.type === "soporte");
+          const isToday = key === todayKey;
           const isSelected = key === selectedKey;
+
+          const base = "relative flex h-9 flex-col items-center justify-center rounded-lg text-sm tabular-nums";
+
+          if (events.length === 0) {
+            return (
+              <div
+                key={key}
+                className={cn(base, "text-slate-400", isToday && "font-semibold text-navy-900 ring-1 ring-inset ring-slate-300")}
+              >
+                {day}
+              </div>
+            );
+          }
 
           return (
             <button
               key={key}
+              type="button"
               onClick={() => setSelectedKey(isSelected ? null : key)}
+              aria-pressed={isSelected}
+              aria-label={`${day} de ${MONTH_NAMES[month]}: ${events.length} servicio${events.length > 1 ? "s" : ""}`}
               className={cn(
-                "relative aspect-square flex flex-col items-center justify-center rounded-xl text-sm font-medium transition-all duration-200 select-none",
-                events.length > 0 ? "cursor-pointer hover:scale-110" : "cursor-default",
-                isSelected ? "ring-2 ring-offset-1 ring-blue-500 dark:ring-offset-slate-900" : "",
-                isToday && !isSelected ? "ring-1 ring-slate-300 dark:ring-slate-600" : "",
-                hasCal && hasSop
-                  ? "bg-gradient-to-br from-blue-100 to-yellow-100 dark:from-blue-900/40 dark:to-yellow-900/20 text-slate-800 dark:text-white"
-                  : hasCal
-                  ? "bg-blue-100 dark:bg-blue-900/40 text-blue-900 dark:text-blue-200"
-                  : hasSop
-                  ? "bg-[#f9e300]/25 dark:bg-[#f9e300]/15 text-slate-800 dark:text-slate-100"
-                  : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                base,
+                "font-semibold transition-colors duration-150",
+                isSelected
+                  ? "bg-navy-800 text-white"
+                  : hasCal && hasSop
+                    ? "bg-gradient-to-br from-navy-100 to-sky-100 text-navy-950 hover:from-navy-200 hover:to-sky-200"
+                    : hasCal
+                      ? "bg-navy-100 text-navy-900 hover:bg-navy-200"
+                      : "bg-sky-100 text-sky-950 hover:bg-sky-200"
               )}
             >
-              <span>{day}</span>
-              {events.length > 0 && (
-                <div className="flex gap-0.5 mt-0.5">
-                  {hasCal && <span className="w-1 h-1 rounded-full bg-blue-500" />}
-                  {hasSop && <span className="w-1 h-1 rounded-full bg-[#f9e300]" />}
-                </div>
-              )}
+              {day}
+              <span className="absolute bottom-1 flex gap-0.5">
+                {hasCal && <span className={cn("size-1 rounded-full", isSelected ? "bg-white" : "bg-navy-600")} />}
+                {hasSop && <span className={cn("size-1 rounded-full", isSelected ? "bg-sky-300" : "bg-sky-500")} />}
+              </span>
             </button>
           );
         })}
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
-        <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-blue-200 dark:bg-blue-800/60 border border-blue-400/60" />
-          Calibración
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-[#f9e300]/40 border border-[#f9e300]/60" />
-          Soporte Técnico
-        </div>
-        <span className="ml-auto italic text-slate-400 dark:text-slate-500 hidden sm:block">
-          Días con servicio programado
+      <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-slate-100 pt-4 text-xs text-slate-500">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="size-2.5 rounded-sm bg-navy-200" /> Calibración
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="size-2.5 rounded-sm bg-sky-200" /> Soporte técnico
         </span>
       </div>
 
-      {/* Day summary — layout-animated para transición suave */}
-      <AnimatePresence mode="wait">
-        {selectedKey && (
+      {/* Day summary */}
+      <div className="mt-3 min-h-14">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
-            key={selectedKey}
-            layout
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden"
+            key={selectedKey ?? (monthHasEvents ? "hint" : "empty")}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.2 } }}
+            exit={{ opacity: 0, transition: { duration: 0.1 } }}
           >
-            <div className="border-t border-slate-100 dark:border-slate-800 pt-4 space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                {selectedEvents.length > 0 ? "Servicios programados" : "Sin servicios este día"}
+            {selectedKey ? (
+              <ul className="space-y-2">
+                {selectedEvents.map((ev, i) => {
+                  const Icon = ev.type === "calibracion" ? ClipboardCheck : Wrench;
+                  return (
+                    <li
+                      key={i}
+                      className={cn(
+                        "flex items-start gap-3 rounded-xl border p-3",
+                        ev.type === "calibracion" ? "border-navy-100 bg-navy-50" : "border-sky-100 bg-sky-50"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "flex size-7 shrink-0 items-center justify-center rounded-lg",
+                          ev.type === "calibracion" ? "bg-navy-100 text-navy-700" : "bg-sky-100 text-sky-700"
+                        )}
+                      >
+                        <Icon className="size-3.5" aria-hidden />
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-navy-950">{ev.location}</p>
+                        <p className="text-xs text-slate-600">{ev.description}</p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-sm text-slate-500">
+                {monthHasEvents
+                  ? "Seleccione un día marcado para ver el detalle."
+                  : "No hay servicios programados este mes."}
               </p>
-
-              {selectedEvents.map((ev, i) => {
-                const Icon = ev.type === "calibracion" ? ClipboardCheck : Wrench;
-                return (
-                  <div
-                    key={i}
-                    className={cn(
-                      "flex items-start gap-3 p-3 rounded-xl border",
-                      ev.type === "calibracion"
-                        ? "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/60"
-                        : "bg-[#f9e300]/10 dark:bg-[#f9e300]/5 border-[#f9e300]/40"
-                    )}
-                  >
-                    <div className={cn(
-                      "p-1.5 rounded-lg shrink-0",
-                      ev.type === "calibracion"
-                        ? "bg-blue-500/15 text-blue-600 dark:text-blue-400"
-                        : "bg-[#f9e300]/25 text-amber-600 dark:text-[#f9e300]"
-                    )}>
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{ev.location}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{ev.description}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            )}
           </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
   );
 }
 
-/* ─── Input helper ───────────────────────────────────────────────────────── */
+/* ─── Input helpers ──────────────────────────────────────────────────────── */
 
 function Field({
+  id,
   label,
   error,
+  hint,
   children,
 }: {
+  id: string;
   label: string;
-  error?: boolean;
-  children: React.ReactNode;
+  error?: string;
+  hint?: string;
+  children: ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">{label}</label>
+      <label htmlFor={id} className="block text-sm font-medium text-navy-950">
+        {label}
+      </label>
       {children}
-      {error && <span className="text-xs text-red-500">Este campo es requerido</span>}
+      {error ? (
+        <p id={`${id}-error`} role="alert" className="text-xs font-medium text-red-600">
+          {error}
+        </p>
+      ) : (
+        hint && <p className="text-xs text-slate-400">{hint}</p>
+      )}
     </div>
   );
 }
 
 const inputCls = (hasError?: boolean) =>
   cn(
-    "w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 outline-none transition-all",
-    hasError ? "border-red-500" : "border-slate-200 dark:border-slate-700"
+    "block h-11 w-full rounded-xl border bg-white px-3.5 text-[15px] text-navy-950 shadow-[0_1px_2px_rgba(2,26,54,0.04)] outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-slate-400",
+    "focus:border-navy-500 focus:ring-4 focus:ring-navy-500/15",
+    hasError ? "border-red-400 focus:border-red-500 focus:ring-red-500/15" : "border-slate-200 hover:border-slate-300"
   );
+
+const REQUIRED = "Este campo es requerido";
 
 /* ─── Contact ────────────────────────────────────────────────────────────── */
 
 export function Contact() {
+  const [sent, setSent] = useState(false);
   const {
     register,
     handleSubmit,
@@ -286,191 +324,244 @@ export function Contact() {
       .catch(() => {}); // silently fail
   }, [setValue]);
 
-  const onSubmit = async (data: FormData) => {
-    await new Promise((r) => setTimeout(r, 2000));
-    console.log(data);
-    alert("¡Mensaje enviado con éxito!");
+  // Los botones "Cotizar", "Solicitar calibración", etc. preseleccionan el tipo de consulta
+  useEffect(() => {
+    const onConsulta = (e: Event) => setValue("type", (e as CustomEvent<Consulta>).detail);
+    window.addEventListener(CONSULTA_EVENT, onConsulta);
+    return () => window.removeEventListener(CONSULTA_EVENT, onConsulta);
+  }, [setValue]);
+
+  // Envío simulado: falta conectar con el envío real de correo
+  const onSubmit = async () => {
+    await new Promise((r) => setTimeout(r, 1200));
     reset();
+    setSent(true);
   };
 
+  const a11y = (name: keyof FormData) => ({
+    id: `contacto-${name}`,
+    "aria-invalid": errors[name] ? true : undefined,
+    "aria-describedby": errors[name] ? `contacto-${name}-error` : undefined,
+  });
+
   return (
-    <section
-      id="contacto"
-      className="py-24 relative overflow-hidden bg-white dark:bg-slate-950"
-    >
-      <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-800/20" />
+    <section id="contacto" className="border-t border-slate-200 bg-slate-50 py-20 sm:py-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <Reveal>
+          <SectionHeading
+            eyebrow="Contacto"
+            title="Hablemos de su proyecto"
+            description="Estamos listos para brindarle la mejor asesoría en pesaje industrial."
+            className="max-w-2xl"
+          />
+        </Reveal>
 
-      <div className="container mx-auto px-6 lg:px-16 relative z-10 flex flex-col gap-14">
-
-        {/* ── Header ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-4"
-        >
-          <h2 className="font-heading text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white leading-tight">
-            Hablemos de su proyecto
-          </h2>
-          <p className="font-body text-lg text-slate-600 dark:text-slate-400 max-w-xl leading-relaxed">
-            Estamos listos para brindarle la mejor asesoría en pesaje industrial.
-          </p>
-          <div className="flex flex-wrap gap-4 pt-2">
-            {[
-              { icon: Phone,  text: "+591 2 2422060" },
-              { icon: Mail,   text: "info@metrica.com.bo" },
-              { icon: MapPin, text: "La Paz · Santa Cruz, Bolivia" },
-            ].map(({ icon: Icon, text }) => (
-              <div
-                key={text}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-sm text-slate-700 dark:text-slate-300"
-              >
-                <Icon className="w-4 h-4 text-blue-500 shrink-0" />
-                {text}
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* ── Two columns: Form + Calendar ── */}
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-
+        <div className="mt-12 grid items-start gap-6 lg:grid-cols-12 lg:gap-8">
           {/* ── Form ── */}
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800"
-          >
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-
-              {/* Nombre + Apellido */}
-              <div className="grid md:grid-cols-2 gap-5">
-                <Field label="Nombre" error={!!errors.nombre}>
-                  <input
-                    {...register("nombre", { required: true })}
-                    className={inputCls(!!errors.nombre)}
-                    placeholder="Su nombre"
-                  />
-                </Field>
-                <Field label="Apellido" error={!!errors.apellido}>
-                  <input
-                    {...register("apellido", { required: true })}
-                    className={inputCls(!!errors.apellido)}
-                    placeholder="Su apellido"
-                  />
-                </Field>
-              </div>
-
-              {/* Email */}
-              <Field label="Email" error={!!errors.email}>
-                <input
-                  {...register("email", { required: true, pattern: /^\S+@\S+$/i })}
-                  type="email"
-                  className={inputCls(!!errors.email)}
-                  placeholder="email@empresa.com"
-                />
-                {errors.email?.type === "pattern" && (
-                  <span className="text-xs text-red-500">Email inválido</span>
-                )}
-              </Field>
-
-              {/* Empresa + Cargo */}
-              <div className="grid md:grid-cols-2 gap-5">
-                <Field label="Empresa" error={!!errors.empresa}>
-                  <input
-                    {...register("empresa", { required: true })}
-                    className={inputCls(!!errors.empresa)}
-                    placeholder="Nombre de la empresa"
-                  />
-                </Field>
-                <Field label="Cargo" error={!!errors.cargo}>
-                  <input
-                    {...register("cargo", { required: true })}
-                    className={inputCls(!!errors.cargo)}
-                    placeholder="Su cargo o rol"
-                  />
-                </Field>
-              </div>
-
-              {/* Ciudad (auto-detectada) */}
-              <Field label="Ciudad">
-                <div className="relative">
-                  <input
-                    {...register("ciudad")}
-                    className={cn(inputCls(), "pr-10")}
-                    placeholder="Detectando ciudad…"
-                  />
-                  <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                </div>
-                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
-                  Ciudad detectada automáticamente · puede editarla
-                </p>
-              </Field>
-
-              {/* Tipo de consulta */}
-              <Field label="Tipo de Consulta">
-                <select
-                  {...register("type", { required: true })}
-                  className={inputCls(!!errors.type)}
-                >
-                  <option value="">Seleccione una opción</option>
-                  <option value="cotizacion">Cotización de Equipos</option>
-                  <option value="calibracion">Servicio de Calibración</option>
-                  <option value="soporte">Soporte Técnico</option>
-                  <option value="otro">Otro</option>
-                </select>
-              </Field>
-
-              {/* Mensaje */}
-              <Field label="Mensaje" error={!!errors.message}>
-                <textarea
-                  {...register("message", { required: true })}
-                  className={cn(inputCls(!!errors.message), "h-28 resize-none")}
-                  placeholder="Describa su requerimiento..."
-                />
-              </Field>
-
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-5 rounded-2xl font-body font-bold text-base bg-[#f9e300] text-slate-900 hover:bg-[#f9e300]/90 hover:scale-[1.02] transition-all duration-300 shadow-[0_0_24px_rgba(249,227,0,0.3)]"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 w-4 h-4 animate-spin" /> Enviando…
-                  </>
+          <Reveal className="lg:col-span-7">
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_32px_64px_-40px_rgba(2,26,54,0.3)] sm:p-8">
+              <AnimatePresence mode="wait" initial={false}>
+                {sent ? (
+                  <motion.div
+                    key="sent"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0, transition: { duration: 0.3, ease: EASE_OUT } }}
+                    exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                    role="status"
+                    className="flex flex-col items-center py-16 text-center"
+                  >
+                    <span className="flex size-14 items-center justify-center rounded-full bg-navy-50 text-navy-700">
+                      <CircleCheck className="size-7" aria-hidden />
+                    </span>
+                    <h3 className="mt-5 font-heading text-2xl font-bold text-navy-950">¡Mensaje enviado!</h3>
+                    <p className="mt-2 max-w-sm text-slate-600">
+                      Gracias por escribirnos. Nuestro equipo se pondrá en contacto con usted a la brevedad.
+                    </p>
+                    <Button variant="outline" className="mt-8" onClick={() => setSent(false)}>
+                      Enviar otro mensaje
+                    </Button>
+                  </motion.div>
                 ) : (
-                  <>
-                    Enviar Mensaje <Send className="ml-2 w-4 h-4" />
-                  </>
+                  <motion.form
+                    key="form"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, transition: { duration: 0.2 } }}
+                    exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                    onSubmit={handleSubmit(onSubmit)}
+                    noValidate
+                    className="grid gap-5 sm:grid-cols-2"
+                  >
+                    <Field id="contacto-nombre" label="Nombre" error={errors.nombre && REQUIRED}>
+                      <input
+                        {...register("nombre", { required: true })}
+                        {...a11y("nombre")}
+                        autoComplete="given-name"
+                        className={inputCls(!!errors.nombre)}
+                        placeholder="Su nombre"
+                      />
+                    </Field>
+                    <Field id="contacto-apellido" label="Apellido" error={errors.apellido && REQUIRED}>
+                      <input
+                        {...register("apellido", { required: true })}
+                        {...a11y("apellido")}
+                        autoComplete="family-name"
+                        className={inputCls(!!errors.apellido)}
+                        placeholder="Su apellido"
+                      />
+                    </Field>
+
+                    <div className="sm:col-span-2">
+                      <Field
+                        id="contacto-email"
+                        label="Email"
+                        error={
+                          errors.email?.type === "pattern" ? "Email inválido" : errors.email && REQUIRED
+                        }
+                      >
+                        <input
+                          {...register("email", { required: true, pattern: /^\S+@\S+$/i })}
+                          {...a11y("email")}
+                          type="email"
+                          autoComplete="email"
+                          className={inputCls(!!errors.email)}
+                          placeholder="email@empresa.com"
+                        />
+                      </Field>
+                    </div>
+
+                    <Field id="contacto-empresa" label="Empresa" error={errors.empresa && REQUIRED}>
+                      <input
+                        {...register("empresa", { required: true })}
+                        {...a11y("empresa")}
+                        autoComplete="organization"
+                        className={inputCls(!!errors.empresa)}
+                        placeholder="Nombre de la empresa"
+                      />
+                    </Field>
+                    <Field id="contacto-cargo" label="Cargo" error={errors.cargo && REQUIRED}>
+                      <input
+                        {...register("cargo", { required: true })}
+                        {...a11y("cargo")}
+                        autoComplete="organization-title"
+                        className={inputCls(!!errors.cargo)}
+                        placeholder="Su cargo o rol"
+                      />
+                    </Field>
+
+                    <Field id="contacto-ciudad" label="Ciudad" hint="Detectada automáticamente · puede editarla">
+                      <div className="relative">
+                        <input
+                          {...register("ciudad")}
+                          id="contacto-ciudad"
+                          autoComplete="address-level2"
+                          className={cn(inputCls(), "pr-10")}
+                          placeholder="Su ciudad"
+                        />
+                        <MapPin className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                      </div>
+                    </Field>
+                    <Field id="contacto-type" label="Tipo de consulta" error={errors.type && "Seleccione una opción"}>
+                      <div className="relative">
+                        <select
+                          {...register("type", { required: true })}
+                          {...a11y("type")}
+                          className={cn(inputCls(!!errors.type), "appearance-none pr-10")}
+                        >
+                          <option value="">Seleccione una opción</option>
+                          <option value="cotizacion">Cotización de equipos</option>
+                          <option value="calibracion">Servicio de calibración</option>
+                          <option value="soporte">Soporte técnico</option>
+                          <option value="otro">Otro</option>
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                      </div>
+                    </Field>
+
+                    <div className="sm:col-span-2">
+                      <Field id="contacto-message" label="Mensaje" error={errors.message && REQUIRED}>
+                        <textarea
+                          {...register("message", { required: true })}
+                          {...a11y("message")}
+                          rows={4}
+                          className={cn(inputCls(!!errors.message), "h-auto resize-none py-3")}
+                          placeholder="Describa su requerimiento..."
+                        />
+                      </Field>
+                    </div>
+
+                    <Button type="submit" size="lg" disabled={isSubmitting} className="w-full sm:col-span-2">
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="animate-spin" /> Enviando…
+                        </>
+                      ) : (
+                        <>
+                          Enviar mensaje <Send />
+                        </>
+                      )}
+                    </Button>
+                  </motion.form>
                 )}
-              </Button>
-            </form>
-          </motion.div>
-
-          {/* ── Calendar ── */}
-          <motion.div
-            layout
-            initial={{ opacity: 0, x: 24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-            className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-800"
-          >
-            <div className="mb-5">
-              <h3 className="font-heading font-bold text-lg text-slate-900 dark:text-white">
-                Agenda de Servicios
-              </h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Seleccione un día con servicio para ver el detalle.
-              </p>
+              </AnimatePresence>
             </div>
-            <ServiceCalendar />
-          </motion.div>
+          </Reveal>
 
+          {/* ── Sidebar ── */}
+          <div className="flex flex-col gap-6 lg:col-span-5">
+            <Reveal delay={0.06}>
+              <div className="relative isolate overflow-hidden rounded-[2rem] bg-navy-800 p-6 text-white sm:p-8">
+                <div
+                  aria-hidden
+                  className="absolute -right-24 -top-24 -z-10 size-72 rounded-full bg-[radial-gradient(circle,rgba(127,176,224,0.25),transparent_65%)]"
+                />
+                <h3 className="font-heading text-lg font-bold">Atención directa</h3>
+                <ul className="mt-5 space-y-1">
+                  {CONTACT_LINKS.map(({ icon: Icon, label, value, href }) => {
+                    const content = (
+                      <>
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-navy-200">
+                          <Icon className="size-4" aria-hidden />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-xs text-white/55">{label}</span>
+                          <span className="block truncate font-medium">{value}</span>
+                        </span>
+                      </>
+                    );
+                    return (
+                      <li key={label}>
+                        {href ? (
+                          <a
+                            href={href}
+                            className="-mx-2 flex items-center gap-3.5 rounded-xl px-2 py-2 transition-colors hover:bg-white/[0.07]"
+                          >
+                            {content}
+                          </a>
+                        ) : (
+                          <div className="-mx-2 flex items-center gap-3.5 px-2 py-2">{content}</div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.12}>
+              <div className="rounded-[2rem] border border-slate-200 bg-white p-6 sm:p-7">
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-navy-50 text-navy-700">
+                    <CalendarDays className="size-4" aria-hidden />
+                  </span>
+                  <div>
+                    <h3 className="font-heading text-base font-bold text-navy-950">Agenda de servicios</h3>
+                    <p className="text-xs text-slate-500">Visitas técnicas programadas en el país</p>
+                  </div>
+                </div>
+                <ServiceCalendar />
+              </div>
+            </Reveal>
+          </div>
         </div>
       </div>
     </section>
