@@ -32,16 +32,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^10.0.0",
-    "eslint-config-next": "^0.2.4",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "overrides": {
-    "ajv": "^8.18.0",
-    "minimatch": "^10.2.1",
-    "glob": "^11.0.0",
-    "rimraf": "^5.0.0",
-    "tmp": "^0.2.4"
-  }
+  "packageManager": "pnpm@12.11.2+sha512.25a51652a196785af5f28bda6dfe8dc582ebefa4ac1d180221ce1390231c5fb76637822ea4b6e4633ce74acdcb0a77f725af11bad38177fdeddaee818a955cb9"
 }

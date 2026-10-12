@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { motion, AnimatePresence, Transition, Target, VariantLabels } from 'framer-motion';
+import { motion, AnimatePresence, Transition, MotionProps } from 'framer-motion';
 
 import './RotatingText.css';
 
@@ -34,9 +34,9 @@ export interface RotatingTextRef {
 export interface RotatingTextProps {
   texts: string[];
   transition?: Transition;
-  initial?: Target | VariantLabels | boolean;
-  animate?: Target | VariantLabels | boolean;
-  exit?: Target | VariantLabels | boolean;
+  initial?: MotionProps['initial'];
+  animate?: MotionProps['animate'];
+  exit?: MotionProps['exit'];
   animatePresenceMode?: 'wait' | 'sync' | 'popLayout';
   animatePresenceInitial?: boolean;
   rotationInterval?: number;
@@ -76,9 +76,9 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>((props, ref)
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
 
   const splitIntoCharacters = (text: string): string[] => {
-    if (typeof Intl !== 'undefined' && (Intl as any).Segmenter) {
-      const segmenter = new (Intl as any).Segmenter('en', { granularity: 'grapheme' });
-      return Array.from(segmenter.segment(text), (segment: any) => segment.segment as string);
+    if (typeof Intl !== 'undefined' && typeof Intl.Segmenter === 'function') {
+      const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
+      return Array.from(segmenter.segment(text), (segment) => segment.segment);
     }
     return Array.from(text);
   };
@@ -108,7 +108,6 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>((props, ref)
       characters: [part],
       needsSpace: i !== arr.length - 1,
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [texts, currentTextIndex, splitBy]);
 
   const getStaggerDelay = useCallback(
@@ -184,7 +183,7 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>((props, ref)
   return (
     <motion.span
       className={cn('text-rotate', mainClassName)}
-      {...(rest as any)}
+      {...rest}
       layout
       transition={transition}
     >
@@ -206,9 +205,9 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>((props, ref)
                 {wordObj.characters.map((char, charIndex) => (
                   <motion.span
                     key={charIndex}
-                    initial={initial as any}
-                    animate={animate as any}
-                    exit={exit as any}
+                    initial={initial}
+                    animate={animate}
+                    exit={exit}
                     transition={{
                       ...(transition as object),
                       delay: getStaggerDelay(previousCharsCount + charIndex, totalChars),
