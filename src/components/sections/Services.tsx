@@ -1,281 +1,205 @@
-"use client";
-
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import Image from "next/image";
 import {
-  ClipboardCheck,
-  Wrench,
-  CheckCircle2,
   ArrowRight,
+  ArrowUpRight,
+  CheckCircle2,
+  FileText,
+  HeadphonesIcon,
+  Settings2,
   ShieldCheck,
   Timer,
-  FileText,
-  Settings2,
-  HeadphonesIcon,
   Zap,
+  type LucideIcon,
 } from "lucide-react";
-import AnimatedContent from "@/components/animations/AnimatedContent";
 import { Button } from "@/components/ui/Button";
+import { SectionLink } from "@/components/navigation/SectionLink";
+import { Reveal } from "@/components/animations/Reveal";
+import { Eyebrow } from "@/components/ui/SectionHeading";
+import { CalibrationChart } from "@/components/illustrations/CalibrationChart";
+import { SupportDiagnostic } from "@/components/illustrations/SupportDiagnostic";
+import type { Consulta } from "@/lib/navigation";
+import { cn } from "@/lib/utils";
 
-const SERVICES = [
+const IBMETRO_URL =
+  "https://ibmetro.gob.bo/dta/catalogo-oec?oec=M%C3%A9trica&tramite=&tipo=&norma=&sector=&estado=%C3%A7&pag=1";
+
+type Service = {
+  id: string;
+  index: string;
+  label: string;
+  headline: string;
+  description: string;
+  features: { icon: LucideIcon; text: string }[];
+  cta: string;
+  consulta: Consulta;
+};
+
+const SERVICES: Service[] = [
   {
     id: "calibracion",
-    icon: ClipboardCheck,
-    accentIcon: ShieldCheck,
-    label: "Calibración Certificada",
-    headlineEs: "Precisión que\npuedes certificar.",
+    index: "01",
+    label: "Laboratorio de calibración",
+    headline: "Precisión que puedes certificar.",
     description:
       "Servicio de calibración acreditado bajo normas ISO/IEC 17025. Emitimos certificados reconocidos internacionalmente, asegurando trazabilidad y exactitud en cada instrumento.",
     features: [
-      { icon: FileText,     text: "Certificados con trazabilidad ISO/IEC 17025" },
-      { icon: ShieldCheck,  text: "Válidos para auditorías de calidad y entes reguladores" },
-      { icon: Timer,        text: "Servicio programado para no interrumpir tu producción" },
+      { icon: FileText, text: "Certificados con trazabilidad ISO/IEC 17025" },
+      { icon: ShieldCheck, text: "Válidos para auditorías de calidad y entes reguladores" },
+      { icon: Timer, text: "Servicio programado para no interrumpir tu producción" },
       { icon: CheckCircle2, text: "Cobertura en toda la cadena de pesaje" },
     ],
-    cta: "Solicitar Calibración",
-    href: "/servicios/calibracion",
-    image: "/images/sections/soporte-calibracion-slider9.svg",
-    sealImage: undefined,
-    accent: "#3b82f6",       // blue-500
-    accentBg: "bg-blue-500/15",
-    accentText: "text-blue-400",
-    accentBorder: "border-blue-500",
-    tabActiveBg: "bg-blue-500/10",
+    cta: "Solicitar calibración",
+    consulta: "calibracion",
   },
   {
     id: "soporte",
-    icon: Wrench,
-    accentIcon: Settings2,
-    label: "Soporte Técnico",
-    headlineEs: "Equipo siempre\noperativo.",
+    index: "02",
+    label: "Soporte técnico",
+    headline: "Equipo siempre operativo.",
     description:
       "Programas de mantenimiento preventivo y correctivo con técnicos especializados en METTLER TOLEDO. Diagnóstico rápido, repuestos originales y soporte remoto disponible.",
     features: [
-      { icon: Settings2,       text: "Mantenimiento preventivo y correctivo certificado" },
-      { icon: HeadphonesIcon,  text: "Soporte remoto y visita técnica en terreno" },
-      { icon: Zap,             text: "Diagnóstico rápido con mínimo tiempo de inactividad" },
-      { icon: CheckCircle2,    text: "Repuestos originales METTLER TOLEDO garantizados" },
+      { icon: Settings2, text: "Mantenimiento preventivo y correctivo" },
+      { icon: HeadphonesIcon, text: "Soporte remoto y visita técnica en terreno" },
+      { icon: Zap, text: "Diagnóstico rápido con mínimo tiempo de inactividad" },
+      { icon: CheckCircle2, text: "Repuestos originales METTLER TOLEDO garantizados" },
     ],
-    cta: "Contactar Soporte",
-    href: "/servicios/soporte",
-    image: "/images/sections/soporte-calibracion-slider10.svg",
-    sealImage: undefined,
-    accent: "#f9e300",       // brand yellow
-    accentBg: "bg-[#f9e300]/15",
-    accentText: "text-[#f9e300]",
-    accentBorder: "border-[#f9e300]",
-    tabActiveBg: "bg-[#f9e300]/10",
+    cta: "Contactar soporte",
+    consulta: "soporte",
   },
 ];
 
-/* ─── animation variants ─────────────────────────────────────────────────── */
+/**
+ * Acreditación del laboratorio (solo aplica a calibración).
+ * Regla de uso: el logo de acreditado va sobre fondo blanco, con el logo de Métrica a su derecha
+ * y ambos del mismo tamaño.
+ */
+function Accreditation() {
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+      <div className="inline-flex shrink-0 items-center gap-4 self-start rounded-md bg-white px-4 py-2.5 ring-1 ring-slate-200">
+        <Image
+          src="/images/logo/ibmetro-acreditado.png"
+          alt="Acreditado por IBMETRO: laboratorio de calibración DTA-CET-041"
+          width={900}
+          height={285}
+          sizes="120px"
+          className="h-9 w-auto"
+        />
+        <Image src="/images/logo/metrica.png" alt="Métrica Ltda." width={800} height={251} sizes="120px" className="h-9 w-auto" />
+      </div>
+      <div className="font-mono text-[11px] leading-relaxed text-slate-500">
+        <p>Acreditación DTA-CET-041 · NB/ISO/IEC 17025:2018</p>
+        <p>Balanzas (instrumentos de pesar de funcionamiento no automático) y pesas patrón.</p>
+        <a
+          href={IBMETRO_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-0.5 inline-flex items-center gap-1 font-semibold text-navy-700 underline-offset-4 transition-colors hover:text-navy-900 hover:underline"
+        >
+          Verificar alcance en IBMETRO <ArrowUpRight className="size-3" aria-hidden />
+        </a>
+      </div>
+    </div>
+  );
+}
 
-const contentVariants: Variants = {
-  hidden:  { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1, y: 0,
-    transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1], staggerChildren: 0.07 },
-  },
-  exit:    { opacity: 0, y: -16, transition: { duration: 0.3, ease: [0.4, 0, 1, 1] } },
-};
+function ServicePanel({
+  service,
+  illustration,
+  className,
+  children,
+}: {
+  service: Service;
+  /** Gráfico técnico del servicio (sin fotos) */
+  illustration: React.ReactNode;
+  className?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <article
+      id={service.id}
+      aria-labelledby={`${service.id}-titulo`}
+      className={cn("flex scroll-mt-24 flex-col", className)}
+    >
+      <Reveal className="flex flex-1 flex-col">
+        {/* Altura mínima común: los títulos de ambas columnas quedan alineados */}
+        <div className="max-w-lg lg:min-h-[19.5rem]">{illustration}</div>
 
-const itemVariants: Variants = {
-  hidden:  { opacity: 0, x: -12 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
-};
+        <p className="mt-12 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-navy-600">
+          <span className="font-semibold text-navy-950">{service.index}</span>
+          <span aria-hidden className="h-px w-8 bg-navy-500/50" />
+          {service.label}
+        </p>
+        <h3
+          id={`${service.id}-titulo`}
+          className="mt-4 max-w-lg font-heading text-3xl font-extrabold leading-[1.08] tracking-tight text-navy-950 sm:text-4xl xl:text-5xl"
+        >
+          {service.headline}
+        </h3>
+        <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-slate-600">{service.description}</p>
 
-const imageVariants: Variants = {
-  hidden:  { opacity: 0, scale: 1.04 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
-  exit:    { opacity: 0, scale: 0.97, transition: { duration: 0.35, ease: [0.4, 0, 1, 1] } },
-};
+        {/* Ficha técnica: filas separadas por líneas, sin tarjetas */}
+        <ul className="mt-7 max-w-lg divide-y divide-slate-200 border-y border-slate-200">
+          {service.features.map(({ icon: Icon, text }) => (
+            <li key={text} className="flex items-center gap-3 py-3 text-sm text-slate-700">
+              <Icon className="size-4 shrink-0 text-navy-600" aria-hidden />
+              {text}
+            </li>
+          ))}
+        </ul>
 
-/* ─── component ──────────────────────────────────────────────────────────── */
+        {children && <div className="mt-7">{children}</div>}
 
-const AUTO_ROTATE_MS = 6000;
+        <div className="mt-8">
+          <Button asChild>
+            <SectionLink section="contacto" consulta={service.consulta}>
+              {service.cta} <ArrowRight />
+            </SectionLink>
+          </Button>
+        </div>
+      </Reveal>
+    </article>
+  );
+}
 
 export function Services() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const service = SERVICES[activeIndex];
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Auto-rotate every 6 s; resets when user clicks a tab manually
-  const startTimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % SERVICES.length);
-    }, AUTO_ROTATE_MS);
-  };
-
-  useEffect(() => {
-    startTimer();
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, []);
-
-  const handleTabClick = (i: number) => {
-    setActiveIndex(i);
-    startTimer(); // reset timer on manual click
-  };
+  const [calibration, support] = SERVICES;
 
   return (
-    <section
-      id="servicios"
-      className="relative py-24 bg-slate-50 dark:bg-slate-900 overflow-hidden"
-    >
-      <div className="container mx-auto px-6 lg:px-16 relative z-10 flex flex-col gap-14">
+    <section id="servicios" className="relative isolate overflow-hidden bg-white py-20 text-navy-950 sm:py-24">
+      {/* Retícula de plano técnico en toda la sección: título y servicios se leen como una sola unidad */}
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(4,55,110,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(4,55,110,0.05)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:linear-gradient(to_bottom,transparent,black_12%,black_80%,transparent)]"
+      />
 
-        {/* ── Header ── */}
-        <AnimatedContent
-          distance={24}
-          direction="vertical"
-          duration={0.7}
-          ease="power3.out"
-          initialOpacity={0}
-          animateOpacity
-          threshold={0.2}
-        >
-          <div className="text-center space-y-4">
-            <h2 className="font-heading text-4xl lg:text-5xl xl:text-6xl font-extrabold text-slate-900 dark:text-white leading-tight">
-              Servicios Especializados
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <Reveal>
+            <Eyebrow>Servicios</Eyebrow>
+            <h2 className="mt-4 font-heading text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl">
+              Servicios especializados
             </h2>
-            <p className="font-body text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
-              Más que vender equipos — garantizamos su funcionamiento óptimo
-              y cumplimiento normativo a largo plazo.
+          </Reveal>
+          <Reveal delay={0.06}>
+            <p className="max-w-md text-base leading-relaxed text-slate-600 lg:text-right">
+              Más que vender equipos — garantizamos su funcionamiento óptimo y cumplimiento normativo a largo plazo.
             </p>
-          </div>
-        </AnimatedContent>
+          </Reveal>
+        </div>
 
-        {/* ── Split panel ── */}
-        <AnimatedContent
-          distance={32}
-          direction="vertical"
-          duration={0.8}
-          ease="power3.out"
-          initialOpacity={0}
-          animateOpacity
-          threshold={0.15}
-        >
-          <div className="grid lg:grid-cols-2 gap-0 rounded-3xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-xl shadow-slate-200/60 dark:shadow-black/40 min-h-[620px]">
-
-            {/* ── LEFT: content panel ── */}
-            <div className="flex flex-col bg-white dark:bg-slate-800/60 p-8 lg:p-12 gap-8">
-
-              {/* Tab buttons */}
-              <div className="flex gap-3 flex-wrap">
-                {SERVICES.map((s, i) => {
-                  const TabIcon = s.icon;
-                  const isActive = i === activeIndex;
-                  return (
-                    <button
-                      key={s.id}
-                      onClick={() => handleTabClick(i)}
-                      className={`
-                        group flex items-center gap-2.5 px-5 py-3 rounded-2xl border text-sm font-bold font-heading
-                        transition-all duration-300 cursor-pointer
-                        ${isActive
-                          ? `${s.tabActiveBg} ${s.accentBorder} ${s.accentText} border`
-                          : "border-slate-200 dark:border-white/10 text-slate-500 dark:text-white/50 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-700 dark:hover:text-white/70"
-                        }
-                      `}
-                    >
-                      <TabIcon className={`w-4 h-4 transition-colors duration-200 ${isActive ? s.accentText : ""}`} />
-                      {s.label}
-                      {isActive && (
-                        <motion.span
-                          layoutId="tab-indicator"
-                          className={`inline-block w-1.5 h-1.5 rounded-full`}
-                          style={{ backgroundColor: s.accent }}
-                        />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Animated content */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={service.id}
-                  variants={contentVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="flex flex-col gap-5 flex-1"
-                >
-                  {/* Headline */}
-                  <motion.div variants={itemVariants}>
-                    <h3 className="font-heading text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white leading-snug whitespace-pre-line">
-                      {service.headlineEs}
-                    </h3>
-                  </motion.div>
-
-                  {/* Description */}
-                  <motion.p
-                    variants={itemVariants}
-                    className="font-body text-slate-600 dark:text-white/65 text-base leading-relaxed"
-                  >
-                    {service.description}
-                  </motion.p>
-
-                  {/* Feature list */}
-                  <motion.ul variants={itemVariants} className="space-y-3">
-                    {service.features.map((feat, i) => {
-                      const FeatIcon = feat.icon;
-                      return (
-                        <motion.li key={i} variants={itemVariants} className="flex items-start gap-3">
-                          <span className={`mt-0.5 shrink-0 ${service.accentBg} ${service.accentText} w-7 h-7 rounded-lg flex items-center justify-center`}>
-                            <FeatIcon className="w-4 h-4" />
-                          </span>
-                          <span className="font-body text-slate-700 dark:text-white/80 text-sm leading-relaxed pt-1">
-                            {feat.text}
-                          </span>
-                        </motion.li>
-                      );
-                    })}
-                  </motion.ul>
-
-                  {/* CTA */}
-                  <motion.div variants={itemVariants} className="mt-auto pt-2">
-                    <a href={service.href}>
-                      <Button
-                        size="lg"
-                        className="font-body rounded-full text-sm px-6 py-5 bg-[#f9e300] text-slate-900 font-bold hover:bg-[#f9e300]/90 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(249,227,0,0.25)]"
-                      >
-                        {service.cta} <ArrowRight className="ml-2 w-4 h-4" />
-                      </Button>
-                    </a>
-                  </motion.div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-
-            {/* ── RIGHT: image panel ── */}
-            <div className="relative bg-slate-100 dark:bg-slate-900 flex items-center justify-center overflow-hidden min-h-[340px] lg:min-h-0">
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={service.id}
-                  src={service.image}
-                  alt={service.label}
-                  variants={imageVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="absolute inset-0 w-full h-full object-cover"
-                  draggable={false}
-                />
-              </AnimatePresence>
-
-              {/* Left-edge gradient — blends image into the content panel */}
-              <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white dark:from-slate-800 to-transparent pointer-events-none z-10" />
-
-              {/* Bottom gradient overlay */}
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-slate-100 dark:from-slate-900 to-transparent pointer-events-none z-10" />
-
-            </div>
-
-          </div>
-        </AnimatedContent>
-
+        <div className="mt-14 grid gap-16 lg:grid-cols-2 lg:gap-0">
+          <ServicePanel service={calibration} illustration={<CalibrationChart />} className="lg:pr-14">
+            <Accreditation />
+          </ServicePanel>
+          {/* Solo una línea vertical tenue separa los dos servicios */}
+          <ServicePanel
+            service={support}
+            illustration={<SupportDiagnostic />}
+            className="lg:border-l lg:border-slate-200 lg:pl-14"
+          />
+        </div>
       </div>
     </section>
   );
