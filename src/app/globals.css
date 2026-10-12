@@ -5,53 +5,103 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-primary: #1e40af;
-  --color-secondary: #0891b2;
-  --color-accent: #10b981;
+  /* Marca: azul Métrica (#04376e = navy-800). El amarillo (#f9e300 = sun-400) solo en acentos puntuales:
+     logo, botón de cotizar, CTA de Nosotros y progreso del hero */
+  --color-navy-50: #eef5fc;
+  --color-navy-100: #d9e8f7;
+  --color-navy-200: #b3d0ee;
+  --color-navy-300: #7fb0e0;
+  --color-navy-400: #4a8acd;
+  --color-navy-500: #1f67b5;
+  --color-navy-600: #0f4f96;
+  --color-navy-700: #08427f;
+  --color-navy-800: #04376e;
+  --color-navy-900: #032b57;
+  --color-navy-950: #021a36;
+
+  --color-sun-200: #fff6a8;
+  --color-sun-300: #fff06b;
+  --color-sun-400: #f9e300;
+  --color-sun-500: #e0cc00;
+  --color-sun-600: #a89900;
 
   /* Typography */
   --font-heading: var(--font-manrope), system-ui, sans-serif;
   --font-body: var(--font-work-sans), system-ui, sans-serif;
-}
 
-:root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-}
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-hero-zoom: hero-zoom 8s var(--ease-out-expo) both;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    --foreground: #f8fafc;
+  @keyframes hero-zoom {
+    from {
+      transform: scale(1.08);
+    }
+    to {
+      transform: scale(1);
+    }
   }
 }
 
-/* Global font assignment */
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-body);
-  overflow-x: hidden;
+/* Barra de progreso del carrusel del hero (se usa con style inline) */
+@keyframes hero-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-heading);
+/* En @layer base para que las clases de Tailwind siempre puedan sobrescribirlos */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: #ffffff;
+    color: var(--color-navy-950);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    text-wrap: balance;
+  }
+
+  /* Las secciones quedan debajo del header fijo al navegar con anclas */
+  section[id] {
+    scroll-margin-top: 5.5rem;
+  }
+
+  ::selection {
+    background: var(--color-navy-800);
+    color: #ffffff;
+  }
+
+  :where(a, button, [role="tab"]):focus-visible {
+    outline: 2px solid var(--color-navy-500);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
 }
 
-/* Glassmorphism Utilities */
-.glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-}
-
-.glass-dark {
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-zoom {
+    animation: none;
+  }
 }

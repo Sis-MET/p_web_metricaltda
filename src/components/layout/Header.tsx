@@ -1,172 +1,253 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { SectionLink } from "@/components/navigation/SectionLink";
+import { NAV_SECTIONS, PAGE_SECTIONS, type SectionId } from "@/lib/navigation";
+import { EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { name: "Inicio", href: "/" },
-  { name: "Productos", href: "/productos" },
-  { name: "Servicios", href: "/servicios" },
-  { name: "Certificaciones", href: "/certificaciones" },
-  { name: "Contacto", href: "/contacto" },
-];
+// Altura (px desde arriba) donde se mide qué sección hay detrás de la barra
+const HEADER_PROBE_Y = 44;
 
-// IDs of sections with dark backgrounds — header stays white over these
-const DARK_SECTION_IDS = ["hero-section", "nosotros"];
-
-export function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isOverDark, setIsOverDark] = useState(true); // starts over Hero (dark)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const pathname = usePathname();
+/** Tono de la barra según la sección que tiene detrás (data-header-theme). */
+function useHeaderTone(pathname: string) {
+  const [tone, setTone] = useState<"dark" | "light">(pathname === "/" ? "dark" : "light");
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const headerBottom = 72; // approx header height
+    let frame = 0;
 
-      // Glass effect triggers after 50px
-      setIsScrolled(scrollY > 50);
+    const update = () => {
+      frame = 0;
+      setScrolled(window.scrollY > 8);
 
-      // Check if header is currently over any dark-background section
-      const overDark = DARK_SECTION_IDS.some((id) => {
-        const el = document.getElementById(id);
-        if (!el) return false;
-        const rect = el.getBoundingClientRect();
-        // Header is "over" the section if its bottom edge overlaps the section
-        return rect.top <= headerBottom && rect.bottom > 0;
-      });
-
-      setIsOverDark(overDark);
+      let next: "dark" | "light" = "light";
+      for (const section of document.querySelectorAll<HTMLElement>("[data-header-theme]")) {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= HEADER_PROBE_Y && rect.bottom > HEADER_PROBE_Y) {
+          next = section.dataset.headerTheme === "dark" ? "dark" : "light";
+          break;
+        }
+      }
+      setTone(next);
     };
 
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
 
-  // Text/icon colors based on whether header is over a dark section
-  const lightMode = !isOverDark; // true = show dark text (over light sections)
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, [pathname]);
+
+  return { tone, scrolled };
+}
+
+/** Sección visible en el home: la que cruza una franja a media pantalla. */
+function useActiveSection(enabled: boolean) {
+  const [active, setActive] = useState<SectionId>("inicio");
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActive(entry.target.id as SectionId);
+        }
+      },
+      { rootMargin: "-45% 0px -50% 0px" }
+    );
+
+    for (const { id } of NAV_SECTIONS) {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  }, [enabled]);
+
+  return active;
+}
+
+export function Header() {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { tone, scrolled } = useHeaderTone(pathname);
+  const spySection = useActiveSection(isHome);
+  const activeSection = isHome ? spySection : PAGE_SECTIONS[pathname];
+  const isDark = tone === "dark" && !isMenuOpen;
+
+  // Cerrar el menú con Escape
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setIsMenuOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isMenuOpen]);
+
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        isScrolled ? "glass py-3" : "bg-transparent py-5"
-      )}
-    >
-      <div className="container mx-auto px-4 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="relative w-40 h-14">
-            <Image
-              src="/images/logo/logoMetrica2.png"
-              alt="Metrica Logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-        </Link>
+    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-4 sm:pt-4">
+      {/* Fondo para cerrar el menú móvil al tocar fuera */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            key="backdrop"
+            aria-hidden
+            onClick={closeMenu}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 -z-10 bg-navy-950/40 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
+      <div
+        className={cn(
+          "mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 rounded-2xl border pl-4 pr-2 backdrop-blur-xl backdrop-saturate-150 sm:pl-5",
+          "transition-[background-color,border-color,box-shadow] duration-300 ease-out",
+          isDark
+            ? scrolled
+              ? "border-white/10 bg-navy-950/55 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.6)]"
+              : "border-white/10 bg-white/[0.06]"
+            : "border-navy-950/[0.06] bg-white/80 shadow-[0_12px_40px_-18px_rgba(2,26,54,0.25)]"
+        )}
+      >
+        <SectionLink
+          section="inicio"
+          onClick={closeMenu}
+          aria-label="Métrica, ir al inicio"
+          className="shrink-0 rounded-lg"
+        >
+          <Image
+            src="/images/logo/metrica.png"
+            alt="Métrica Ltda."
+            width={800}
+            height={251}
+            sizes="128px"
+            preload
+            className="h-9 w-auto sm:h-10"
+          />
+        </SectionLink>
 
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "font-body relative px-4 py-2 text-sm font-medium transition-colors rounded-full",
-                  !isActive &&
-                    (lightMode
-                      ? "hover:bg-slate-100 dark:hover:bg-slate-800"
-                      : "hover:bg-white/10"),
-                  isActive
-                    ? lightMode
-                      ? "text-slate-900 dark:text-white"
-                      : "text-white"
-                    : lightMode
-                    ? "text-slate-600 dark:text-slate-300"
-                    : "text-white/80"
-                )}
-              >
-                {/* Active Pill Background */}
-                {isActive && (
-                  <motion.span
-                    layoutId="active-nav-pill"
+        {/* Navegación de escritorio */}
+        <nav aria-label="Principal" className="hidden lg:block">
+          <ul className="flex items-center gap-0.5">
+            {NAV_SECTIONS.map((item) => {
+              const isActive = item.id === activeSection;
+              return (
+                <li key={item.id}>
+                  <SectionLink
+                    section={item.id}
+                    aria-current={isActive ? "location" : undefined}
                     className={cn(
-                      "absolute inset-0 rounded-full -z-10 backdrop-blur-sm",
-                      lightMode
-                        ? "bg-slate-200/50 dark:bg-slate-700/50"
-                        : "bg-white/20"
+                      "relative isolate block rounded-full px-3.5 py-2 text-sm font-medium transition-colors duration-200",
+                      isDark
+                        ? isActive
+                          ? "text-white"
+                          : "text-white/70 hover:text-white"
+                        : isActive
+                          ? "text-navy-900"
+                          : "text-slate-600 hover:text-navy-900"
                     )}
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                {item.name}
-              </Link>
-            );
-          })}
-          <Link href="/contacto" className="ml-4">
-            <Button className="font-body rounded-full text-sm px-6 py-2 bg-[#f9e300] text-slate-900 font-bold hover:bg-[#f9e300]/90 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(249,227,0,0.3)]">
-              Solicitar Cotización
-            </Button>
-          </Link>
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="nav-pill"
+                        aria-hidden
+                        className={cn(
+                          "absolute inset-0 -z-10 rounded-full",
+                          isDark ? "bg-white/15" : "bg-navy-800/[0.08]"
+                        )}
+                        transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                      />
+                    )}
+                    {item.label}
+                  </SectionLink>
+                </li>
+              );
+            })}
+          </ul>
         </nav>
 
-        {/* Mobile Menu Button */}
-        <button
-          className={cn(
-            "md:hidden transition-colors",
-            lightMode ? "text-slate-700 dark:text-slate-200" : "text-white"
-          )}
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <X /> : <Menu />}
-        </button>
+        <div className="flex items-center gap-2">
+          <Button asChild size="sm" variant="brand" className="hidden sm:inline-flex">
+            <SectionLink section="contacto" consulta="cotizacion">
+              Solicitar cotización
+            </SectionLink>
+          </Button>
+
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen((open) => !open)}
+            aria-expanded={isMenuOpen}
+            aria-controls="menu-movil"
+            aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            className={cn(
+              "flex size-11 items-center justify-center rounded-xl transition-colors lg:hidden",
+              isDark ? "text-white hover:bg-white/10" : "text-navy-900 hover:bg-navy-800/[0.06]"
+            )}
+          >
+            {isMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Menú móvil */}
       <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute top-full left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4 md:hidden shadow-xl"
+        {isMenuOpen && (
+          <motion.nav
+            key="menu"
+            id="menu-movil"
+            aria-label="Principal"
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.2, ease: EASE_OUT }}
+            className="mx-auto mt-2 max-w-7xl origin-top rounded-2xl border border-navy-950/[0.06] bg-white/95 p-2 shadow-[0_24px_60px_-20px_rgba(2,26,54,0.35)] backdrop-blur-xl lg:hidden"
           >
-            <nav className="flex flex-col gap-4">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={cn(
-                    "font-body text-lg font-medium py-2 border-b border-slate-100 dark:border-slate-800 last:border-0",
-                    pathname === item.href
-                      ? "text-blue-600 dark:text-blue-400"
-                      : "text-slate-700 dark:text-slate-200"
-                  )}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <Link href="/contacto" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button className="font-body w-full mt-2 rounded-full bg-[#f9e300] text-slate-900 font-bold hover:bg-[#f9e300]/90 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(249,227,0,0.3)]">
-                  Solicitar Cotización
-                </Button>
-              </Link>
-            </nav>
-          </motion.div>
+            <ul className="flex flex-col">
+              {NAV_SECTIONS.map((item) => {
+                const isActive = item.id === activeSection;
+                return (
+                  <li key={item.id}>
+                    <SectionLink
+                      section={item.id}
+                      onClick={closeMenu}
+                      aria-current={isActive ? "location" : undefined}
+                      className={cn(
+                        "flex items-center justify-between rounded-xl px-4 py-3 text-base font-medium transition-colors",
+                        isActive ? "bg-navy-50 text-navy-900" : "text-slate-700 hover:bg-slate-50"
+                      )}
+                    >
+                      {item.label}
+                      {isActive && <span aria-hidden className="size-1.5 rounded-full bg-navy-500 ring-4 ring-navy-500/20" />}
+                    </SectionLink>
+                  </li>
+                );
+              })}
+            </ul>
+            <Button asChild variant="brand" className="mt-2 w-full">
+              <SectionLink section="contacto" consulta="cotizacion" onClick={closeMenu}>
+                Solicitar cotización <ArrowRight />
+              </SectionLink>
+            </Button>
+          </motion.nav>
         )}
       </AnimatePresence>
     </header>

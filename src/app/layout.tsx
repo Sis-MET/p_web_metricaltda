@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope, Work_Sans } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { MotionProvider } from "@/components/providers/MotionProvider";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -19,8 +20,13 @@ const workSans = Work_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Metrica - Industrial Weighing Solutions",
-  description: "Premium industrial scales, calibration, and maintenance services.",
+  title: "Métrica | Balanzas industriales y calibración acreditada en Bolivia",
+  description:
+    "Representantes exclusivos de METTLER TOLEDO en Bolivia. Venta de balanzas y básculas, calibración acreditada NB/ISO/IEC 17025 y soporte técnico.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#04376e",
 };
 
 export default function RootLayout({
@@ -29,13 +35,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
-      <body
-        className={`${manrope.variable} ${workSans.variable} antialiased`}
-      >
-        <Header />
-        {children}
-        <Footer />
+    // Las variables de fuente van en <html>: Tailwind resuelve --font-heading/--font-body en :root
+    <html lang="es" data-scroll-behavior="smooth" className={`${manrope.variable} ${workSans.variable}`}>
+      <body className="antialiased">
+        <MotionProvider>
+          <Header />
+          {children}
+          <Footer />
+        </MotionProvider>
       </body>
     </html>
   );
