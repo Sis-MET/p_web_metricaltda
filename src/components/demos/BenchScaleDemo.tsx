@@ -53,7 +53,7 @@ const kg = new Intl.NumberFormat("es-BO", { minimumFractionDigits: 3, maximumFra
 const INITIAL: BenchSceneState = { phase: 0, text: "0.000", stable: false, verified: false, before: null, after: null };
 
 // Escritorio: el texto va a la derecha, así que el modelo se corre a la izquierda
-const SHIFT_DESKTOP = { x: -0.16, y: 0 };
+const SHIFT_DESKTOP = { x: -0.2, y: 0 };
 const SHIFT_MOBILE = { x: 0, y: -0.02 };
 
 type States = Store<BenchSceneState>;

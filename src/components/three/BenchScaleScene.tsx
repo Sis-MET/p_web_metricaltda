@@ -41,8 +41,10 @@ const EXPLODED = {
 const LABEL_POINTS = PART_LABELS.map((p) => p.position);
 
 const CAMERA: Record<"close" | "wide", View> = {
-  close: { position: [3.6, 3.0, 5.6], target: [0, 0.95, 0] },
-  wide: { position: [1.6, 6.6, 10.8], target: [0, 1.15, 0] },
+  // Lo bastante lejos para que la balanza ocupe ~40 % del ancho y no quede bajo el texto
+  close: { position: [4.75, 3.65, 7.4], target: [0, 0.95, 0] },
+  // Vista explosionada vertical: más alto y centrado en las piezas apiladas
+  wide: { position: [3.2, 4.6, 9.4], target: [0, 1.55, 0] },
 };
 
 const COLORS = {
@@ -52,10 +54,10 @@ const COLORS = {
   support: "#9aa6b2",
   aluminium: "#c9d0d8",
   cheese: "#f0cb68",
-  water: "#9fd6ff",
+  water: "#dbe6ec",
 };
 
-const DROPS = 42;
+const DROPS = 36;
 
 export type BenchSceneState = {
   phase: number;
@@ -217,14 +219,26 @@ const hash = (i: number, k: number) => {
   return v - Math.floor(v);
 };
 
-// Cada gota cae sobre una de las tres piezas: plato, base o soporte
+/** Contorno (medio ancho x, medio fondo z) sobre el que cae el agua de cada pieza: plato, base, soporte */
+const DROP_ZONES = [
+  { hx: 1.35, hz: 1.05 },
+  { hx: 1.25, hz: 0.95 },
+  { hx: 1.0, hz: 0.8 },
+];
+/**
+ * Altura de caída sobre la pieza: chorros cortos, no lluvia en todo el fondo.
+ * Menor que la separación entre piezas apiladas, para que no atraviesen la pieza de arriba.
+ */
+const DROP_HEIGHT = { min: 0.15, range: 0.7 };
+
+// Cada gota cae sobre una de las tres piezas, dentro de su contorno
 const createDrops = () =>
   Array.from({ length: DROPS }, (_, i) => ({
     zone: i % 3,
-    x: (hash(i, 1) - 0.5) * 2.4,
-    z: (hash(i, 2) - 0.5) * 1.8,
-    y: 2 + hash(i, 3) * 3,
-    speed: 4 + hash(i, 4) * 2,
+    fx: hash(i, 1) - 0.5,
+    fz: hash(i, 2) - 0.5,
+    y: DROP_HEIGHT.min + hash(i, 3) * DROP_HEIGHT.range,
+    speed: 2.6 + hash(i, 4) * 1.2,
   }));
 
 function Water({ intensityRef, explodeRef }: { intensityRef: React.RefObject<number>; explodeRef: React.RefObject<number> }) {
@@ -244,14 +258,18 @@ function Water({ intensityRef, explodeRef }: { intensityRef: React.RefObject<num
     const intensity = intensityRef.current ?? 0;
     const e = explodeRef.current ?? 0;
     drops.forEach((d, i) => {
+      const zone = DROP_ZONES[d.zone];
       const zoneX = d.zone === 0 ? EXPLODED.pan.x * e : d.zone === 2 ? EXPLODED.support.x * e : 0;
+      const zoneZ = d.zone === 0 ? EXPLODED.pan.z * e : 0;
       const floor =
         d.zone === 0 ? PAN_TOP + EXPLODED.pan.y * e : d.zone === 2 ? SUPPORT_Y + 0.03 + EXPLODED.support.y * e : CELL_TOP;
+      // d.y es la altura sobre la pieza; al llegar a ella vuelve a caer desde arriba
       d.y -= d.speed * dt;
-      if (d.y < floor) d.y = floor + 2 + Math.random() * 2.5;
-      position.set(zoneX + d.x, d.y, d.z);
-      const s = intensity * (d.y - floor < 0.15 ? 1.6 : 1);
-      scale.set(s, s * 1.8, s);
+      if (d.y < 0) d.y = DROP_HEIGHT.min + Math.random() * DROP_HEIGHT.range;
+      position.set(zoneX + d.fx * 2 * zone.hx, floor + d.y, zoneZ + d.fz * 2 * zone.hz);
+      // Gota estirada en la caída; se ensancha un poco al tocar la superficie
+      const s = intensity * (d.y < 0.1 ? 1.4 : 1);
+      scale.set(s, s * (d.y < 0.1 ? 1 : 3), s);
       matrix.compose(position, quaternion, scale);
       m.setMatrixAt(i, matrix);
     });
@@ -260,8 +278,8 @@ function Water({ intensityRef, explodeRef }: { intensityRef: React.RefObject<num
 
   return (
     <instancedMesh ref={mesh} args={[undefined, undefined, DROPS]} frustumCulled={false}>
-      <sphereGeometry args={[0.035, 8, 8]} />
-      <meshStandardMaterial color={COLORS.water} transparent opacity={0.75} roughness={0.1} metalness={0.2} />
+      <sphereGeometry args={[0.028, 8, 8]} />
+      <meshStandardMaterial color={COLORS.water} transparent opacity={0.6} roughness={0.1} metalness={0.2} />
     </instancedMesh>
   );
 }
@@ -274,8 +292,6 @@ function World({ playing, seek, resetView, shift, states, labelElements }: Omit<
   const support = useRef<THREE.Group>(null);
   const product = useRef<THREE.Group>(null);
   const gauge = useRef<THREE.MeshStandardMaterial>(null);
-  const panShadow = useRef<THREE.Mesh>(null);
-  const supportShadow = useRef<THREE.Mesh>(null);
 
   const time = useRef(0);
   const playingRef = useRef(playing);
@@ -331,17 +347,8 @@ function World({ playing, seek, resetView, shift, states, labelElements }: Omit<
     // Piezas
     const e = s.explode;
     pan.current?.position.set(EXPLODED.pan.x * e, PAN_Y + EXPLODED.pan.y * e, EXPLODED.pan.z * e);
-    if (pan.current) pan.current.rotation.z = 0.1 * e;
+    if (pan.current) pan.current.rotation.z = 0.06 * e;
     support.current?.position.set(EXPLODED.support.x * e, SUPPORT_Y + EXPLODED.support.y * e, 0);
-    // Las sombras de las piezas separadas las siguen sobre la mesa (armada, coinciden con la de la base)
-    if (panShadow.current) {
-      panShadow.current.position.set(EXPLODED.pan.x * e, 0.004, EXPLODED.pan.z * e);
-      panShadow.current.visible = e > 0.02;
-    }
-    if (supportShadow.current) {
-      supportShadow.current.position.set(EXPLODED.support.x * e, 0.005, 0);
-      supportShadow.current.visible = e > 0.02;
-    }
     if (product.current) {
       product.current.position.set(0, PAN_TOP + PRODUCT.height / 2 + s.product.lift, 0);
       product.current.scale.setScalar(Math.max(0.0001, s.product.scale));
@@ -396,7 +403,9 @@ function World({ playing, seek, resetView, shift, states, labelElements }: Omit<
   return (
     <>
       <color attach="background" args={[COLORS.background]} />
-      <hemisphereLight args={["#d4e5ff", "#0a2342", 0.9]} />
+      {/* Niebla del color del fondo: el piso se funde con él y no se ve su borde (antes se notaba una curva) */}
+      <fog attach="fog" args={[COLORS.background, 13 * distance, 30 * distance]} />
+      <hemisphereLight args={["#ffffff", "#1c1c1b", 0.9]} />
       <directionalLight position={[4, 8, 5]} intensity={2.2} />
       <Environment resolution={256} frames={1}>
         <Lightformer intensity={2.2} position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[12, 6, 1]} />
@@ -406,13 +415,11 @@ function World({ playing, seek, resetView, shift, states, labelElements }: Omit<
 
       {/* Mesa */}
       <mesh rotation-x={-Math.PI / 2} position={[0, -0.001, 0]}>
-        <circleGeometry args={[40, 64]} />
-        <meshStandardMaterial color="#0c2546" roughness={0.9} />
+        <circleGeometry args={[60, 64]} />
+        <meshStandardMaterial color="#151514" roughness={0.95} />
       </mesh>
-      {/* Sombras: la base fija y las piezas que se separan */}
+      {/* Sombra de la base (las piezas se separan hacia arriba, sobre ella) */}
       <BlobShadow size={[4.6, 3.8]} opacity={0.75} />
-      <BlobShadow size={[4.2, 3.4]} opacity={0.45} meshRef={panShadow} />
-      <BlobShadow size={[3.0, 2.6]} opacity={0.4} meshRef={supportShadow} />
 
       {/* Base */}
       <RoundedBox args={[BASE.w, BASE.h, BASE.d]} radius={0.1} smoothness={4} position={[0, BASE.bottom + BASE.h / 2, 0]}>

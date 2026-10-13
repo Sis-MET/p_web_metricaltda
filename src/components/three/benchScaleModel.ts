@@ -11,17 +11,21 @@ export const PAN_Y = 1.065;
 export const PAN_TOP = 1.11;
 export const PRODUCT = { radius: 0.62, height: 0.42 };
 
-/** Desplazamiento de cada pieza cuando se separa para la limpieza */
+/**
+ * Desplazamiento de cada pieza cuando se separa para la limpieza.
+ * Vista explosionada vertical (como en un manual): las piezas suben apiladas sobre la base,
+ * así el conjunto nunca es más ancho que la balanza armada y no queda bajo el texto.
+ */
 export const EXPLODED = {
-  pan: [-3.1, 1.0, -0.2] as [number, number, number],
-  support: [3.0, 0.45, 0] as [number, number, number],
+  pan: [0, 1.9, -0.15] as [number, number, number],
+  support: [0, 0.95, 0] as [number, number, number],
 };
 
-/** Etiquetas de las piezas en la vista desmontada */
+/** Etiquetas de las piezas en la vista desmontada (a la izquierda, lejos del texto) */
 export const PART_LABELS: { label: string; position: [number, number, number] }[] = [
-  { label: "Plato", position: [EXPLODED.pan[0], PAN_TOP + EXPLODED.pan[1] + 0.45, 0] },
-  { label: "Soporte del plato", position: [EXPLODED.support[0], SUPPORT_Y + EXPLODED.support[1] + 0.4, 0] },
-  { label: "Celda de carga", position: [0, CELL_TOP + 0.35, 0] },
+  { label: "Plato", position: [-2.15, PAN_TOP + EXPLODED.pan[1], EXPLODED.pan[2]] },
+  { label: "Soporte del plato", position: [-1.85, SUPPORT_Y + EXPLODED.support[1], 0] },
+  { label: "Celda de carga", position: [-1.2, CELL_TOP + 0.05, 0.2] },
   { label: "Base", position: [0, 0.2, BASE.d / 2 + 0.5] },
 ];
 
