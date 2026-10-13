@@ -10,6 +10,7 @@ import { Eyebrow } from "@/components/ui/SectionHeading";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AddToQuoteButton } from "@/components/products/AddToQuoteButton";
 import { ProductGrid } from "@/components/products/ProductBrowser";
+import { BrochureLink } from "@/components/products/BrochureLink";
 import { AccreditationSeal } from "@/components/services/Accreditation";
 import { BenchScaleDemo } from "@/components/demos/BenchScaleDemo";
 import { getCategory, categoryHref } from "@/content/categories";
@@ -116,15 +117,18 @@ export default async function ProductPage({ params }: Props) {
 
               <div className="mt-8 flex flex-col gap-4">
                 <AddToQuoteButton slug={product.slug} model={product.model} />
-                <a
-                  href={whatsappUrl(whatsappMessage)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 self-start text-sm font-semibold text-ink-800 underline-offset-4 hover:underline"
-                >
-                  <MessageCircle className="size-4" aria-hidden />
-                  Consultar por WhatsApp
-                </a>
+                <div className="flex flex-wrap gap-x-6 gap-y-2">
+                  <a
+                    href={whatsappUrl(whatsappMessage)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-ink-800 underline-offset-4 hover:underline"
+                  >
+                    <MessageCircle className="size-4" aria-hidden />
+                    Consultar por WhatsApp
+                  </a>
+                  {product.brochure && <BrochureLink brochure={product.brochure} model={product.model} variant="inline" />}
+                </div>
               </div>
 
               <ul className="mt-8 space-y-2.5 border-t border-neutral-200 pt-6">
@@ -171,6 +175,11 @@ export default async function ProductPage({ params }: Props) {
               Las capacidades y opciones exactas dependen del modelo. Un asesor le confirma la configuración adecuada para su
               aplicación.
             </p>
+            {product.brochure && (
+              <div className="mt-6">
+                <BrochureLink brochure={product.brochure} model={product.model} variant="card" />
+              </div>
+            )}
           </Reveal>
         </div>
       </section>
