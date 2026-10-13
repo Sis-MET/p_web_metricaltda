@@ -166,6 +166,31 @@ function DirectContact({ className }: { className?: string }) {
   );
 }
 
+/**
+ * Anima la altura real del contenido al cambiar de sección. No usa `layout` de Framer Motion:
+ * esa animación es un scale y estiraría textos e imágenes durante la transición.
+ */
+function AutoHeight({ children }: { children: React.ReactNode }) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number | "auto">("auto");
+
+  useEffect(() => {
+    const content = contentRef.current;
+    if (!content) return;
+    const observer = new ResizeObserver(([entry]) => setHeight(entry.borderBoxSize[0].blockSize));
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <motion.div animate={{ height }} transition={{ duration: 0.28, ease: EASE_OUT }} className="overflow-hidden">
+      <div ref={contentRef} className="relative">
+        {children}
+      </div>
+    </motion.div>
+  );
+}
+
 /** Panel de una sección: sus subpáginas y el contacto directo */
 function DropdownPanel({ item }: { item: NavItem }) {
   const links = item.children ?? [];
@@ -385,11 +410,11 @@ export function Header() {
           </div>
         </div>
 
-        {/* Menú desplegable de escritorio */}
+        {/* Menú desplegable de escritorio: un solo panel; al cambiar de sección se cruza el contenido y se anima la altura */}
         <AnimatePresence>
           {openItem && (
             <motion.div
-              key={openItem.href}
+              key="menu-desktop"
               id={menuId(openItem)}
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -399,7 +424,20 @@ export function Header() {
               onClick={(event) => (event.target as HTMLElement).closest("a") && dropdown.close()}
               className="mx-auto mt-2 hidden max-w-7xl rounded-2xl border border-ink-950/[0.06] bg-white/95 p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] backdrop-blur-xl lg:block"
             >
-              <DropdownPanel item={openItem} />
+              <AutoHeight>
+                {/* popLayout saca de flujo el contenido que sale: el que entra define la altura */}
+                <AnimatePresence initial={false} mode="popLayout">
+                  <motion.div
+                    key={openItem.href}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.18, ease: EASE_OUT }}
+                  >
+                    <DropdownPanel item={openItem} />
+                  </motion.div>
+                </AnimatePresence>
+              </AutoHeight>
             </motion.div>
           )}
         </AnimatePresence>
