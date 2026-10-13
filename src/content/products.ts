@@ -1,5 +1,5 @@
 import type { CategorySlug } from "./categories";
-import type { Product } from "./catalog";
+import type { Brochure, Product } from "./catalog";
 
 import bba211 from "@/assets/products/bba211.png";
 import bba231 from "@/assets/products/bba231.png";
@@ -19,6 +19,12 @@ import pbk785pbd555 from "@/assets/products/pbk785-pbd555.png";
 import pbk9pfk9 from "@/assets/products/pbk9-pfk9.png";
 import powercellPdx from "@/assets/products/powercell-pdx.png";
 
+/** Fichas técnicas METTLER TOLEDO, servidas desde public/fichas-tecnicas */
+const brochure = (file: string, language?: Brochure["language"]): Brochure => ({
+  href: `/fichas-tecnicas/${file}.pdf`,
+  ...(language && { language }),
+});
+
 const SHARED_DIGITAL =
   "Plataformas precalibradas y robustas, aptas para entornos hostiles con protección IP65 opcional, nivelación ergonómica, protección contra sobrecargas e interfaz digital SICSpro para conectar y pesar.";
 
@@ -33,6 +39,7 @@ export const PRODUCTS: Product[] = [
     model: "BPA121",
     type: "Báscula compacta",
     image: bpa121,
+    brochure: brochure("bpa121"),
     summary: "Báscula de sobremesa portátil para pesar de forma eficiente y fiable en entornos húmedos y de procesamiento de alimentos.",
     description:
       "La BPA121 es una báscula de sobremesa portátil, diseñada para ofrecer un pesaje eficiente y fiable en entornos industriales, especialmente en aquellos con humedad o condiciones adversas. Su diseño compacto facilita el transporte y la integración en los flujos de trabajo de procesamiento de alimentos, y su plato y soporte se desmontan para limpiar cada pieza por separado.",
@@ -63,6 +70,7 @@ export const PRODUCTS: Product[] = [
     model: "ICS226",
     type: "Báscula compacta",
     image: ics226,
+    brochure: brochure("ics226"),
     summary: "Báscula portátil de acero inoxidable para pesaje y porcionado en producción de alimentos y envasado.",
     description:
       "La ICS226 es una solución portátil ideal para aplicaciones de pesaje y porcionado en entornos de producción de alimentos y envasado. Está fabricada completamente en acero inoxidable y su protección IP65/IP67 contra el agua y el polvo la hace adecuada para entornos con humedad ligera.",
@@ -90,6 +98,7 @@ export const PRODUCTS: Product[] = [
     model: "ICS241",
     type: "Báscula compacta",
     image: ics241,
+    brochure: brochure("ics241"),
     summary: "Pesaje y recuento con registro de datos en tarjeta SD para producción, logística y control de calidad.",
     description:
       "La ICS241 está diseñada para tareas sencillas de pesaje y recuento en producción, logística y control de calidad. Su pantalla LCD y su teclado alfanumérico la hacen intuitiva, y la gestión de datos mediante tarjeta SD mejora la productividad y reduce los errores humanos.",
@@ -116,6 +125,7 @@ export const PRODUCTS: Product[] = [
     model: "BBA211",
     type: "Báscula de sobremesa",
     image: bba211,
+    brochure: brochure("bba211", "en"),
     summary: "Pesaje simple y control de peso para paquetes, envíos y recepción de mercancías.",
     description:
       "La BBA211 es una báscula de sobremesa para aplicaciones sencillas de pesaje y control de peso (over/under). Es eficiente, robusta y fácil de usar, ideal para entornos industriales y comerciales como el pesaje de paquetes, envíos y recepción de mercancías.",
@@ -143,6 +153,7 @@ export const PRODUCTS: Product[] = [
     model: "BBA231",
     type: "Báscula de sobremesa",
     image: bba231,
+    brochure: brochure("bba231"),
     summary: "Báscula versátil, económica y robusta para el pesaje rutinario en ambientes secos o con polvo.",
     description:
       "La BBA231 es una báscula de sobremesa versátil, económica y robusta, diseñada para aplicaciones rutinarias de pesaje en entornos industriales secos o con polvo: pesaje directo, recuento, control de peso (over/under) y pesaje de animales.",
@@ -170,6 +181,7 @@ export const PRODUCTS: Product[] = [
     model: "BBA236",
     type: "Báscula de sobremesa",
     image: bba236,
+    brochure: brochure("bba236"),
     summary: "Báscula robusta de acero inoxidable para ambientes secos o con salpicaduras de líquidos.",
     description:
       "La BBA236 es una báscula de sobremesa robusta y rentable para uso versátil en entornos industriales secos o con salpicaduras de líquidos. Su diseño intuitivo la hace ideal para pesaje directo, control de exceso/defecto, recuento y pesaje de animales.",
@@ -197,6 +209,7 @@ export const PRODUCTS: Product[] = [
     model: "BBA256x",
     type: "Báscula intrínsecamente segura",
     image: bba256x,
+    brochure: brochure("bba256x"),
     summary: "Pesaje seguro en zonas con riesgo de explosión, con homologaciones ATEX e IECEx.",
     description:
       "La BBA256x es una báscula de sobremesa intrínsecamente segura para pesar en entornos con riesgo de explosión, como zonas químicas o farmacéuticas. Su construcción en acero inoxidable y sus homologaciones ATEX e IECEx la preparan para condiciones adversas, incluida la exposición a humedad y productos químicos agresivos.",
@@ -226,6 +239,7 @@ export const PRODUCTS: Product[] = [
     model: "PBA220",
     type: "Plataforma de pesaje",
     image: pba220,
+    brochure: brochure("pba220"),
     summary: "Plataforma económica y robusta para inventarios, envíos y recepción de mercancías en ambientes secos.",
     description:
       "La PBA220 es una plataforma de pesaje económica, robusta y versátil para tareas de pesaje en entornos secos, como inventarios, control de envíos y recepción de mercancías. Es compatible con todos los terminales analógicos de METTLER TOLEDO.",
@@ -253,6 +267,7 @@ export const PRODUCTS: Product[] = [
     model: "PBD555",
     type: "Plataforma digital de pesaje",
     image: pbk785pbd555,
+    brochure: brochure("pbk785-pbd555"),
     summary: "Plataforma digital precalibrada con celda de galgas METTLER TOLEDO y resolución aprobada de hasta 7500e.",
     description: `La PBD555 utiliza la celda de carga de galgas extensométricas de METTLER TOLEDO, con una resolución aprobada de hasta 7500e. ${SHARED_DIGITAL}`,
     capacity: { min: 3, max: 35 },
@@ -278,6 +293,7 @@ export const PRODUCTS: Product[] = [
     model: "PBK785",
     type: "Plataforma digital de alta precisión",
     image: pbk785pbd555,
+    brochure: brochure("pbk785-pbd555"),
     summary: "Tecnología de compensación de fuerza MonoBloc® con resolución aprobada de hasta 61 000e.",
     description: `La PBK785 utiliza la tecnología de compensación de fuerza MonoBloc®, con una resolución aprobada de hasta 61 000e (OIML). ${SHARED_DIGITAL}`,
     capacity: { min: 0.61, max: 35.1 },
@@ -303,6 +319,7 @@ export const PRODUCTS: Product[] = [
     model: "PBD655",
     type: "Plataforma digital de pesaje",
     image: pbd655,
+    brochure: brochure("pbd655"),
     summary: "Plataforma digital robusta y económica, con resolución certificable de 6000e para entornos duros y con polvo.",
     description:
       "La serie PBD655 es extremadamente robusta y duradera, diseñada para una operación simple y confiable. Incorpora una celda METTLER TOLEDO exclusiva con resolución certificable de 6000e OIML y un convertidor A/D rápido y estable para pesar y contar con precisión. Viene precalibrada y con protección IP65.",
@@ -329,6 +346,7 @@ export const PRODUCTS: Product[] = [
     model: "PBD659",
     type: "Plataforma higiénica",
     image: pbd659pba639,
+    brochure: brochure("pbd659-pba639"),
     summary: "Plataforma de acero inoxidable IP68/IP69K para áreas húmedas y de lavado frecuente.",
     description: `La PBD659 está diseñada para entornos húmedos y de lavado frecuente, ideal para aplicaciones con estándares de higiene elevados. ${SHARED_HYGIENIC}`,
     protection: "IP68 / IP69K",
@@ -352,6 +370,7 @@ export const PRODUCTS: Product[] = [
     model: "PBA639",
     type: "Plataforma higiénica",
     image: pbd659pba639,
+    brochure: brochure("pbd659-pba639"),
     summary: "Plataforma higiénica para ambientes húmedos con requisitos de limpieza rigurosos.",
     description: `La PBA639 está diseñada para ambientes húmedos con requisitos de higiene rigurosos y procesos que exigen alta confiabilidad y durabilidad. ${SHARED_HYGIENIC}`,
     protection: "IP68 / IP69K",
@@ -376,6 +395,7 @@ export const PRODUCTS: Product[] = [
     model: "PBA757",
     type: "Plataforma de pesaje",
     image: pba757,
+    brochure: brochure("pba757"),
     summary: "Plataforma rígida para pesaje estático y dinámico: recuento, control de peso y verificación de envases.",
     description:
       "La PBA757 está diseñada para aplicaciones industriales estáticas y dinámicas. Construida en acero inoxidable y equipada con celdas de carga analógicas de alto rendimiento, garantiza resultados rápidos y precisos incluso en condiciones adversas, con un diseño que minimiza los errores por vibraciones, impactos o cambios de temperatura.",
@@ -403,6 +423,7 @@ export const PRODUCTS: Product[] = [
     model: "PBA436",
     type: "Plataforma de pesaje",
     image: pba436,
+    brochure: brochure("pba436"),
     summary: "Plataforma de acero inoxidable con diseño higiénico abierto para entornos de lavado suave.",
     description:
       "La PBA436 combina durabilidad, precisión y diseño higiénico para entornos con lavado suave. Su bastidor abierto facilita la limpieza y minimiza los riesgos de contaminación, mientras los topes de sobrecarga protegen la celda de carga.",
@@ -430,6 +451,7 @@ export const PRODUCTS: Product[] = [
     model: "PBA439",
     type: "Plataforma higiénica",
     image: pba439,
+    brochure: brochure("pba439"),
     summary: "Plataforma de acero inoxidable IP68/IP69K para lavado intensivo y altos estándares de limpieza.",
     description:
       "La PBA439 está diseñada para entornos industriales con altos estándares de limpieza. Fabricada en acero inoxidable, con protección IP68/IP69K, es ideal para ambientes húmedos y procesos con lavado intensivo, con un diseño higiénico que minimiza la contaminación.",
@@ -457,6 +479,7 @@ export const PRODUCTS: Product[] = [
     model: "PBD769",
     type: "Plataforma higiénica",
     image: pbd769,
+    brochure: brochure("pbd769"),
     summary: "Plataforma higiénica de alta resolución para pesaje dinámico en ambientes húmedos y de lavado.",
     description:
       "La PBD769 combina precisión, durabilidad y facilidad de limpieza para entornos industriales exigentes. Fabricada en acero inoxidable con protección IP66/IP68, resiste ambientes húmedos y lavados intensivos con un rendimiento fiable.",
@@ -483,6 +506,7 @@ export const PRODUCTS: Product[] = [
     model: "PBK9 / PFK9",
     type: "Plataformas de pesaje",
     image: pbk9pfk9,
+    brochure: brochure("pbk9-pfk9"),
     summary: "Plataformas de alta resolución para áreas húmedas, polvorientas y peligrosas, de 0,6 kg a 3 t.",
     description:
       "Las plataformas PBK9 y PFK9 están diseñadas para entornos industriales difíciles, incluidas las áreas húmedas, polvorientas y peligrosas. En acero inoxidable con protección IP68/IP69K, son ideales para aplicaciones de alta precisión como el conteo de piezas, la formulación de mezclas y el llenado.",

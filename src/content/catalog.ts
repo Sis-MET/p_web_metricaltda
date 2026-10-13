@@ -42,9 +42,14 @@ export type Product = {
   environments: Environment[];
   features: string[];
   specs: { label: string; value: string }[];
+  /** Ficha técnica del fabricante (PDF) */
+  brochure?: Brochure;
   /** Demo 3D en la ficha del producto */
   demo?: "bpa121";
 };
+
+/** Ficha técnica en PDF; `language` solo cuando no está en español */
+export type Brochure = { href: string; language?: "en" };
 
 export const productHref = (product: Pick<Product, "category" | "slug">) =>
   `/productos/${product.category}/${product.slug}`;
