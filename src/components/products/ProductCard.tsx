@@ -18,7 +18,8 @@ export function ProductCard({ product }: { product: ProductSummary }) {
           alt={`${product.type} ${product.model}`}
           fill
           sizes="(min-width: 1280px) 300px, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
-          className="object-contain p-8 transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          // Las fotos vienen recortadas al borde del equipo: alineadas abajo, todas se apoyan en la sombra
+          className="object-contain object-bottom p-8 transition-transform duration-500 ease-out group-hover:scale-[1.04]"
         />
         <span className="absolute left-4 top-4 rounded-full border border-neutral-200/80 bg-white/90 px-3 py-1 text-xs font-semibold text-ink-800">
           {product.type}
