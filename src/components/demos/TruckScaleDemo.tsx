@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useReducedMotion } from "framer-motion";
 import { ArrowRight, Move3d, Pause, Play, RotateCcw, ScanEye } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { SectionLink } from "@/components/navigation/SectionLink";
 import type { TruckReading } from "@/components/three/TruckScaleScene";
 import {
   CELLS,
@@ -18,6 +17,7 @@ import {
   TRUCKS,
   type TruckConfig,
 } from "@/components/three/truckScaleModel";
+import { productHref } from "@/content/catalog";
 import { createStore, useStore, type Store } from "@/lib/store";
 import {
   HmiPanel,
@@ -36,6 +36,8 @@ const TruckScaleScene = dynamic(() => import("@/components/three/scenes").then((
   ssr: false,
   loading: () => <ViewerPlaceholder />,
 });
+
+const TRUCK_SCALE = { category: "basculas-de-camiones", slug: "powercell-pdx" } as const;
 
 const INTRO =
   "Vea cómo cada eje carga las celdas más cercanas mientras el camión avanza. Active los rayos X para ver las celdas y la red digital bajo la plataforma.";
@@ -362,9 +364,9 @@ export function TruckScaleDemo() {
 
             <div className="mt-8 hidden flex-wrap gap-3 lg:flex">
               <Button asChild>
-                <SectionLink section="contacto" consulta="cotizacion">
-                  Solicitar asesoría <ArrowRight />
-                </SectionLink>
+                <Link href={productHref(TRUCK_SCALE)}>
+                  Ver la báscula POWERCELL PDX <ArrowRight />
+                </Link>
               </Button>
               <Button asChild variant="frost">
                 <Link href="/productos">Ver todos los productos</Link>

@@ -1,12 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useReducedMotion } from "framer-motion";
 import { ArrowRight, CircleCheck, Move3d, Pause, Play, RotateCcw } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { SectionLink } from "@/components/navigation/SectionLink";
 import type { BenchSceneState } from "@/components/three/BenchScaleScene";
 import { PART_LABELS } from "@/components/three/benchScaleModel";
 import { createStore, useStore, type Store } from "@/lib/store";
@@ -152,7 +149,8 @@ function MobileText({ states, interacted }: { states: States; interacted: boolea
 
 /* ─── Demo ──────────────────────────────────────────────────────────────── */
 
-export function BenchScaleDemo() {
+/** `actions`: botones bajo el texto en escritorio (la ficha del producto pasa los suyos) */
+export function BenchScaleDemo({ actions }: { actions?: ReactNode }) {
   const reducedMotion = useReducedMotion();
   const isDesktop = useIsDesktop();
   const viewerRef = useRef<HTMLDivElement>(null);
@@ -228,10 +226,10 @@ export function BenchScaleDemo() {
           {/* Texto */}
           <div className="pointer-events-auto max-w-md">
             <p className="font-heading text-xs font-bold uppercase tracking-[0.18em] text-ink-300">
-              Demo 3D · Industria alimentaria
+              Demo 3D · BPA121
             </p>
             <h2 className="mt-3 font-heading text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl lg:text-5xl">
-              Balanza de mesa BPA121
+              Se desmonta, se limpia y sigue pesando igual
             </h2>
             <p className="mt-3 hidden text-base leading-relaxed text-white/70 lg:block">{INTRO}</p>
             <MobileText states={states} interacted={userPlaying !== null} />
@@ -244,16 +242,7 @@ export function BenchScaleDemo() {
               <Verification states={states} />
             </div>
 
-            <div className="mt-8 hidden flex-wrap gap-3 lg:flex">
-              <Button asChild variant="light">
-                <SectionLink section="contacto" consulta="cotizacion">
-                  Solicitar cotización <ArrowRight />
-                </SectionLink>
-              </Button>
-              <Button asChild variant="glass">
-                <Link href="/productos">Ver todos los productos</Link>
-              </Button>
-            </div>
+            {actions && <div className="mt-8 hidden flex-wrap gap-3 lg:flex">{actions}</div>}
           </div>
 
           <div className="pointer-events-auto hidden lg:block">{controls}</div>
