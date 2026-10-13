@@ -283,7 +283,7 @@ export function TruckScaleDemo() {
       id="demo-camion"
       data-header-theme="dark"
       aria-label="Demo 3D: báscula de camiones"
-      className="relative isolate h-svh min-h-[40rem] scroll-mt-0 overflow-hidden bg-mt-900 text-white"
+      className="relative isolate flex min-h-svh scroll-mt-0 flex-col overflow-hidden bg-mt-900 text-white"
     >
       {/* Escena a pantalla completa */}
       <div ref={viewerRef} className="absolute inset-0 [&_*]:touch-pan-y!">
@@ -343,7 +343,7 @@ export function TruckScaleDemo() {
         ))}
       </div>
 
-      <div className="pointer-events-none relative mx-auto flex h-full max-w-7xl flex-col px-4 pb-5 pt-24 sm:px-6 lg:px-8 lg:pb-10 lg:pt-32">
+      <div className="pointer-events-none relative mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 pb-5 pt-24 sm:px-6 lg:px-8 lg:pb-10 lg:pt-28">
         <div className="flex items-start justify-between gap-8">
           {/* Texto */}
           <div className="pointer-events-auto max-w-md">
@@ -363,7 +363,7 @@ export function TruckScaleDemo() {
               <StepList steps={STEPS} active={step - 1} onSelect={toggleStep} />
             </div>
 
-            <div className="mt-8 hidden flex-wrap gap-3 lg:flex">
+            <div className="mt-8 hidden gap-3 lg:flex lg:w-max">
               <Button asChild variant="light">
                 <Link href={productHref(TRUCK_SCALE)}>
                   Ver la báscula POWERCELL PDX <ArrowRight />

@@ -185,7 +185,7 @@ export function BenchScaleDemo({ actions }: { actions?: ReactNode }) {
       id="demo-mesa"
       data-header-theme="dark"
       aria-label="Demo 3D: balanza de mesa BPA121"
-      className="relative isolate h-svh min-h-[40rem] scroll-mt-0 overflow-hidden bg-mt-900 text-white"
+      className="relative isolate flex min-h-svh scroll-mt-0 flex-col overflow-hidden bg-mt-900 text-white"
     >
       <div ref={viewerRef} className="absolute inset-0 [&_*]:touch-pan-y!">
         {shouldMount && (
@@ -221,7 +221,7 @@ export function BenchScaleDemo({ actions }: { actions?: ReactNode }) {
         ))}
       </div>
 
-      <div className="pointer-events-none relative mx-auto flex h-full max-w-7xl flex-col px-4 pb-5 pt-24 sm:px-6 lg:px-8 lg:pb-10 lg:pt-32">
+      <div className="pointer-events-none relative mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 pb-5 pt-24 sm:px-6 lg:px-8 lg:pb-10 lg:pt-28">
         <div className="flex items-start justify-between gap-8 lg:flex-row-reverse">
           {/* Texto */}
           <div className="pointer-events-auto max-w-md">
@@ -229,7 +229,7 @@ export function BenchScaleDemo({ actions }: { actions?: ReactNode }) {
               Demo 3D · BPA121
             </p>
             <h2 className="mt-3 font-heading text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl lg:text-5xl">
-              Se desmonta, se limpia y sigue pesando igual
+              Se desmonta y sigue pesando igual
             </h2>
             <p className="mt-3 hidden text-base leading-relaxed text-white/70 lg:block">{INTRO}</p>
             <MobileText states={states} interacted={userPlaying !== null} />
@@ -242,7 +242,7 @@ export function BenchScaleDemo({ actions }: { actions?: ReactNode }) {
               <Verification states={states} />
             </div>
 
-            {actions && <div className="mt-8 hidden flex-wrap gap-3 lg:flex">{actions}</div>}
+            {actions && <div className="mt-6 hidden flex-wrap gap-3 lg:flex">{actions}</div>}
           </div>
 
           <div className="pointer-events-auto hidden lg:block">{controls}</div>
