@@ -15,13 +15,13 @@ export function GridPattern({ tone = "dark", size = 64, className }: { tone?: "d
   );
 }
 
-/** Brillo amarillo Métrica, sutil, para fondos negros */
-export function SunGlow({ className }: { className?: string }) {
+/** Brillo azul METTLER, sutil, que da profundidad a los fondos azules */
+export function Glow({ className }: { className?: string }) {
   return (
     <div
       aria-hidden
       className={cn(
-        "pointer-events-none absolute -z-10 size-[44rem] rounded-full bg-[radial-gradient(circle,rgba(249,227,0,0.11),transparent_62%)]",
+        "pointer-events-none absolute -z-10 size-[44rem] rounded-full bg-[radial-gradient(circle,rgba(74,127,189,0.32),transparent_62%)]",
         className
       )}
     />

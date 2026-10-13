@@ -110,7 +110,7 @@ export function Hero() {
       data-header-theme="dark"
       aria-roledescription="carrusel"
       aria-label="Destacados"
-      className="relative isolate overflow-hidden bg-black"
+      className="relative isolate overflow-hidden bg-mt-950"
       onTouchStart={(e) => (touchStartX.current = e.touches[0].clientX)}
       onTouchEnd={(e) => {
         if (touchStartX.current === null) return;
@@ -140,9 +140,9 @@ export function Hero() {
             />
           </div>
         ))}
-        {/* Degradado negro (antes azul) para leer el texto sobre la foto */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-black/15" />
-        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black/85 to-transparent" />
+        {/* Degradado azul METTLER para leer el texto sobre la foto */}
+        <div className="absolute inset-0 bg-gradient-to-r from-mt-950/90 via-mt-900/65 to-mt-900/15" />
+        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-mt-950/85 to-transparent" />
       </div>
 
       <div className="mx-auto flex min-h-svh max-w-7xl flex-col justify-center px-4 pb-32 pt-28 sm:px-6 lg:px-8 lg:pb-40">

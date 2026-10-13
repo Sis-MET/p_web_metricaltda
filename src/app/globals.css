@@ -3,9 +3,11 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Marca Métrica: amarillo y negro, como el logo.
-     ink = negros y grises carbón neutros (sin tinte azul); sun = amarillo Métrica (#f9e300),
-     solo en acentos: cotizar, CTA de Nosotros, progreso del hero, datos de los demos */
+  /* Marca Métrica: amarillo y negro, como el logo, con el azul METTLER TOLEDO en puntos estratégicos.
+     ink = negros y grises carbón neutros: textos y footer
+     sun = amarillo Métrica (#f9e300), solo en acentos: cotizar, CTA de Nosotros, progreso del hero, datos
+     mt = azul METTLER TOLEDO (#003672, el del panel de sus equipos): Quiénes somos y demos 3D
+     bone = blanco hueso del showroom de los demos: productos y el llamado final antes del footer */
   --color-ink-50: #f5f5f4;
   --color-ink-100: #e8e8e6;
   --color-ink-200: #d1d1ce;
@@ -17,6 +19,24 @@
   --color-ink-800: #222221;
   --color-ink-900: #171716;
   --color-ink-950: #0d0d0c;
+
+  --color-mt-50: #eef4fa;
+  --color-mt-100: #d8e5f3;
+  --color-mt-200: #b1cae6;
+  --color-mt-300: #7ea7d3;
+  --color-mt-400: #4a7fbd;
+  --color-mt-500: #2160a5;
+  --color-mt-600: #0a4a8c;
+  --color-mt-700: #003672;
+  --color-mt-800: #002a5a;
+  --color-mt-900: #001f44;
+  --color-mt-950: #00142e;
+
+  --color-bone-50: #f4f3f0;
+  --color-bone-100: #e9e8e4;
+  --color-bone-200: #dfddd7;
+  --color-bone-300: #cfcdc6;
+  --color-bone-400: #b6b4ad;
 
   --color-sun-200: #fff6a8;
   --color-sun-300: #fff06b;

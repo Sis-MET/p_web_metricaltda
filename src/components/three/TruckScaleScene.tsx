@@ -37,13 +37,13 @@ import type { Store } from "@/lib/store";
 
 /* ─── Constantes de escena ──────────────────────────────────────────────── */
 
-// Showroom claro: piso gris cálido, acero oscuro para la plataforma y amarillo Métrica en datos y franjas
+// Entorno azul METTLER (mt-900 / mt-800); acero para la plataforma y amarillo Métrica en datos y franjas
 const COLORS = {
-  background: "#e9e8e4",
-  ground: "#dfddd7",
-  concrete: "#bebcb5",
-  deck: "#3e4145",
-  deckRail: "#26282b",
+  background: "#001f44",
+  ground: "#002a5a",
+  concrete: "#8592a3",
+  deck: "#4d6582",
+  deckRail: "#2c4664",
   steel: "#dadbdc",
   signal: "#e3b300",
   cable: "#3a3a38",
@@ -589,7 +589,7 @@ function World({
       <color attach="background" args={[COLORS.background]} />
       <fog attach="fog" args={[COLORS.background, 32 * distance, 80 * distance]} />
 
-      <hemisphereLight args={["#ffffff", "#c9c7c0", 0.9]} />
+      <hemisphereLight args={["#d8e5f3", "#002a5a", 0.8]} />
       <directionalLight
         position={[-12, 20, 12]}
         intensity={2.4}
@@ -603,8 +603,8 @@ function World({
       />
       <Environment resolution={256} frames={1}>
         <Lightformer intensity={2.5} position={[0, 12, 0]} rotation-x={Math.PI / 2} scale={[40, 12, 1]} />
-        <Lightformer intensity={1.2} position={[-14, 4, 10]} scale={[12, 3, 1]} color="#fffaf0" />
-        <Lightformer intensity={0.8} position={[14, 3, -10]} scale={[12, 3, 1]} color="#ffffff" />
+        <Lightformer intensity={1.2} position={[-14, 4, 10]} scale={[12, 3, 1]} color="#d8e5f3" />
+        <Lightformer intensity={0.8} position={[14, 3, -10]} scale={[12, 3, 1]} color="#7ea7d3" />
       </Environment>
 
       <mesh rotation-x={-Math.PI / 2} receiveShadow>
@@ -616,10 +616,10 @@ function World({
         args={[220, 220]}
         cellSize={1}
         cellThickness={0.5}
-        cellColor="#cfcdc6"
+        cellColor="#0b3d78"
         sectionSize={6}
         sectionThickness={1}
-        sectionColor="#b6b4ad"
+        sectionColor="#1b5296"
         fadeDistance={60}
         fadeStrength={1.6}
         infiniteGrid

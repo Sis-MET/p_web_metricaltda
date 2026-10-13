@@ -52,7 +52,7 @@ export function useIsDesktop() {
   );
 }
 
-/** Fondo del demo: `dark` (carbón) o `light` (showroom claro). */
+/** Fondo del demo: `dark` (azul METTLER) o `light` (fondos claros del sitio). */
 export type Surface = "dark" | "light";
 
 export function ViewerPlaceholder() {
@@ -95,7 +95,7 @@ export function ViewerButton({
             : "border-ink-950/10 bg-white/90 text-ink-900 hover:border-ink-950/25 hover:bg-white"
           : pressed
             ? "border-white bg-white text-ink-950"
-            : "border-white/15 bg-ink-950/85 text-white hover:border-white/40 hover:bg-ink-800"
+            : "border-white/15 bg-mt-950/85 text-white hover:border-white/40 hover:bg-mt-800"
       )}
     >
       {children}
@@ -127,7 +127,7 @@ export function HmiPanel({
         "overflow-hidden rounded-lg border font-mono",
         light
           ? "border-neutral-200 bg-white text-ink-950 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.35)]"
-          : "border-white/10 bg-[#0b0b0a]/90 text-white shadow-[0_24px_60px_-24px_rgba(0,0,0,0.9)]",
+          : "border-white/10 bg-mt-950/90 text-white shadow-[0_24px_60px_-24px_rgba(0,0,0,0.9)]",
         className
       )}
     >
@@ -262,7 +262,7 @@ export function StepChips({ steps, active, onSelect, surface = "dark" }: StepsPr
                   ? "border-sun-400 bg-sun-400 text-ink-950"
                   : light
                     ? "border-ink-950/10 bg-white/90 text-ink-700"
-                    : "border-white/15 bg-ink-950/85 text-white/80"
+                    : "border-white/15 bg-mt-950/85 text-white/80"
               )}
             >
               <span

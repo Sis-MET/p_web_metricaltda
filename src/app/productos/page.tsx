@@ -33,7 +33,7 @@ export default function ProductsPage() {
         nav={<SubNav section="/productos" label="Tipos de producto" />}
       />
 
-      <section className="bg-neutral-50 py-16 sm:py-20">
+      <section className="bg-bone-100 py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {CATEGORIES.map((category, i) => (
@@ -45,7 +45,7 @@ export default function ProductsPage() {
             ))}
           </ul>
 
-          <ul className="mt-16 grid gap-8 border-t border-neutral-200 pt-12 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="mt-16 grid gap-8 border-t border-bone-300 pt-12 sm:grid-cols-2 lg:grid-cols-4">
             {ASSURANCES.map(({ icon: Icon, title, text }) => (
               <li key={title}>
                 <Icon className="size-5 text-ink-700" aria-hidden />

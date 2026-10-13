@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { CtaBand } from "@/components/layout/CtaBand";
 import { Reveal } from "@/components/animations/Reveal";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { GridPattern, SunGlow } from "@/components/ui/Backdrop";
+import { GridPattern, Glow } from "@/components/ui/Backdrop";
 import { IndustryChips, MettlerToledoCard, Stats } from "@/components/sections/About";
 import { ACCREDITATION, BRANDS, COMPANY, OFFICES, mapsUrl } from "@/content/company";
 import { trailFor } from "@/lib/routes";
@@ -94,9 +94,9 @@ export default function AboutPage() {
       </section>
 
       {/* ── Representaciones e industrias ── */}
-      <section data-header-theme="dark" className="relative isolate overflow-hidden bg-ink-950 py-16 text-white sm:py-24">
+      <section data-header-theme="dark" className="relative isolate overflow-hidden bg-mt-800 py-16 text-white sm:py-24">
         <GridPattern className="[mask-image:radial-gradient(ellipse_at_top_left,black,transparent_65%)]" />
-        <SunGlow className="-left-64 -top-72" />
+        <Glow className="-left-64 -top-72" />
         <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
           <Reveal>
             <SectionHeading

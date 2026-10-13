@@ -248,7 +248,7 @@ export function TruckScaleDemo() {
 
   const controls = (
     <div className="flex flex-wrap items-center gap-2">
-      <div role="radiogroup" aria-label="Tipo de camión" className="flex rounded-full border border-ink-950/10 bg-white/90 p-1">
+      <div role="radiogroup" aria-label="Tipo de camión" className="flex rounded-full border border-white/10 bg-mt-950/85 p-1">
         {TRUCKS.map((t, i) => (
           <button
             key={t.id}
@@ -259,20 +259,20 @@ export function TruckScaleDemo() {
             onClick={() => setTruckIndex(i)}
             className={cn(
               "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors duration-200 sm:text-sm",
-              i === truckIndex ? "bg-ink-900 text-white" : "text-ink-600 hover:text-ink-950"
+              i === truckIndex ? "bg-white text-mt-950" : "text-white/70 hover:text-white"
             )}
           >
             {t.short}
           </button>
         ))}
       </div>
-      <ViewerButton surface="light" label={playing ? "Pausar" : "Reproducir"} onClick={() => setUserPlaying(!playing)}>
+      <ViewerButton label={playing ? "Pausar" : "Reproducir"} onClick={() => setUserPlaying(!playing)}>
         {playing ? <Pause /> : <Play />}
       </ViewerButton>
-      <ViewerButton surface="light" label="Rayos X" pressed={xray} onClick={() => setXray((x) => !x)}>
+      <ViewerButton label="Rayos X" pressed={xray} onClick={() => setXray((x) => !x)}>
         <ScanEye />
       </ViewerButton>
-      <ViewerButton surface="light" label="Vista general" onClick={() => selectStep(0)}>
+      <ViewerButton label="Vista general" onClick={() => selectStep(0)}>
         <RotateCcw />
       </ViewerButton>
     </div>
@@ -281,8 +281,9 @@ export function TruckScaleDemo() {
   return (
     <section
       id="demo-camion"
+      data-header-theme="dark"
       aria-label="Demo 3D: báscula de camiones"
-      className="relative isolate h-svh min-h-[40rem] scroll-mt-0 overflow-hidden bg-[#e9e8e4] text-ink-950"
+      className="relative isolate h-svh min-h-[40rem] scroll-mt-0 overflow-hidden bg-mt-900 text-white"
     >
       {/* Escena a pantalla completa */}
       <div ref={viewerRef} className="absolute inset-0 [&_*]:touch-pan-y!">
@@ -302,9 +303,9 @@ export function TruckScaleDemo() {
       </div>
 
       {/* Degradados para leer el texto sobre el modelo */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-[#e9e8e4] via-[#e9e8e4]/70 to-transparent lg:hidden" />
-      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 hidden w-[55%] bg-gradient-to-r from-[#e9e8e4] via-[#e9e8e4]/80 to-transparent lg:block" />
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#e9e8e4] via-[#e9e8e4]/60 to-transparent" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-mt-900 via-mt-900/70 to-transparent lg:hidden" />
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 hidden w-[55%] bg-gradient-to-r from-mt-900 via-mt-900/80 to-transparent lg:block" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-mt-900 via-mt-900/60 to-transparent" />
 
       {/* Puntos numerados y etiquetas de celdas: la escena los posiciona en cada cuadro */}
       <div className="pointer-events-none absolute inset-0">
@@ -322,7 +323,7 @@ export function TruckScaleDemo() {
               "pointer-events-auto absolute left-0 top-0 flex size-8 items-center justify-center rounded-full border text-xs font-bold transition-[background-color,border-color,color] duration-200",
               step === h.id
                 ? "border-sun-400 bg-sun-400 text-ink-950"
-                : "border-ink-950 bg-ink-900 text-white ring-4 ring-black/10 hover:bg-ink-700"
+                : "border-white/50 bg-mt-950/85 text-white ring-4 ring-mt-300/20 hover:border-white hover:bg-mt-800"
             )}
           >
             {h.id}
@@ -335,7 +336,7 @@ export function TruckScaleDemo() {
               cellLabelElements.current[i] = el;
             }}
             style={{ opacity: 0, visibility: "hidden" }}
-            className="absolute left-0 top-0 select-none rounded bg-[#0b0b0a]/90 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-sun-200 ring-1 ring-white/15 transition-[opacity,visibility] duration-300"
+            className="absolute left-0 top-0 select-none rounded bg-mt-950/90 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-sun-200 ring-1 ring-white/15 transition-[opacity,visibility] duration-300"
           >
             {cell.id}
           </span>
@@ -346,29 +347,29 @@ export function TruckScaleDemo() {
         <div className="flex items-start justify-between gap-8">
           {/* Texto */}
           <div className="pointer-events-auto max-w-md">
-            <p className="font-heading text-xs font-bold uppercase tracking-[0.18em] text-ink-500">
+            <p className="font-heading text-xs font-bold uppercase tracking-[0.18em] text-mt-200">
               Demo 3D · POWERCELL PDX
             </p>
             <h2 className="mt-3 font-heading text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl lg:text-5xl">
               Básculas de camiones
             </h2>
-            <p className="mt-3 hidden text-base leading-relaxed text-ink-600 lg:block">{INTRO}</p>
+            <p className="mt-3 hidden text-base leading-relaxed text-white/70 lg:block">{INTRO}</p>
             {/* Móvil: el paso elegido reemplaza la descripción */}
-            <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-ink-600 sm:text-base lg:hidden" aria-live="polite">
+            <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-white/70 sm:text-base lg:hidden" aria-live="polite">
               {step > 0 ? STEPS[step - 1].text : INTRO}
             </p>
 
             <div className="mt-7 hidden lg:block">
-              <StepList steps={STEPS} active={step - 1} onSelect={toggleStep} surface="light" />
+              <StepList steps={STEPS} active={step - 1} onSelect={toggleStep} />
             </div>
 
             <div className="mt-8 hidden flex-wrap gap-3 lg:flex">
-              <Button asChild>
+              <Button asChild variant="light">
                 <Link href={productHref(TRUCK_SCALE)}>
                   Ver la báscula POWERCELL PDX <ArrowRight />
                 </Link>
               </Button>
-              <Button asChild variant="frost">
+              <Button asChild variant="glass">
                 <Link href="/productos">Ver todos los productos</Link>
               </Button>
             </div>
@@ -380,7 +381,7 @@ export function TruckScaleDemo() {
 
         {/* Pie: terminal de pesaje */}
         <div className="mt-auto flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <p className="hidden items-center gap-2 text-xs text-ink-500 lg:inline-flex">
+          <p className="hidden items-center gap-2 text-xs text-white/50 lg:inline-flex">
             <Move3d className="size-4" aria-hidden />
             Arrastre para girar la vista
           </p>
@@ -389,7 +390,7 @@ export function TruckScaleDemo() {
             <Terminal readings={readings} truck={truck} />
           </div>
           <div className="pointer-events-auto lg:hidden">
-            <StepChips steps={STEPS} active={step - 1} onSelect={toggleStep} surface="light" />
+            <StepChips steps={STEPS} active={step - 1} onSelect={toggleStep} />
           </div>
         </div>
       </div>

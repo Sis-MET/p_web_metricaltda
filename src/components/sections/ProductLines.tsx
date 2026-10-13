@@ -9,7 +9,7 @@ import { CATEGORIES } from "@/content/categories";
 /** Las líneas de producto, cada una hacia su página. */
 export function ProductLines() {
   return (
-    <section id="productos" className="bg-neutral-50 py-20 sm:py-24">
+    <section id="productos" className="bg-bone-100 py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <Reveal className="max-w-2xl">

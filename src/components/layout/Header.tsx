@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 const HEADER_PROBE_Y = 44;
 const CLOSE_DELAY_MS = 150;
 
-// Las páginas empiezan con una cabecera negra, salvo las fichas de producto (fondo claro).
+// Las páginas empiezan con una cabecera azul, salvo las fichas de producto (fondo claro).
 // Sirve para el primer render, antes de poder medir qué hay detrás de la barra.
 const LIGHT_TOP = /^\/productos\/[^/]+\/[^/]+$/;
 
@@ -141,7 +141,7 @@ function QuoteIcon({ isDark }: { isDark: boolean }) {
 
 function DirectContact({ className }: { className?: string }) {
   return (
-    <div className={cn("flex flex-col justify-between rounded-xl bg-ink-950 px-5 py-4 text-white", className)}>
+    <div className={cn("flex flex-col justify-between rounded-xl bg-mt-800 px-5 py-4 text-white", className)}>
       <div>
         <p className="font-heading text-sm font-bold">¿Necesita asesoría?</p>
         <p className="mt-1 text-[13px] leading-snug text-white/60">Hable directamente con nuestro equipo comercial.</p>
@@ -310,7 +310,7 @@ export function Header() {
             "transition-[background-color,border-color,box-shadow] duration-300 ease-out",
             isDark
               ? scrolled
-                ? "border-white/10 bg-ink-950/55 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.6)]"
+                ? "border-white/10 bg-mt-950/55 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.6)]"
                 : "border-white/10 bg-white/[0.06]"
               : "border-ink-950/[0.06] bg-white/85 shadow-[0_12px_40px_-18px_rgba(0,0,0,0.25)]"
           )}

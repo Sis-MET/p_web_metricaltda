@@ -1,5 +1,5 @@
 import { Mail, MapPin, MessageCircle, Phone, type LucideIcon } from "lucide-react";
-import { SunGlow } from "@/components/ui/Backdrop";
+import { Glow } from "@/components/ui/Backdrop";
 import { EMAILS, OFFICES, SALES_PHONE, mapsUrl, whatsappUrl } from "@/content/company";
 
 type Channel = { icon: LucideIcon; label: string; value: string; href: string; external?: boolean };
@@ -20,8 +20,8 @@ const CHANNELS: Channel[] = [
 /** Canales directos de atención, junto a los formularios */
 export function ContactCard({ title = "Atención directa" }: { title?: string }) {
   return (
-    <div className="relative isolate overflow-hidden rounded-[2rem] bg-ink-950 p-6 text-white sm:p-8">
-      <SunGlow className="-right-72 -top-80" />
+    <div className="relative isolate overflow-hidden rounded-[2rem] bg-mt-800 p-6 text-white sm:p-8">
+      <Glow className="-right-72 -top-80" />
       <h3 className="font-heading text-lg font-bold">{title}</h3>
       <ul className="mt-5 space-y-1">
         {CHANNELS.map(({ icon: Icon, label, value, href, external }) => (

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { GridPattern, SunGlow } from "@/components/ui/Backdrop";
+import { GridPattern, Glow } from "@/components/ui/Backdrop";
 import { Reveal } from "@/components/animations/Reveal";
 import { CountUp } from "@/components/animations/CountUp";
 import { BRANDS, COMPANY, INDUSTRIES, STATS } from "@/content/company";
@@ -67,9 +67,9 @@ export function MettlerToledoCard() {
 /** Presentación de la empresa en el inicio; la historia completa está en /nosotros. */
 export function About() {
   return (
-    <section id="nosotros" data-header-theme="dark" className="relative isolate overflow-hidden bg-ink-950 py-20 text-white sm:py-28">
+    <section id="nosotros" data-header-theme="dark" className="relative isolate overflow-hidden bg-mt-800 py-20 text-white sm:py-28">
       <GridPattern className="[mask-image:radial-gradient(ellipse_at_top_right,black,transparent_65%)]" />
-      <SunGlow className="-right-48 -top-48" />
+      <Glow className="-right-48 -top-48" />
 
       <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:gap-16 lg:px-8">
         <div className="lg:col-span-7">

@@ -48,7 +48,7 @@ const CAMERA: Record<"close" | "wide", View> = {
 };
 
 const COLORS = {
-  background: "#121211",
+  background: "#001f44",
   plastic: "#f3f5f8",
   panel: "#1f44a3",
   support: "#9aa6b2",
@@ -405,7 +405,7 @@ function World({ playing, seek, resetView, shift, states, labelElements }: Omit<
       <color attach="background" args={[COLORS.background]} />
       {/* Niebla del color del fondo: el piso se funde con él y no se ve su borde (antes se notaba una curva) */}
       <fog attach="fog" args={[COLORS.background, 13 * distance, 30 * distance]} />
-      <hemisphereLight args={["#ffffff", "#1c1c1b", 0.9]} />
+      <hemisphereLight args={["#ffffff", "#002a5a", 0.9]} />
       <directionalLight position={[4, 8, 5]} intensity={2.2} />
       <Environment resolution={256} frames={1}>
         <Lightformer intensity={2.2} position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[12, 6, 1]} />
@@ -416,7 +416,7 @@ function World({ playing, seek, resetView, shift, states, labelElements }: Omit<
       {/* Mesa */}
       <mesh rotation-x={-Math.PI / 2} position={[0, -0.001, 0]}>
         <circleGeometry args={[60, 64]} />
-        <meshStandardMaterial color="#151514" roughness={0.95} />
+        <meshStandardMaterial color="#00244e" roughness={0.95} />
       </mesh>
       {/* Sombra de la base (las piezas se separan hacia arriba, sobre ella) */}
       <BlobShadow size={[4.6, 3.8]} opacity={0.75} />

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Eyebrow } from "@/components/ui/SectionHeading";
-import { GridPattern, SunGlow } from "@/components/ui/Backdrop";
+import { GridPattern, Glow } from "@/components/ui/Backdrop";
 import { Breadcrumbs } from "./Breadcrumbs";
 import type { NavLink } from "@/lib/routes";
 import { cn } from "@/lib/utils";
@@ -18,15 +18,15 @@ type PageHeaderProps = {
   className?: string;
 };
 
-/** Cabecera de las páginas internas: negra, compacta y con la ruta de navegación. */
+/** Cabecera de las páginas internas: azul METTLER, compacta y con la ruta de navegación. */
 export function PageHeader({ trail, eyebrow, title, description, actions, aside, nav, className }: PageHeaderProps) {
   return (
     <header
       data-header-theme="dark"
-      className={cn("relative isolate overflow-hidden bg-ink-950 pb-12 pt-28 text-white sm:pb-14 sm:pt-32", className)}
+      className={cn("relative isolate overflow-hidden bg-mt-800 pb-12 pt-28 text-white sm:pb-14 sm:pt-32", className)}
     >
       <GridPattern className="[mask-image:radial-gradient(ellipse_at_top_right,black,transparent_70%)]" />
-      <SunGlow className="-right-56 -top-64" />
+      <Glow className="-right-56 -top-64" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Breadcrumbs trail={trail} />
