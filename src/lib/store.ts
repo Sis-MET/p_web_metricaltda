@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * Store mínimo para datos que cambian muy seguido (lecturas de los demos 3D):
+ * Store mínimo para estado compartido fuera de React (lecturas de los demos 3D, lista de cotización):
  * solo se re-renderizan los componentes suscritos, no el árbol que los contiene.
  */
 export type Store<T> = {
@@ -16,6 +16,7 @@ export function createStore<T>(initial: T): Store<T> {
   return {
     get: () => value,
     set: (next) => {
+      if (Object.is(next, value)) return;
       value = next;
       listeners.forEach((listener) => listener());
     },
@@ -26,6 +27,7 @@ export function createStore<T>(initial: T): Store<T> {
   };
 }
 
-export function useStore<T>(store: Store<T>) {
-  return useSyncExternalStore(store.subscribe, store.get, store.get);
+/** `serverValue`: lo que se renderiza en el servidor y durante la hidratación */
+export function useStore<T>(store: Store<T>, serverValue: T = store.get()) {
+  return useSyncExternalStore(store.subscribe, store.get, () => serverValue);
 }
