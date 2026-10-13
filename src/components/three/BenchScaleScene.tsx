@@ -130,14 +130,16 @@ function FrontPanel({ stateRef }: { stateRef: React.RefObject<{ text: string; st
   }, []);
 
   // Redibuja solo cuando cambia lo que muestra el display, como máximo ~12 veces por segundo
-  // (cada redibujo sube dos texturas a la GPU)
-  useFrame(({ clock }) => {
+  // (cada redibujo sube dos texturas a la GPU).
+  // Ojo: no usar el reloj de R3F, se reinicia a 0 cada vez que la escena se pausa y reanuda,
+  // y el display quedaba congelado hasta que el reloj alcanzaba su valor anterior.
+  useFrame(() => {
     const c = canvases.current;
     const s = stateRef.current;
     if (!c || !s) return;
     const signature = `${s.text}|${s.stable}|${s.zero}|${s.on}`;
     if (signature === c.signature) return;
-    const now = clock.elapsedTime;
+    const now = performance.now() / 1000;
     if (now - c.lastDraw < 0.08 && c.signature !== "") return;
     c.lastDraw = now;
     c.signature = signature;
