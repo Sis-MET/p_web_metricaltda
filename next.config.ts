@@ -9,9 +9,16 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "5mb" },
   },
   async redirects() {
+    // Direcciones del sitio anterior: conservan los enlaces guardados y el posicionamiento en buscadores
     return [
-      // La acreditación pertenece solo al laboratorio de calibración: ahora se muestra ahí
-      { source: "/certificaciones", destination: "/#calibracion", permanent: false },
+      { source: "/index.php", destination: "/", permanent: true },
+      { source: "/inicio/nosotros", destination: "/nosotros", permanent: true },
+      { source: "/productos/industrial/:path*", destination: "/productos/balanzas-industriales", permanent: true },
+      { source: "/contacto/contactanos", destination: "/contacto", permanent: true },
+      { source: "/contacto/reclamo-o-sugerencia", destination: "/contacto/reclamos-y-sugerencias", permanent: true },
+      { source: "/contacto/trabaja-con-nostros", destination: "/contacto/trabaja-con-nosotros", permanent: true },
+      // La acreditación pertenece solo al laboratorio de calibración
+      { source: "/certificaciones", destination: "/servicios/calibracion", permanent: true },
     ];
   },
 };

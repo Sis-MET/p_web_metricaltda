@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { SectionLink } from "@/components/navigation/SectionLink";
-import type { Consulta, SectionId } from "@/lib/navigation";
+import { QUOTE_HREF } from "@/lib/routes";
 import { EASE_IN, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -18,8 +18,8 @@ type Slide = {
   title: [string, string];
   description: string;
   image: string;
-  primary: { label: string; section: SectionId };
-  secondary: { label: string; consulta: Consulta };
+  primary: { label: string; href: string };
+  secondary: { label: string; href: string };
 };
 
 const SLIDES: Slide[] = [
@@ -30,8 +30,8 @@ const SLIDES: Slide[] = [
     description:
       "Robustez, Confiabilidad, Precisión y Ergonomía: Las balanzas METTLER TOLEDO están diseñadas para enfrentar los procesos de pesaje más exigentes en entornos industriales desafiantes. Garantizamos la máxima precisión y confiabilidad en cada medición, sin comprometer la facilidad de uso y ergonomía para los operadores.",
     image: "/images/hero/balanzas-industriales.jpg",
-    primary: { label: "Ver catálogo", section: "productos" },
-    secondary: { label: "Cotizar", consulta: "cotizacion" },
+    primary: { label: "Ver catálogo", href: "/productos/balanzas-industriales" },
+    secondary: { label: "Cotizar", href: QUOTE_HREF },
   },
   {
     id: "trucks",
@@ -40,8 +40,8 @@ const SLIDES: Slide[] = [
     description:
       "La tecnología avanzada, durabilidad y exactitud de las básculas de camiones Powercell PDX de Mettler Toledo permiten controlar grandes volúmenes transportados por los camiones con la más alta precisión.",
     image: "/images/hero/basculas-camion.jpg",
-    primary: { label: "Ver cómo funciona", section: "demo-camion" },
-    secondary: { label: "Asesoría", consulta: "cotizacion" },
+    primary: { label: "Ver cómo funciona", href: "#demo-camion" },
+    secondary: { label: "Asesoría", href: "/contacto" },
   },
   {
     id: "calibration",
@@ -50,8 +50,8 @@ const SLIDES: Slide[] = [
     description:
       "Garantice la precisión y confiabilidad de sus balanzas y pesas con nuestro servicio de calibración, consulte sobre nuestros alcances.",
     image: "/images/hero/calibracion.jpg",
-    primary: { label: "Nuestros servicios", section: "servicios" },
-    secondary: { label: "Agendar", consulta: "calibracion" },
+    primary: { label: "Conocer el laboratorio", href: "/servicios/calibracion" },
+    secondary: { label: "Agendar", href: "/servicios/calibracion#solicitar" },
   },
   {
     id: "support",
@@ -60,8 +60,8 @@ const SLIDES: Slide[] = [
     description:
       "Servicio para balanzas industriales y básculas de camiones. Profesionalismo, experiencia y compromiso para asegurar la precisión y fiabilidad de tus equipos.",
     image: "/images/hero/soporte-tecnico.jpg",
-    primary: { label: "Ver soporte", section: "servicios" },
-    secondary: { label: "Contacto", consulta: "soporte" },
+    primary: { label: "Ver soporte", href: "/servicios/soporte-tecnico" },
+    secondary: { label: "Solicitar soporte", href: "/servicios/soporte-tecnico#solicitar" },
   },
 ];
 
@@ -169,14 +169,12 @@ export function Hero() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button asChild size="lg" variant="light">
-                  <SectionLink section={slide.primary.section}>
+                  <Link href={slide.primary.href}>
                     {slide.primary.label} <ArrowRight />
-                  </SectionLink>
+                  </Link>
                 </Button>
                 <Button asChild size="lg" variant="glass">
-                  <SectionLink section="contacto" consulta={slide.secondary.consulta}>
-                    {slide.secondary.label}
-                  </SectionLink>
+                  <Link href={slide.secondary.href}>{slide.secondary.label}</Link>
                 </Button>
               </div>
             </motion.div>

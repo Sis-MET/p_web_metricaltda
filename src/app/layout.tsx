@@ -4,6 +4,8 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MotionProvider } from "@/components/providers/MotionProvider";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { COMPANY, EMAILS, OFFICES, SITE_URL } from "@/content/company";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -20,13 +22,45 @@ const workSans = Work_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Métrica | Balanzas industriales y calibración acreditada en Bolivia",
-  description:
-    "Representantes exclusivos de METTLER TOLEDO en Bolivia. Venta de balanzas y básculas, calibración acreditada NB/ISO/IEC 17025 y soporte técnico.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Métrica | Balanzas industriales y calibración acreditada en Bolivia",
+    template: "%s | Métrica Ltda.",
+  },
+  description: COMPANY.description,
+  openGraph: {
+    type: "website",
+    locale: "es_BO",
+    siteName: COMPANY.name,
+  },
 };
 
 export const viewport: Viewport = {
   themeColor: "#0d0d0c",
+};
+
+const ORGANIZATION = {
+  "@type": "Organization",
+  name: COMPANY.name,
+  url: SITE_URL,
+  logo: `${SITE_URL}/images/logo/metrica.png`,
+  email: EMAILS.info,
+  foundingDate: String(COMPANY.founded),
+  address: OFFICES.map((office) => ({
+    "@type": "PostalAddress",
+    streetAddress: office.address.join(", "),
+    addressLocality: office.city,
+    addressCountry: "BO",
+  })),
+  contactPoint: OFFICES.flatMap((office) =>
+    office.phones.slice(0, 1).map((phone) => ({
+      "@type": "ContactPoint",
+      telephone: phone.number,
+      contactType: "sales",
+      areaServed: "BO",
+      availableLanguage: "es",
+    }))
+  ),
 };
 
 export default function RootLayout({
@@ -43,6 +77,7 @@ export default function RootLayout({
           {children}
           <Footer />
         </MotionProvider>
+        <JsonLd data={ORGANIZATION} />
       </body>
     </html>
   );

@@ -1,17 +1,20 @@
 import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
-import { Products } from "@/components/sections/Products";
+import { ProductLines } from "@/components/sections/ProductLines";
 import { Services } from "@/components/sections/Services";
-import { Contact } from "@/components/sections/Contact";
+import { TruckScaleDemo } from "@/components/demos/TruckScaleDemo";
+import { CtaBand } from "@/components/layout/CtaBand";
 
+/** Inicio: un resumen de cada sección del sitio, con el demo de básculas de camiones como vitrina. */
 export default function Home() {
   return (
     <main className="min-h-screen">
       <Hero />
       <About />
-      <Products />
+      <ProductLines />
+      <TruckScaleDemo />
       <Services />
-      <Contact />
+      <CtaBand />
     </main>
   );
 }
