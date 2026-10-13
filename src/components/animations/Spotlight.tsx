@@ -19,7 +19,7 @@ export function Spotlight({ className, children }: { className?: string; childre
         className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-300 group-hover/spot:opacity-100"
         style={{
           background:
-            "radial-gradient(420px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(31,103,181,0.12), transparent 45%)",
+            "radial-gradient(420px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(249,227,0,0.14), transparent 45%)",
         }}
       />
     </div>

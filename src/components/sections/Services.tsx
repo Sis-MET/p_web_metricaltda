@@ -77,7 +77,7 @@ const SERVICES: Service[] = [
 function Accreditation() {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
-      <div className="inline-flex shrink-0 items-center gap-4 self-start rounded-md bg-white px-4 py-2.5 ring-1 ring-slate-200">
+      <div className="inline-flex shrink-0 items-center gap-4 self-start rounded-md bg-white px-4 py-2.5 ring-1 ring-neutral-200">
         <Image
           src="/images/logo/ibmetro-acreditado.png"
           alt="Acreditado por IBMETRO: laboratorio de calibración DTA-CET-041"
@@ -88,14 +88,14 @@ function Accreditation() {
         />
         <Image src="/images/logo/metrica.png" alt="Métrica Ltda." width={800} height={251} sizes="120px" className="h-9 w-auto" />
       </div>
-      <div className="font-mono text-[11px] leading-relaxed text-slate-500">
+      <div className="font-mono text-[11px] leading-relaxed text-neutral-500">
         <p>Acreditación DTA-CET-041 · NB/ISO/IEC 17025:2018</p>
         <p>Balanzas (instrumentos de pesar de funcionamiento no automático) y pesas patrón.</p>
         <a
           href={IBMETRO_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-0.5 inline-flex items-center gap-1 font-semibold text-navy-700 underline-offset-4 transition-colors hover:text-navy-900 hover:underline"
+          className="mt-0.5 inline-flex items-center gap-1 font-semibold text-ink-700 underline-offset-4 transition-colors hover:text-ink-900 hover:underline"
         >
           Verificar alcance en IBMETRO <ArrowUpRight className="size-3" aria-hidden />
         </a>
@@ -126,24 +126,24 @@ function ServicePanel({
         {/* Altura mínima común: los títulos de ambas columnas quedan alineados */}
         <div className="max-w-lg lg:min-h-[19.5rem]">{illustration}</div>
 
-        <p className="mt-12 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-navy-600">
-          <span className="font-semibold text-navy-950">{service.index}</span>
-          <span aria-hidden className="h-px w-8 bg-navy-500/50" />
+        <p className="mt-12 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.2em] text-ink-600">
+          <span className="font-semibold text-ink-950">{service.index}</span>
+          <span aria-hidden className="h-px w-8 bg-sun-400" />
           {service.label}
         </p>
         <h3
           id={`${service.id}-titulo`}
-          className="mt-4 max-w-lg font-heading text-3xl font-extrabold leading-[1.08] tracking-tight text-navy-950 sm:text-4xl xl:text-5xl"
+          className="mt-4 max-w-lg font-heading text-3xl font-extrabold leading-[1.08] tracking-tight text-ink-950 sm:text-4xl xl:text-5xl"
         >
           {service.headline}
         </h3>
-        <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-slate-600">{service.description}</p>
+        <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-neutral-600">{service.description}</p>
 
         {/* Ficha técnica: filas separadas por líneas, sin tarjetas */}
-        <ul className="mt-7 max-w-lg divide-y divide-slate-200 border-y border-slate-200">
+        <ul className="mt-7 max-w-lg divide-y divide-neutral-200 border-y border-neutral-200">
           {service.features.map(({ icon: Icon, text }) => (
-            <li key={text} className="flex items-center gap-3 py-3 text-sm text-slate-700">
-              <Icon className="size-4 shrink-0 text-navy-600" aria-hidden />
+            <li key={text} className="flex items-center gap-3 py-3 text-sm text-neutral-700">
+              <Icon className="size-4 shrink-0 text-ink-600" aria-hidden />
               {text}
             </li>
           ))}
@@ -167,11 +167,11 @@ export function Services() {
   const [calibration, support] = SERVICES;
 
   return (
-    <section id="servicios" className="relative isolate overflow-hidden bg-white py-20 text-navy-950 sm:py-24">
+    <section id="servicios" className="relative isolate overflow-hidden bg-white py-20 text-ink-950 sm:py-24">
       {/* Retícula de plano técnico en toda la sección: título y servicios se leen como una sola unidad */}
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(4,55,110,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(4,55,110,0.05)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:linear-gradient(to_bottom,transparent,black_12%,black_80%,transparent)]"
+        className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:linear-gradient(to_bottom,transparent,black_12%,black_80%,transparent)]"
       />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -183,7 +183,7 @@ export function Services() {
             </h2>
           </Reveal>
           <Reveal delay={0.06}>
-            <p className="max-w-md text-base leading-relaxed text-slate-600 lg:text-right">
+            <p className="max-w-md text-base leading-relaxed text-neutral-600 lg:text-right">
               Más que vender equipos — garantizamos su funcionamiento óptimo y cumplimiento normativo a largo plazo.
             </p>
           </Reveal>
@@ -197,7 +197,7 @@ export function Services() {
           <ServicePanel
             service={support}
             illustration={<SupportDiagnostic />}
-            className="lg:border-l lg:border-slate-200 lg:pl-14"
+            className="lg:border-l lg:border-neutral-200 lg:pl-14"
           />
         </div>
       </div>

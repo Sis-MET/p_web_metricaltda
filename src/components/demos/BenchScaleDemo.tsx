@@ -125,7 +125,7 @@ function Verification({ states }: { states: States }) {
 function PhasePill({ states }: { states: States }) {
   const { phase } = useStore(states);
   return (
-    <p className="rounded-full border border-white/10 bg-navy-950/85 px-3 py-2 text-xs font-semibold">
+    <p className="rounded-full border border-white/10 bg-ink-950/85 px-3 py-2 text-xs font-semibold">
       <span className="text-white/50">Paso {phase + 1} de 4 · </span>
       {STEPS[phase].title}
     </p>
@@ -187,7 +187,7 @@ export function BenchScaleDemo() {
       id="demo-mesa"
       data-header-theme="dark"
       aria-label="Demo 3D: balanza de mesa BPA121"
-      className="relative isolate h-svh min-h-[40rem] scroll-mt-0 overflow-hidden bg-[#061a33] text-white"
+      className="relative isolate h-svh min-h-[40rem] scroll-mt-0 overflow-hidden bg-[#121211] text-white"
     >
       <div ref={viewerRef} className="absolute inset-0 [&_*]:touch-pan-y!">
         {shouldMount && (
@@ -203,9 +203,9 @@ export function BenchScaleDemo() {
         )}
       </div>
 
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-[#061a33] via-[#061a33]/70 to-transparent lg:hidden" />
-      <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-[55%] bg-gradient-to-l from-[#061a33] via-[#061a33]/80 to-transparent lg:block" />
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#061a33] via-[#061a33]/60 to-transparent" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-[#121211] via-[#121211]/70 to-transparent lg:hidden" />
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-[55%] bg-gradient-to-l from-[#121211] via-[#121211]/80 to-transparent lg:block" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#121211] via-[#121211]/60 to-transparent" />
 
       {/* Etiquetas de las piezas: la escena las posiciona y muestra con la balanza desmontada */}
       <div className="pointer-events-none absolute inset-0">
@@ -216,7 +216,7 @@ export function BenchScaleDemo() {
               labelElements.current[i] = el;
             }}
             style={{ opacity: 0, visibility: "hidden" }}
-            className="absolute left-0 top-0 select-none whitespace-nowrap rounded-full border border-white/15 bg-[#020c1a]/90 px-2.5 py-1 text-[11px] font-semibold text-white transition-[opacity,visibility] duration-300"
+            className="absolute left-0 top-0 select-none whitespace-nowrap rounded-full border border-white/15 bg-[#0b0b0a]/90 px-2.5 py-1 text-[11px] font-semibold text-white transition-[opacity,visibility] duration-300"
           >
             {part.label}
           </span>
@@ -227,7 +227,7 @@ export function BenchScaleDemo() {
         <div className="flex items-start justify-between gap-8 lg:flex-row-reverse">
           {/* Texto */}
           <div className="pointer-events-auto max-w-md">
-            <p className="font-heading text-xs font-bold uppercase tracking-[0.18em] text-navy-200">
+            <p className="font-heading text-xs font-bold uppercase tracking-[0.18em] text-ink-300">
               Demo 3D · Industria alimentaria
             </p>
             <h2 className="mt-3 font-heading text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl lg:text-5xl">

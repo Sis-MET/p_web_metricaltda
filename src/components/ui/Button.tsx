@@ -9,17 +9,20 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-navy-800 text-white shadow-[0_10px_24px_-12px_rgba(4,55,110,0.7)] hover:bg-navy-700 hover:shadow-[0_14px_28px_-12px_rgba(4,55,110,0.8)] hover:[&_svg]:translate-x-0.5",
+          "bg-ink-800 text-white shadow-[0_10px_24px_-12px_rgba(0,0,0,0.7)] hover:bg-ink-700 hover:shadow-[0_14px_28px_-12px_rgba(0,0,0,0.8)] hover:[&_svg]:translate-x-0.5",
         // Amarillo Métrica: solo para las acciones destacadas (cotizar, CTA de Nosotros)
         brand:
-          "bg-sun-400 text-navy-950 shadow-[0_8px_22px_-12px_rgba(249,227,0,0.7)] hover:bg-sun-300 hover:[&_svg]:translate-x-0.5",
+          "bg-sun-400 text-ink-950 shadow-[0_8px_22px_-12px_rgba(249,227,0,0.7)] hover:bg-sun-300 hover:[&_svg]:translate-x-0.5",
         light:
-          "bg-white text-navy-950 shadow-[0_10px_28px_-14px_rgba(0,0,0,0.6)] hover:bg-navy-50 hover:[&_svg]:translate-x-0.5",
+          "bg-white text-ink-950 shadow-[0_10px_28px_-14px_rgba(0,0,0,0.6)] hover:bg-ink-50 hover:[&_svg]:translate-x-0.5",
         outline:
-          "border border-slate-300 bg-white text-navy-900 hover:border-navy-800 hover:bg-navy-50 hover:[&_svg]:translate-x-0.5",
+          "border border-neutral-300 bg-white text-ink-900 hover:border-ink-800 hover:bg-ink-50 hover:[&_svg]:translate-x-0.5",
         glass:
           "border border-white/20 bg-white/10 text-white backdrop-blur-md hover:border-white/35 hover:bg-white/20",
-        ghost: "text-navy-800 hover:bg-navy-50",
+        // Glass sobre fondos claros
+        frost:
+          "border border-ink-950/10 bg-white/55 text-ink-950 backdrop-blur-md hover:border-ink-950/20 hover:bg-white/80",
+        ghost: "text-ink-800 hover:bg-ink-50",
       },
       size: {
         sm: "h-9 px-4 text-sm",

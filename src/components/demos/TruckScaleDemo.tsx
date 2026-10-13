@@ -116,8 +116,8 @@ function PlanView({ readings, truck }: { readings: Store<TruckReading>; truck: T
         y={PLAN.deckTop}
         width={DECK_X1 - DECK_X0}
         height={PLAN.deckBottom - PLAN.deckTop}
-        fill="rgba(4,55,110,0.35)"
-        stroke="rgba(108,196,255,0.5)"
+        fill="rgba(0,0,0,0.35)"
+        stroke="rgba(249,227,0,0.5)"
       />
       {[-3, 3].map((m) => (
         <line
@@ -126,7 +126,7 @@ function PlanView({ readings, truck }: { readings: Store<TruckReading>; truck: T
           x2={metersToX(m)}
           y1={PLAN.deckTop}
           y2={PLAN.deckBottom}
-          stroke="rgba(108,196,255,0.35)"
+          stroke="rgba(249,227,0,0.3)"
           strokeDasharray="3 3"
         />
       ))}
@@ -156,15 +156,15 @@ function PlanView({ readings, truck }: { readings: Store<TruckReading>; truck: T
         const dx = anchor === "start" ? -5 : anchor === "end" ? 5 : 0;
         return (
           <g key={cell.id}>
-            <rect x={x - 4.5} y={y - 4.5} width={9} height={9} fill="#0b2a4a" stroke="rgba(108,196,255,0.7)" />
-            <rect x={x - 4.5} y={y - 4.5} width={9} height={9} fill="#6cc4ff" opacity={value / max} />
+            <rect x={x - 4.5} y={y - 4.5} width={9} height={9} fill="#1a1a19" stroke="rgba(249,227,0,0.7)" />
+            <rect x={x - 4.5} y={y - 4.5} width={9} height={9} fill="#f9e300" opacity={value / max} />
             <text
               x={x + dx}
               y={top ? PLAN.deckTop - 8 : PLAN.deckBottom + 15}
               textAnchor={anchor}
               className="fill-white/80 text-[8.5px]"
             >
-              <tspan className="fill-sky-300">{cell.id}</tspan> {tonnes.format(value / 1000)}
+              <tspan className="fill-sun-400">{cell.id}</tspan> {tonnes.format(value / 1000)}
             </text>
           </g>
         );
@@ -202,7 +202,7 @@ function Terminal({ readings, truck }: { readings: Store<TruckReading>; truck: T
             <span className="ml-1.5 text-sm font-medium text-white/45">kg</span>
           </p>
           <div className="mt-2 flex items-center justify-between gap-2 text-[10px] uppercase tracking-wider">
-            <span className={cn(r.total === 0 ? "text-sky-300" : "text-white/25")}>→0←</span>
+            <span className={cn(r.total === 0 ? "text-sun-400" : "text-white/25")}>→0←</span>
             <span className="text-white/25">Neto</span>
             <span className="text-white/60">
               Ejes {r.axlesOnDeck}/{truck.axles.length}
@@ -246,7 +246,7 @@ export function TruckScaleDemo() {
 
   const controls = (
     <div className="flex flex-wrap items-center gap-2">
-      <div role="radiogroup" aria-label="Tipo de camión" className="flex rounded-full border border-white/10 bg-navy-950/85 p-1">
+      <div role="radiogroup" aria-label="Tipo de camión" className="flex rounded-full border border-ink-950/10 bg-white/90 p-1">
         {TRUCKS.map((t, i) => (
           <button
             key={t.id}
@@ -257,20 +257,20 @@ export function TruckScaleDemo() {
             onClick={() => setTruckIndex(i)}
             className={cn(
               "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors duration-200 sm:text-sm",
-              i === truckIndex ? "bg-white text-navy-950" : "text-white/70 hover:text-white"
+              i === truckIndex ? "bg-ink-900 text-white" : "text-ink-600 hover:text-ink-950"
             )}
           >
             {t.short}
           </button>
         ))}
       </div>
-      <ViewerButton label={playing ? "Pausar" : "Reproducir"} onClick={() => setUserPlaying(!playing)}>
+      <ViewerButton surface="light" label={playing ? "Pausar" : "Reproducir"} onClick={() => setUserPlaying(!playing)}>
         {playing ? <Pause /> : <Play />}
       </ViewerButton>
-      <ViewerButton label="Rayos X" pressed={xray} onClick={() => setXray((x) => !x)}>
+      <ViewerButton surface="light" label="Rayos X" pressed={xray} onClick={() => setXray((x) => !x)}>
         <ScanEye />
       </ViewerButton>
-      <ViewerButton label="Vista general" onClick={() => selectStep(0)}>
+      <ViewerButton surface="light" label="Vista general" onClick={() => selectStep(0)}>
         <RotateCcw />
       </ViewerButton>
     </div>
@@ -279,9 +279,8 @@ export function TruckScaleDemo() {
   return (
     <section
       id="demo-camion"
-      data-header-theme="dark"
       aria-label="Demo 3D: báscula de camiones"
-      className="relative isolate h-svh min-h-[40rem] scroll-mt-0 overflow-hidden bg-[#061a33] text-white"
+      className="relative isolate h-svh min-h-[40rem] scroll-mt-0 overflow-hidden bg-[#e9e8e4] text-ink-950"
     >
       {/* Escena a pantalla completa */}
       <div ref={viewerRef} className="absolute inset-0 [&_*]:touch-pan-y!">
@@ -301,9 +300,9 @@ export function TruckScaleDemo() {
       </div>
 
       {/* Degradados para leer el texto sobre el modelo */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-[#061a33] via-[#061a33]/70 to-transparent lg:hidden" />
-      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 hidden w-[55%] bg-gradient-to-r from-[#061a33] via-[#061a33]/80 to-transparent lg:block" />
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#061a33] via-[#061a33]/60 to-transparent" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-[#e9e8e4] via-[#e9e8e4]/70 to-transparent lg:hidden" />
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 hidden w-[55%] bg-gradient-to-r from-[#e9e8e4] via-[#e9e8e4]/80 to-transparent lg:block" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#e9e8e4] via-[#e9e8e4]/60 to-transparent" />
 
       {/* Puntos numerados y etiquetas de celdas: la escena los posiciona en cada cuadro */}
       <div className="pointer-events-none absolute inset-0">
@@ -320,8 +319,8 @@ export function TruckScaleDemo() {
             className={cn(
               "pointer-events-auto absolute left-0 top-0 flex size-8 items-center justify-center rounded-full border text-xs font-bold transition-[background-color,border-color,color] duration-200",
               step === h.id
-                ? "border-white bg-white text-navy-950"
-                : "border-white/50 bg-navy-950/85 text-white ring-4 ring-navy-300/20 hover:border-white hover:bg-navy-800"
+                ? "border-sun-400 bg-sun-400 text-ink-950"
+                : "border-ink-950 bg-ink-900 text-white ring-4 ring-black/10 hover:bg-ink-700"
             )}
           >
             {h.id}
@@ -334,7 +333,7 @@ export function TruckScaleDemo() {
               cellLabelElements.current[i] = el;
             }}
             style={{ opacity: 0, visibility: "hidden" }}
-            className="absolute left-0 top-0 select-none rounded bg-[#020c1a]/90 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-sky-100 ring-1 ring-white/15 transition-[opacity,visibility] duration-300"
+            className="absolute left-0 top-0 select-none rounded bg-[#0b0b0a]/90 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-sun-200 ring-1 ring-white/15 transition-[opacity,visibility] duration-300"
           >
             {cell.id}
           </span>
@@ -345,29 +344,29 @@ export function TruckScaleDemo() {
         <div className="flex items-start justify-between gap-8">
           {/* Texto */}
           <div className="pointer-events-auto max-w-md">
-            <p className="font-heading text-xs font-bold uppercase tracking-[0.18em] text-navy-200">
+            <p className="font-heading text-xs font-bold uppercase tracking-[0.18em] text-ink-500">
               Demo 3D · POWERCELL PDX
             </p>
             <h2 className="mt-3 font-heading text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl lg:text-5xl">
               Básculas de camiones
             </h2>
-            <p className="mt-3 hidden text-base leading-relaxed text-white/70 lg:block">{INTRO}</p>
+            <p className="mt-3 hidden text-base leading-relaxed text-ink-600 lg:block">{INTRO}</p>
             {/* Móvil: el paso elegido reemplaza la descripción */}
-            <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-white/70 sm:text-base lg:hidden" aria-live="polite">
+            <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-ink-600 sm:text-base lg:hidden" aria-live="polite">
               {step > 0 ? STEPS[step - 1].text : INTRO}
             </p>
 
             <div className="mt-7 hidden lg:block">
-              <StepList steps={STEPS} active={step - 1} onSelect={toggleStep} />
+              <StepList steps={STEPS} active={step - 1} onSelect={toggleStep} surface="light" />
             </div>
 
             <div className="mt-8 hidden flex-wrap gap-3 lg:flex">
-              <Button asChild variant="light">
+              <Button asChild>
                 <SectionLink section="contacto" consulta="cotizacion">
                   Solicitar asesoría <ArrowRight />
                 </SectionLink>
               </Button>
-              <Button asChild variant="glass">
+              <Button asChild variant="frost">
                 <Link href="/productos">Ver todos los productos</Link>
               </Button>
             </div>
@@ -379,7 +378,7 @@ export function TruckScaleDemo() {
 
         {/* Pie: terminal de pesaje */}
         <div className="mt-auto flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <p className="hidden items-center gap-2 text-xs text-white/50 lg:inline-flex">
+          <p className="hidden items-center gap-2 text-xs text-ink-500 lg:inline-flex">
             <Move3d className="size-4" aria-hidden />
             Arrastre para girar la vista
           </p>
@@ -388,7 +387,7 @@ export function TruckScaleDemo() {
             <Terminal readings={readings} truck={truck} />
           </div>
           <div className="pointer-events-auto lg:hidden">
-            <StepChips steps={STEPS} active={step - 1} onSelect={toggleStep} />
+            <StepChips steps={STEPS} active={step - 1} onSelect={toggleStep} surface="light" />
           </div>
         </div>
       </div>

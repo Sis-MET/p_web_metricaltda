@@ -16,11 +16,12 @@ export function Eyebrow({
     <p
       className={cn(
         "inline-flex items-center gap-3 font-heading text-xs font-bold uppercase tracking-[0.18em]",
-        tone === "dark" ? "text-navy-200" : "text-navy-600",
+        tone === "dark" ? "text-ink-300" : "text-ink-500",
         className
       )}
     >
-      <span aria-hidden className={cn("h-0.5 w-8 rounded-full", tone === "dark" ? "bg-navy-300" : "bg-navy-500")} />
+      {/* Hilo de marca: una barrita amarilla Métrica, nada más */}
+      <span aria-hidden className="h-0.5 w-8 rounded-full bg-sun-400" />
       {children}
     </p>
   );
@@ -47,7 +48,7 @@ export function SectionHeading({
       <h2
         className={cn(
           "mt-4 font-heading text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl",
-          tone === "dark" ? "text-white" : "text-navy-950"
+          tone === "dark" ? "text-white" : "text-ink-950"
         )}
       >
         {title}
@@ -56,7 +57,7 @@ export function SectionHeading({
         <p
           className={cn(
             "mt-5 text-base leading-relaxed sm:text-lg",
-            tone === "dark" ? "text-white/75" : "text-slate-600",
+            tone === "dark" ? "text-white/75" : "text-neutral-600",
             align === "center" && "mx-auto max-w-2xl"
           )}
         >

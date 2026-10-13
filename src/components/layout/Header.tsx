@@ -112,7 +112,7 @@ export function Header() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 -z-10 bg-navy-950/40 lg:hidden"
+            className="fixed inset-0 -z-10 bg-ink-950/40 lg:hidden"
           />
         )}
       </AnimatePresence>
@@ -123,9 +123,9 @@ export function Header() {
           "transition-[background-color,border-color,box-shadow] duration-300 ease-out",
           isDark
             ? scrolled
-              ? "border-white/10 bg-navy-950/55 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.6)]"
+              ? "border-white/10 bg-ink-950/55 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.6)]"
               : "border-white/10 bg-white/[0.06]"
-            : "border-navy-950/[0.06] bg-white/80 shadow-[0_12px_40px_-18px_rgba(2,26,54,0.25)]"
+            : "border-ink-950/[0.06] bg-white/80 shadow-[0_12px_40px_-18px_rgba(0,0,0,0.25)]"
         )}
       >
         <SectionLink
@@ -162,8 +162,8 @@ export function Header() {
                           ? "text-white"
                           : "text-white/70 hover:text-white"
                         : isActive
-                          ? "text-navy-900"
-                          : "text-slate-600 hover:text-navy-900"
+                          ? "text-ink-900"
+                          : "text-neutral-600 hover:text-ink-900"
                     )}
                   >
                     {isActive && (
@@ -172,7 +172,7 @@ export function Header() {
                         aria-hidden
                         className={cn(
                           "absolute inset-0 -z-10 rounded-full",
-                          isDark ? "bg-white/15" : "bg-navy-800/[0.08]"
+                          isDark ? "bg-white/15" : "bg-ink-800/[0.08]"
                         )}
                         transition={{ type: "spring", stiffness: 500, damping: 40 }}
                       />
@@ -200,7 +200,7 @@ export function Header() {
             aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
             className={cn(
               "flex size-11 items-center justify-center rounded-xl transition-colors lg:hidden",
-              isDark ? "text-white hover:bg-white/10" : "text-navy-900 hover:bg-navy-800/[0.06]"
+              isDark ? "text-white hover:bg-white/10" : "text-ink-900 hover:bg-ink-800/[0.06]"
             )}
           >
             {isMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -219,7 +219,7 @@ export function Header() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.2, ease: EASE_OUT }}
-            className="mx-auto mt-2 max-w-7xl origin-top rounded-2xl border border-navy-950/[0.06] bg-white/95 p-2 shadow-[0_24px_60px_-20px_rgba(2,26,54,0.35)] backdrop-blur-xl lg:hidden"
+            className="mx-auto mt-2 max-w-7xl origin-top rounded-2xl border border-ink-950/[0.06] bg-white/95 p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] backdrop-blur-xl lg:hidden"
           >
             <ul className="flex flex-col">
               {NAV_SECTIONS.map((item) => {
@@ -232,11 +232,11 @@ export function Header() {
                       aria-current={isActive ? "location" : undefined}
                       className={cn(
                         "flex items-center justify-between rounded-xl px-4 py-3 text-base font-medium transition-colors",
-                        isActive ? "bg-navy-50 text-navy-900" : "text-slate-700 hover:bg-slate-50"
+                        isActive ? "bg-ink-50 text-ink-900" : "text-neutral-700 hover:bg-neutral-50"
                       )}
                     >
                       {item.label}
-                      {isActive && <span aria-hidden className="size-1.5 rounded-full bg-navy-500 ring-4 ring-navy-500/20" />}
+                      {isActive && <span aria-hidden className="size-1.5 rounded-full bg-sun-400 ring-4 ring-sun-400/25" />}
                     </SectionLink>
                   </li>
                 );

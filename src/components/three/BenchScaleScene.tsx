@@ -46,7 +46,7 @@ const CAMERA: Record<"close" | "wide", View> = {
 };
 
 const COLORS = {
-  background: "#061a33",
+  background: "#121211",
   plastic: "#f3f5f8",
   panel: "#1f44a3",
   support: "#9aa6b2",
@@ -400,8 +400,8 @@ function World({ playing, seek, resetView, shift, states, labelElements }: Omit<
       <directionalLight position={[4, 8, 5]} intensity={2.2} />
       <Environment resolution={256} frames={1}>
         <Lightformer intensity={2.2} position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[12, 6, 1]} />
-        <Lightformer intensity={1.4} position={[-6, 2, 5]} scale={[6, 2, 1]} color="#dbe8ff" />
-        <Lightformer intensity={0.8} position={[6, 2, -5]} scale={[6, 2, 1]} color="#7fb0e0" />
+        <Lightformer intensity={1.4} position={[-6, 2, 5]} scale={[6, 2, 1]} color="#fff8e6" />
+        <Lightformer intensity={0.45} position={[6, 2, -5]} scale={[6, 2, 1]} color="#f9e300" />
       </Environment>
 
       {/* Mesa */}
@@ -439,7 +439,7 @@ function World({ playing, seek, resetView, shift, states, labelElements }: Omit<
       </mesh>
       <mesh position={[0, CELL_TOP + 0.003, 0]}>
         <boxGeometry args={[0.36, 0.006, 0.2]} />
-        <meshStandardMaterial ref={gauge} color="#0b2a4a" emissive="#6cc4ff" emissiveIntensity={0.2} />
+        <meshStandardMaterial ref={gauge} color="#1b1b1a" emissive="#f9e300" emissiveIntensity={0.2} />
       </mesh>
 
       {/* Soporte del plato */}

@@ -120,18 +120,18 @@ function ServiceCalendar() {
           type="button"
           onClick={() => changeMonth(-1)}
           aria-label="Mes anterior"
-          className="flex size-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-navy-900"
+          className="flex size-9 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-ink-900"
         >
           <ChevronLeft className="size-4" />
         </button>
-        <span className="font-heading text-sm font-bold text-navy-950" aria-live="polite">
+        <span className="font-heading text-sm font-bold text-ink-950" aria-live="polite">
           {MONTH_NAMES[month]} {year}
         </span>
         <button
           type="button"
           onClick={() => changeMonth(1)}
           aria-label="Mes siguiente"
-          className="flex size-9 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-navy-900"
+          className="flex size-9 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-ink-900"
         >
           <ChevronRight className="size-4" />
         </button>
@@ -140,7 +140,7 @@ function ServiceCalendar() {
       {/* Day-name header */}
       <div className="mt-3 grid grid-cols-7">
         {DAY_NAMES.map((d) => (
-          <div key={d} className="py-1 text-center text-[11px] font-semibold uppercase text-slate-400">
+          <div key={d} className="py-1 text-center text-[11px] font-semibold uppercase text-neutral-400">
             {d}
           </div>
         ))}
@@ -164,7 +164,7 @@ function ServiceCalendar() {
             return (
               <div
                 key={key}
-                className={cn(base, "text-slate-400", isToday && "font-semibold text-navy-900 ring-1 ring-inset ring-slate-300")}
+                className={cn(base, "text-neutral-400", isToday && "font-semibold text-ink-900 ring-1 ring-inset ring-neutral-300")}
               >
                 {day}
               </div>
@@ -182,18 +182,18 @@ function ServiceCalendar() {
                 base,
                 "font-semibold transition-colors duration-150",
                 isSelected
-                  ? "bg-navy-800 text-white"
+                  ? "bg-ink-800 text-white"
                   : hasCal && hasSop
-                    ? "bg-gradient-to-br from-navy-100 to-sky-100 text-navy-950 hover:from-navy-200 hover:to-sky-200"
+                    ? "bg-gradient-to-br from-ink-100 to-sun-200 text-ink-950 hover:from-ink-200 hover:to-sun-300"
                     : hasCal
-                      ? "bg-navy-100 text-navy-900 hover:bg-navy-200"
-                      : "bg-sky-100 text-sky-950 hover:bg-sky-200"
+                      ? "bg-ink-100 text-ink-900 hover:bg-ink-200"
+                      : "bg-sun-200 text-ink-950 hover:bg-sun-300"
               )}
             >
               {day}
               <span className="absolute bottom-1 flex gap-0.5">
-                {hasCal && <span className={cn("size-1 rounded-full", isSelected ? "bg-white" : "bg-navy-600")} />}
-                {hasSop && <span className={cn("size-1 rounded-full", isSelected ? "bg-sky-300" : "bg-sky-500")} />}
+                {hasCal && <span className={cn("size-1 rounded-full", isSelected ? "bg-white" : "bg-ink-600")} />}
+                {hasSop && <span className={cn("size-1 rounded-full", isSelected ? "bg-sun-400" : "bg-sun-600")} />}
               </span>
             </button>
           );
@@ -201,12 +201,12 @@ function ServiceCalendar() {
       </div>
 
       {/* Legend */}
-      <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-slate-100 pt-4 text-xs text-slate-500">
+      <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-neutral-100 pt-4 text-xs text-neutral-500">
         <span className="inline-flex items-center gap-1.5">
-          <span className="size-2.5 rounded-sm bg-navy-200" /> Calibración
+          <span className="size-2.5 rounded-sm bg-ink-200" /> Calibración
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="size-2.5 rounded-sm bg-sky-200" /> Soporte técnico
+          <span className="size-2.5 rounded-sm bg-sun-300" /> Soporte técnico
         </span>
       </div>
 
@@ -228,27 +228,27 @@ function ServiceCalendar() {
                       key={i}
                       className={cn(
                         "flex items-start gap-3 rounded-xl border p-3",
-                        ev.type === "calibracion" ? "border-navy-100 bg-navy-50" : "border-sky-100 bg-sky-50"
+                        ev.type === "calibracion" ? "border-ink-100 bg-ink-50" : "border-sun-200 bg-sun-200/40"
                       )}
                     >
                       <span
                         className={cn(
                           "flex size-7 shrink-0 items-center justify-center rounded-lg",
-                          ev.type === "calibracion" ? "bg-navy-100 text-navy-700" : "bg-sky-100 text-sky-700"
+                          ev.type === "calibracion" ? "bg-ink-100 text-ink-700" : "bg-sun-200 text-ink-800"
                         )}
                       >
                         <Icon className="size-3.5" aria-hidden />
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-navy-950">{ev.location}</p>
-                        <p className="text-xs text-slate-600">{ev.description}</p>
+                        <p className="text-sm font-semibold text-ink-950">{ev.location}</p>
+                        <p className="text-xs text-neutral-600">{ev.description}</p>
                       </div>
                     </li>
                   );
                 })}
               </ul>
             ) : (
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-neutral-500">
                 {monthHasEvents
                   ? "Seleccione un día marcado para ver el detalle."
                   : "No hay servicios programados este mes."}
@@ -278,7 +278,7 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={id} className="block text-sm font-medium text-navy-950">
+      <label htmlFor={id} className="block text-sm font-medium text-ink-950">
         {label}
       </label>
       {children}
@@ -287,7 +287,7 @@ function Field({
           {error}
         </p>
       ) : (
-        hint && <p className="text-xs text-slate-400">{hint}</p>
+        hint && <p className="text-xs text-neutral-400">{hint}</p>
       )}
     </div>
   );
@@ -295,9 +295,9 @@ function Field({
 
 const inputCls = (hasError?: boolean) =>
   cn(
-    "block h-11 w-full rounded-xl border bg-white px-3.5 text-[15px] text-navy-950 shadow-[0_1px_2px_rgba(2,26,54,0.04)] outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-slate-400",
-    "focus:border-navy-500 focus:ring-4 focus:ring-navy-500/15",
-    hasError ? "border-red-400 focus:border-red-500 focus:ring-red-500/15" : "border-slate-200 hover:border-slate-300"
+    "block h-11 w-full rounded-xl border bg-white px-3.5 text-[15px] text-ink-950 shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-neutral-400",
+    "focus:border-ink-500 focus:ring-4 focus:ring-ink-500/15",
+    hasError ? "border-red-400 focus:border-red-500 focus:ring-red-500/15" : "border-neutral-200 hover:border-neutral-300"
   );
 
 const REQUIRED = "Este campo es requerido";
@@ -345,7 +345,7 @@ export function Contact() {
   });
 
   return (
-    <section id="contacto" className="border-t border-slate-200 bg-slate-50 py-20 sm:py-28">
+    <section id="contacto" className="border-t border-neutral-200 bg-neutral-50 py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal>
           <SectionHeading
@@ -359,7 +359,7 @@ export function Contact() {
         <div className="mt-12 grid items-start gap-6 lg:grid-cols-12 lg:gap-8">
           {/* ── Form ── */}
           <Reveal className="lg:col-span-7">
-            <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_32px_64px_-40px_rgba(2,26,54,0.3)] sm:p-8">
+            <div className="rounded-[2rem] border border-neutral-200 bg-white p-6 shadow-[0_32px_64px_-40px_rgba(0,0,0,0.3)] sm:p-8">
               <AnimatePresence mode="wait" initial={false}>
                 {sent ? (
                   <motion.div
@@ -370,11 +370,11 @@ export function Contact() {
                     role="status"
                     className="flex flex-col items-center py-16 text-center"
                   >
-                    <span className="flex size-14 items-center justify-center rounded-full bg-navy-50 text-navy-700">
+                    <span className="flex size-14 items-center justify-center rounded-full bg-ink-50 text-ink-700">
                       <CircleCheck className="size-7" aria-hidden />
                     </span>
-                    <h3 className="mt-5 font-heading text-2xl font-bold text-navy-950">¡Mensaje enviado!</h3>
-                    <p className="mt-2 max-w-sm text-slate-600">
+                    <h3 className="mt-5 font-heading text-2xl font-bold text-ink-950">¡Mensaje enviado!</h3>
+                    <p className="mt-2 max-w-sm text-neutral-600">
                       Gracias por escribirnos. Nuestro equipo se pondrá en contacto con usted a la brevedad.
                     </p>
                     <Button variant="outline" className="mt-8" onClick={() => setSent(false)}>
@@ -457,7 +457,7 @@ export function Contact() {
                           className={cn(inputCls(), "pr-10")}
                           placeholder="Su ciudad"
                         />
-                        <MapPin className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                        <MapPin className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
                       </div>
                     </Field>
                     <Field id="contacto-type" label="Tipo de consulta" error={errors.type && "Seleccione una opción"}>
@@ -473,7 +473,7 @@ export function Contact() {
                           <option value="soporte">Soporte técnico</option>
                           <option value="otro">Otro</option>
                         </select>
-                        <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                        <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
                       </div>
                     </Field>
 
@@ -509,17 +509,17 @@ export function Contact() {
           {/* ── Sidebar ── */}
           <div className="flex flex-col gap-6 lg:col-span-5">
             <Reveal delay={0.06}>
-              <div className="relative isolate overflow-hidden rounded-[2rem] bg-navy-800 p-6 text-white sm:p-8">
+              <div className="relative isolate overflow-hidden rounded-[2rem] bg-ink-950 p-6 text-white sm:p-8">
                 <div
                   aria-hidden
-                  className="absolute -right-24 -top-24 -z-10 size-72 rounded-full bg-[radial-gradient(circle,rgba(127,176,224,0.25),transparent_65%)]"
+                  className="absolute -right-24 -top-24 -z-10 size-72 rounded-full bg-[radial-gradient(circle,rgba(249,227,0,0.12),transparent_65%)]"
                 />
                 <h3 className="font-heading text-lg font-bold">Atención directa</h3>
                 <ul className="mt-5 space-y-1">
                   {CONTACT_LINKS.map(({ icon: Icon, label, value, href }) => {
                     const content = (
                       <>
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-navy-200">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-sun-400">
                           <Icon className="size-4" aria-hidden />
                         </span>
                         <span className="min-w-0">
@@ -548,14 +548,14 @@ export function Contact() {
             </Reveal>
 
             <Reveal delay={0.12}>
-              <div className="rounded-[2rem] border border-slate-200 bg-white p-6 sm:p-7">
+              <div className="rounded-[2rem] border border-neutral-200 bg-white p-6 sm:p-7">
                 <div className="mb-4 flex items-center gap-3">
-                  <span className="flex size-9 items-center justify-center rounded-xl bg-navy-50 text-navy-700">
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-ink-50 text-ink-700">
                     <CalendarDays className="size-4" aria-hidden />
                   </span>
                   <div>
-                    <h3 className="font-heading text-base font-bold text-navy-950">Agenda de servicios</h3>
-                    <p className="text-xs text-slate-500">Visitas técnicas programadas en el país</p>
+                    <h3 className="font-heading text-base font-bold text-ink-950">Agenda de servicios</h3>
+                    <p className="text-xs text-neutral-500">Visitas técnicas programadas en el país</p>
                   </div>
                 </div>
                 <ServiceCalendar />

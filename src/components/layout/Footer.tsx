@@ -32,7 +32,7 @@ const linkCls = "transition-colors duration-200 hover:text-white";
 
 export function Footer() {
   return (
-    <footer data-header-theme="dark" className="bg-navy-900 text-white">
+    <footer data-header-theme="dark" className="bg-ink-950 text-white">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-12">
           {/* ── Brand ── */}
@@ -54,7 +54,7 @@ export function Footer() {
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5 transition-colors duration-200 hover:border-white hover:bg-white hover:text-navy-900"
+                  className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5 transition-colors duration-200 hover:border-white hover:bg-white hover:text-ink-900"
                 >
                   <Icon className="size-4" />
                 </a>
@@ -65,7 +65,7 @@ export function Footer() {
           {/* ── Oficinas ── */}
           {OFFICES.map((office) => (
             <div key={office.city} className="flex flex-col gap-4 lg:col-span-3">
-              <h4 className="font-heading text-xs font-bold uppercase tracking-[0.18em] text-navy-200">
+              <h4 className="font-heading text-xs font-bold uppercase tracking-[0.18em] text-sun-400">
                 {office.city}
               </h4>
               <div className="flex gap-3 text-sm leading-relaxed text-white/70">
@@ -101,7 +101,7 @@ export function Footer() {
 
           {/* ── Enlaces ── */}
           <nav aria-label="Enlaces rápidos" className="flex flex-col gap-4 lg:col-span-2">
-            <h4 className="font-heading text-xs font-bold uppercase tracking-[0.18em] text-navy-200">
+            <h4 className="font-heading text-xs font-bold uppercase tracking-[0.18em] text-sun-400">
               Enlaces
             </h4>
             <ul className="space-y-2 text-sm text-white/70">

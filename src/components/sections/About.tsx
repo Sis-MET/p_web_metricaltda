@@ -26,7 +26,7 @@ export function About() {
     <section
       id="nosotros"
       data-header-theme="dark"
-      className="relative isolate overflow-hidden bg-navy-800 py-20 text-white sm:py-28"
+      className="relative isolate overflow-hidden bg-ink-950 py-20 text-white sm:py-28"
     >
       {/* Decoración: retícula tenue y brillos de marca */}
       <div
@@ -35,7 +35,8 @@ export function About() {
       />
       <div
         aria-hidden
-        className="absolute -right-48 -top-48 -z-10 size-[40rem] rounded-full bg-[radial-gradient(circle,rgba(127,176,224,0.22),transparent_65%)]"
+        // Brillo amarillo Métrica, sutil
+        className="absolute -right-48 -top-48 -z-10 size-[44rem] rounded-full bg-[radial-gradient(circle,rgba(249,227,0,0.11),transparent_62%)]"
       />
 
       <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:gap-16 lg:px-8">
@@ -65,7 +66,7 @@ export function About() {
                   key={label}
                   className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 text-sm font-medium text-white/90"
                 >
-                  <Icon className="size-4 text-navy-300" aria-hidden />
+                  <Icon className="size-4 text-sun-400/90" aria-hidden />
                   {label}
                 </li>
               ))}
@@ -115,7 +116,7 @@ export function About() {
                 sizes="(min-width: 1024px) 400px, 80vw"
                 className="mt-6 h-auto w-full max-w-sm"
               />
-              <span className="mt-7 inline-flex items-center gap-1.5 text-sm font-semibold text-navy-200 transition-colors group-hover:text-white">
+              <span className="mt-7 inline-flex items-center gap-1.5 text-sm font-semibold text-ink-200 transition-colors group-hover:text-sun-400">
                 Visitar sitio oficial
                 <ArrowUpRight className="size-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </span>

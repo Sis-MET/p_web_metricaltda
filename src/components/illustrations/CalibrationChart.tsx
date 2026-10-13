@@ -20,12 +20,13 @@ const PX_PER_E = 44;
 const CAPACITY = 3000; // en divisiones de verificación (e)
 
 const COLORS = {
-  grid: "rgba(2,26,54,0.06)",
-  axis: "rgba(2,26,54,0.28)",
-  empFill: "rgba(31,103,181,0.08)",
-  empStroke: "rgba(31,103,181,0.55)",
-  curve: "#032b57",
-  uncertainty: "#0284c7",
+  grid: "rgba(0,0,0,0.06)",
+  axis: "rgba(0,0,0,0.28)",
+  // Banda de tolerancia en amarillo Métrica; curva y medidas en carbón
+  empFill: "rgba(249,227,0,0.2)",
+  empStroke: "rgba(168,153,0,0.75)",
+  curve: "#171716",
+  uncertainty: "#62625e",
 };
 
 const x = (load: number) => X0 + (load / CAPACITY) * (X1 - X0);
@@ -113,7 +114,7 @@ export function CalibrationChart() {
           ))}
 
           {/* Ejes */}
-          <g className="fill-slate-500 font-mono text-[9px]">
+          <g className="fill-neutral-500 font-mono text-[9px]">
             <text x={X0 - 6} y={y(1.5) + 3} textAnchor="end">+1,5e</text>
             <text x={X0 - 6} y={Y_ZERO + 3} textAnchor="end">0</text>
             <text x={X0 - 6} y={y(-1.5) + 3} textAnchor="end">−1,5e</text>
@@ -125,15 +126,15 @@ export function CalibrationChart() {
           </g>
         </svg>
 
-        <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-slate-200 px-3 py-2 text-[10px] text-slate-500">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-neutral-200 px-3 py-2 text-[10px] text-neutral-500">
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-3 border border-dashed border-navy-500/60 bg-navy-500/10" /> EMP (error máximo permitido)
+            <span className="h-2 w-3 border border-dashed border-sun-600 bg-sun-400/30" /> EMP (error máximo permitido)
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="size-2 rounded-full border border-navy-900" /> Error de indicación
+            <span className="size-2 rounded-full border border-ink-900" /> Error de indicación
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2.5 w-px bg-sky-600" /> Incertidumbre U (k = 2)
+            <span className="h-2.5 w-px bg-ink-500" /> Incertidumbre U (k = 2)
           </span>
         </div>
       </HmiPanel>

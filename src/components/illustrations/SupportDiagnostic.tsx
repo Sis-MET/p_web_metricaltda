@@ -46,20 +46,20 @@ export function SupportDiagnostic() {
           )
         }
       >
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-neutral-100">
           {CHECKS.map((check, i) => {
             const isDone = i < completed;
             const isRunning = !isDone && i === completed && inView;
             return (
               <li key={check.label} className="flex items-center justify-between gap-4 px-4 py-3 text-xs">
-                <span className="flex items-center gap-3 text-slate-700">
-                  <span className="w-5 text-slate-300 tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+                <span className="flex items-center gap-3 text-neutral-700">
+                  <span className="w-5 text-neutral-300 tabular-nums">{String(i + 1).padStart(2, "0")}</span>
                   {check.label}
                 </span>
                 <span
                   className={cn(
                     "inline-flex items-center gap-1.5 uppercase tracking-wider transition-colors duration-300",
-                    isDone ? "text-emerald-600" : isRunning ? "text-sky-600" : "text-slate-300"
+                    isDone ? "text-emerald-600" : isRunning ? "text-amber-600" : "text-neutral-300"
                   )}
                 >
                   {isDone ? (
@@ -75,14 +75,14 @@ export function SupportDiagnostic() {
         </ul>
 
         {/* Avance del diagnóstico */}
-        <div className="border-t border-slate-200 px-4 py-3">
-          <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-slate-500">
+        <div className="border-t border-neutral-200 px-4 py-3">
+          <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-neutral-500">
             <span>Soporte remoto · Visita en terreno</span>
             <span className="tabular-nums">
               {completed}/{CHECKS.length}
             </span>
           </div>
-          <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-100">
+          <div className="mt-2 h-1 overflow-hidden rounded-full bg-neutral-100">
             <div
               className="h-full origin-left rounded-full bg-emerald-500 transition-transform duration-500 ease-out"
               style={{ transform: `scaleX(${completed / CHECKS.length})` }}

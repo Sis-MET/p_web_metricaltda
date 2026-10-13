@@ -110,7 +110,7 @@ export function Hero() {
       data-header-theme="dark"
       aria-roledescription="carrusel"
       aria-label="Destacados"
-      className="relative isolate overflow-hidden bg-navy-950"
+      className="relative isolate overflow-hidden bg-black"
       onTouchStart={(e) => (touchStartX.current = e.touches[0].clientX)}
       onTouchEnd={(e) => {
         if (touchStartX.current === null) return;
@@ -140,8 +140,9 @@ export function Hero() {
             />
           </div>
         ))}
-        <div className="absolute inset-0 bg-gradient-to-r from-navy-950/95 via-navy-950/75 to-navy-950/25" />
-        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-navy-950/90 to-transparent" />
+        {/* Degradado negro (antes azul) para leer el texto sobre la foto */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-black/15" />
+        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black/85 to-transparent" />
       </div>
 
       <div className="mx-auto flex min-h-svh max-w-7xl flex-col justify-center px-4 pb-32 pt-28 sm:px-6 lg:px-8 lg:pb-40">
@@ -153,15 +154,15 @@ export function Hero() {
               animate={{ opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE_OUT } }}
               exit={{ opacity: 0, y: -8, transition: { duration: 0.16, ease: EASE_IN } }}
             >
-              <p className="flex items-center gap-3 font-heading text-xs font-bold uppercase tracking-[0.18em] text-navy-200">
+              <p className="flex items-center gap-3 font-heading text-xs font-bold uppercase tracking-[0.18em] text-ink-100">
                 <span className="tabular-nums">0{index + 1}</span>
-                <span aria-hidden className="h-0.5 w-8 rounded-full bg-navy-300" />
+                <span aria-hidden className="h-0.5 w-8 rounded-full bg-sun-400" />
                 {slide.label}
               </p>
               <h1 className="mt-5 font-heading text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
                 {slide.title[0]}
                 <br />
-                <span className="text-navy-300">{slide.title[1]}</span>
+                <span>{slide.title[1]}</span>
               </h1>
               <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-white/75 sm:text-lg">
                 {slide.description}

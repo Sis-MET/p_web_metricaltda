@@ -37,21 +37,23 @@ import type { Store } from "@/lib/store";
 
 /* ─── Constantes de escena ──────────────────────────────────────────────── */
 
+// Showroom claro: piso gris cálido, acero oscuro para la plataforma y amarillo Métrica en datos y franjas
 const COLORS = {
-  background: "#061a33",
-  ground: "#0a2342",
-  concrete: "#8592a3",
-  deck: "#4d6582",
-  deckRail: "#2c4664",
-  steel: "#d6dee7",
-  signal: "#6cc4ff",
-  cable: "#10233b",
-  cab: "#eef2f6",
-  cargo: "#e2e8ef",
-  brand: "#04376e",
-  chassis: "#1b2531",
-  tire: "#121519",
-  glass: "#14263b",
+  background: "#e9e8e4",
+  ground: "#dfddd7",
+  concrete: "#bebcb5",
+  deck: "#3e4145",
+  deckRail: "#26282b",
+  steel: "#dadbdc",
+  signal: "#e3b300",
+  cable: "#3a3a38",
+  cab: "#f6f6f4",
+  cargo: "#eeede9",
+  brand: "#f9e300",
+  terminal: "#2a2b2d",
+  chassis: "#1e1f21",
+  tire: "#151515",
+  glass: "#1c1d1f",
 };
 
 const WHEEL_RADIUS = 0.52;
@@ -105,8 +107,8 @@ function useMaterials() {
       hub: new THREE.MeshStandardMaterial({ color: "#aeb8c3", metalness: 0.85, roughness: 0.3 }),
       glass: new THREE.MeshStandardMaterial({ color: COLORS.glass, metalness: 0.9, roughness: 0.08 }),
       light: new THREE.MeshStandardMaterial({ color: "#ffffff", emissive: "#dfeeff", emissiveIntensity: 1.6 }),
-      terminal: new THREE.MeshStandardMaterial({ color: COLORS.brand, metalness: 0.35, roughness: 0.4 }),
-      screen: new THREE.MeshStandardMaterial({ color: "#0b2a4a", emissive: COLORS.signal, emissiveIntensity: 0.9 }),
+      terminal: new THREE.MeshStandardMaterial({ color: COLORS.terminal, metalness: 0.35, roughness: 0.4 }),
+      screen: new THREE.MeshStandardMaterial({ color: "#141414", emissive: COLORS.signal, emissiveIntensity: 0.9 }),
     }),
     []
   );
@@ -205,7 +207,7 @@ function LoadCells({ readingRef, materials }: { readingRef: React.RefObject<Scal
       CELLS.map(
         () =>
           new THREE.MeshStandardMaterial({
-            color: "#1d3b5e",
+            color: "#2a2a28",
             emissive: COLORS.signal,
             emissiveIntensity: 0.2,
             metalness: 0.3,
@@ -587,7 +589,7 @@ function World({
       <color attach="background" args={[COLORS.background]} />
       <fog attach="fog" args={[COLORS.background, 32 * distance, 80 * distance]} />
 
-      <hemisphereLight args={["#bcd7ff", "#0a2342", 0.7]} />
+      <hemisphereLight args={["#ffffff", "#c9c7c0", 0.9]} />
       <directionalLight
         position={[-12, 20, 12]}
         intensity={2.4}
@@ -601,8 +603,8 @@ function World({
       />
       <Environment resolution={256} frames={1}>
         <Lightformer intensity={2.5} position={[0, 12, 0]} rotation-x={Math.PI / 2} scale={[40, 12, 1]} />
-        <Lightformer intensity={1.2} position={[-14, 4, 10]} scale={[12, 3, 1]} color="#cfe3ff" />
-        <Lightformer intensity={0.8} position={[14, 3, -10]} scale={[12, 3, 1]} color="#7fb0e0" />
+        <Lightformer intensity={1.2} position={[-14, 4, 10]} scale={[12, 3, 1]} color="#fffaf0" />
+        <Lightformer intensity={0.8} position={[14, 3, -10]} scale={[12, 3, 1]} color="#ffffff" />
       </Environment>
 
       <mesh rotation-x={-Math.PI / 2} receiveShadow>
@@ -614,10 +616,10 @@ function World({
         args={[220, 220]}
         cellSize={1}
         cellThickness={0.5}
-        cellColor="#143159"
+        cellColor="#cfcdc6"
         sectionSize={6}
         sectionThickness={1}
-        sectionColor="#1f4a7d"
+        sectionColor="#b6b4ad"
         fadeDistance={60}
         fadeStrength={1.6}
         infiniteGrid
