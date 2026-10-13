@@ -230,7 +230,7 @@ function DropdownPanel({ item }: { item: NavItem }) {
                   <span className="flex items-center gap-1.5 font-heading text-sm font-bold text-ink-950">
                     {label}
                     <ArrowRight
-                      className="size-3.5 -translate-x-1 opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-x-0 group-hover:opacity-100"
+                      className="size-3.5 -translate-x-1 opacity-0 transition-[opacity,translate] duration-200 group-hover:translate-x-0 group-hover:opacity-100"
                       aria-hidden
                     />
                   </span>

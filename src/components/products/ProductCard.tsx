@@ -10,7 +10,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
   const specs = compact([product.capacity && formatCapacity(product.capacity), product.protection]);
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-neutral-200/80 bg-white transition-[box-shadow,border-color,transform] duration-300 ease-out hover:-translate-y-1 hover:border-neutral-300 hover:shadow-[0_24px_48px_-24px_rgba(0,0,0,0.25)]">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-neutral-200/80 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-[translate,box-shadow,border-color] duration-500 ease-out-expo hover:-translate-y-1 hover:border-neutral-300 hover:shadow-[0_24px_48px_-24px_rgba(0,0,0,0.25)]">
       <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-b from-neutral-100 to-white">
         <div aria-hidden className="absolute inset-x-10 bottom-5 h-8 rounded-[50%] bg-ink-950/10 blur-xl" />
         <Image
@@ -19,7 +19,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
           fill
           sizes="(min-width: 1280px) 300px, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
           // Las fotos vienen recortadas al borde del equipo: alineadas abajo, todas se apoyan en la sombra
-          className="object-contain object-bottom p-8 transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          className="origin-bottom object-contain object-bottom p-8 transition-transform duration-700 ease-out-expo group-hover:scale-[1.03]"
         />
         <span className="absolute left-4 top-4 rounded-full border border-neutral-200/80 bg-white/90 px-3 py-1 text-xs font-semibold text-ink-800">
           {product.type}
@@ -48,7 +48,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         <div className="mt-auto flex items-center justify-between pt-5">
           <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-800">
             Ver ficha
-            <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden />
+            <ArrowRight className="size-4 transition-transform duration-500 ease-out-expo group-hover:translate-x-1" aria-hidden />
           </span>
           <AddToQuoteButton slug={product.slug} model={product.model} variant="icon" className="relative z-10" />
         </div>
