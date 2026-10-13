@@ -25,7 +25,8 @@
     "react-hook-form": "^7.71.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
-    "three": "^0.183.0"
+    "three": "^0.183.0",
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

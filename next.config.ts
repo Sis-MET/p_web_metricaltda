@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  experimental: {
+    // Formularios con adjuntos (hoja de vida, fotos): el límite propio de cada envío es de 4 MB
+    serverActions: { bodySizeLimit: "5mb" },
+  },
   async redirects() {
     return [
       // La acreditación pertenece solo al laboratorio de calibración: ahora se muestra ahí
