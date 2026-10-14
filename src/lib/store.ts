@@ -31,3 +31,74 @@ export function createStore<T>(initial: T): Store<T> {
 export function useStore<T>(store: Store<T>, serverValue: T = store.get()) {
   return useSyncExternalStore(store.subscribe, store.get, () => serverValue);
 }
+
+/* ─── Almacenamiento del navegador ──────────────────────────────────────── */
+
+export type StorageKind = "local" | "session";
+
+const storageOf = (kind: StorageKind) => (kind === "local" ? localStorage : sessionStorage);
+
+/** JSON guardado en el navegador; `null` si no hay, si el almacenamiento está bloqueado o el dato está corrupto */
+export function readStored(kind: StorageKind, key: string): unknown {
+  try {
+    const raw = storageOf(kind).getItem(key);
+    return raw === null ? null : JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+/** `null` borra la clave */
+export function writeStored(kind: StorageKind, key: string, value: unknown) {
+  try {
+    if (value === null) storageOf(kind).removeItem(key);
+    else storageOf(kind).setItem(key, JSON.stringify(value));
+  } catch {
+    // Sin almacenamiento el dato vive igual durante la visita
+  }
+}
+
+export type StoredStore<T> = Store<T> & { update: (fn: (current: T) => T) => void };
+
+/**
+ * Store guardado en localStorage o sessionStorage. Lo guardado se lee la primera vez que alguien
+ * se suscribe o escribe (nunca en el servidor ni al renderizar: `get` es puro) y, en localStorage,
+ * se sincroniza entre pestañas. `parse` valida lo leído: el navegador no es una fuente confiable.
+ */
+export function createStoredStore<T>(kind: StorageKind, key: string, initial: T, parse: (raw: unknown) => T): StoredStore<T> {
+  const store = createStore(initial);
+  let loaded = false;
+
+  const read = () => {
+    const raw = readStored(kind, key);
+    return raw === null ? initial : parse(raw);
+  };
+
+  const load = () => {
+    if (loaded || typeof window === "undefined") return;
+    loaded = true;
+    store.set(read());
+    window.addEventListener("storage", (event) => {
+      if (event.key === key && event.storageArea === storageOf(kind)) store.set(read());
+    });
+  };
+
+  const set = (next: T) => {
+    load();
+    store.set(next);
+    writeStored(kind, key, next);
+  };
+
+  return {
+    get: store.get,
+    set,
+    update: (fn) => {
+      load();
+      set(fn(store.get()));
+    },
+    subscribe: (listener) => {
+      load();
+      return store.subscribe(listener);
+    },
+  };
+}
