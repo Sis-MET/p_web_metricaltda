@@ -40,6 +40,8 @@ export type FormDef = {
   fields: FieldDef[];
   /** Validación entre campos; devuelve el error y el campo donde mostrarlo */
   check?: (values: FormValues) => { field: string; message: string } | undefined;
+  /** Además del correo, la solicitud se registra como prospecto en Bitrix24 */
+  crm?: { opportunityTypes: (values: FormValues) => string[] };
 };
 
 export type FormValue = string | string[] | File[] | QuoteItem[];

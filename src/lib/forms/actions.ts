@@ -1,12 +1,9 @@
 "use server";
 
 import { randomInt } from "node:crypto";
-import { productTitle } from "@/content/catalog";
-import { PRODUCTS } from "@/content/products";
 import { FORMS, isFormId } from "./definitions";
 import { deliver } from "./delivery";
-import type { QuoteItem } from "@/lib/quote";
-import { HONEYPOT, parseSubmission, type FieldDef, type FormDef, type FormState, type FormValue } from "./schema";
+import { HONEYPOT, parseSubmission, type FormDef, type FormState } from "./schema";
 
 const BOLIVIA_DATE = new Intl.DateTimeFormat("en-CA", {
   timeZone: "America/La_Paz",
@@ -25,26 +22,6 @@ function createReference(prefix: string) {
   return `${prefix}-${date}-${code}`;
 }
 
-/** Valor de un campo tal como lo leerá el equipo de Métrica */
-function display(field: FieldDef, value: FormValue): string {
-  switch (field.type) {
-    case "file":
-      return (value as File[]).map((file) => file.name).join(", ");
-    case "checkbox":
-      return (value as string[]).join(", ");
-    case "quote":
-      return (value as QuoteItem[])
-        .map(({ slug, qty }) => {
-          const product = PRODUCTS.find((p) => p.slug === slug);
-          return product ? `${qty} × ${productTitle(product)}` : null;
-        })
-        .filter(Boolean)
-        .join("\n");
-    default:
-      return value as string;
-  }
-}
-
 export async function submitForm(formId: string, _previous: FormState, data: FormData): Promise<FormState> {
   if (!isFormId(formId)) return { status: "error" };
   const form: FormDef = FORMS[formId];
@@ -55,20 +32,10 @@ export async function submitForm(formId: string, _previous: FormState, data: For
   const result = parseSubmission(form, data);
   if (!result.ok) return { status: "invalid", errors: result.errors };
 
-  const { values } = result;
   const reference = createReference(form.prefix);
 
   try {
-    await deliver({
-      subject: `${form.subject} · ${reference}`,
-      inbox: form.inbox,
-      reference,
-      replyTo: values.email as string,
-      fields: form.fields
-        .map((field) => ({ label: field.label, value: display(field, values[field.name]) }))
-        .filter((field) => field.value),
-      attachments: form.fields.flatMap((field) => (field.type === "file" ? (values[field.name] as File[]) : [])),
-    });
+    await deliver({ form, values: result.values, reference });
   } catch (error) {
     console.error(`[formulario] ${reference} no se pudo entregar`, error);
     return { status: "error" };

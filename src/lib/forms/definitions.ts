@@ -3,16 +3,36 @@ import type { FieldDef, FormDef } from "./schema";
 
 /* ─── Campos comunes ────────────────────────────────────────────────────── */
 
-const NAME: FieldDef = {
+/** Nombres de los datos de contacto comunes: la entrega los usa para el correo y el CRM */
+export const CONTACT = {
   name: "nombre",
-  label: "Nombre y apellido",
+  lastName: "apellido",
+  company: "empresa",
+  position: "cargo",
+  email: "email",
+  phone: "telefono",
+  city: "ciudad",
+} as const;
+
+// Nombre y apellido por separado: así llegan ordenados al CRM
+const NAME: FieldDef = {
+  name: CONTACT.name,
+  label: "Nombre",
   type: "text",
   required: true,
-  autoComplete: "name",
-  placeholder: "Su nombre completo",
+  autoComplete: "given-name",
+  placeholder: "Su nombre",
+};
+const LAST_NAME: FieldDef = {
+  name: CONTACT.lastName,
+  label: "Apellido",
+  type: "text",
+  required: true,
+  autoComplete: "family-name",
+  placeholder: "Su apellido",
 };
 const COMPANY: FieldDef = {
-  name: "empresa",
+  name: CONTACT.company,
   label: "Empresa",
   type: "text",
   required: true,
@@ -20,14 +40,14 @@ const COMPANY: FieldDef = {
   placeholder: "Empresa a la que pertenece",
 };
 const ROLE: FieldDef = {
-  name: "cargo",
+  name: CONTACT.position,
   label: "Cargo",
   type: "text",
   autoComplete: "organization-title",
   placeholder: "Su cargo o rol",
 };
 const EMAIL: FieldDef = {
-  name: "email",
+  name: CONTACT.email,
   label: "Correo electrónico",
   type: "email",
   required: true,
@@ -35,22 +55,23 @@ const EMAIL: FieldDef = {
   placeholder: "nombre@empresa.com",
 };
 const PHONE: FieldDef = {
-  name: "telefono",
+  name: CONTACT.phone,
   label: "Teléfono o celular",
   type: "tel",
   required: true,
   autoComplete: "tel",
   placeholder: "+591 7xxxxxxx",
 };
-const CITY: FieldDef = {
-  name: "ciudad",
-  label: "Ciudad",
-  type: "text",
-  autoComplete: "address-level2",
-  placeholder: "Ciudad",
-};
-
 const options = (...labels: string[]) => labels.map((label) => ({ value: label, label }));
+
+// Las mismas opciones de "Ciudad del prospecto" en Bitrix24 (se vinculan por el texto)
+const CITY: FieldDef = {
+  name: CONTACT.city,
+  label: "Ciudad",
+  type: "select",
+  placeholder: "Seleccione su ciudad",
+  options: options("La Paz", "Cochabamba", "Santa Cruz", "Oruro", "Potosí", "Sucre", "Tarija", "Beni", "Pando"),
+};
 
 /* ─── Formularios del sitio ─────────────────────────────────────────────── */
 
@@ -66,6 +87,7 @@ export const FORMS = {
     },
     fields: [
       NAME,
+      LAST_NAME,
       COMPANY,
       EMAIL,
       PHONE,
@@ -101,11 +123,12 @@ export const FORMS = {
     fields: [
       { name: "productos", label: "Productos", type: "quote" },
       NAME,
+      LAST_NAME,
       COMPANY,
       EMAIL,
       PHONE,
       ROLE,
-      CITY,
+      { ...CITY, required: true },
       {
         name: "servicios",
         label: "Incluir en la cotización",
@@ -126,6 +149,18 @@ export const FORMS = {
       (values.productos as QuoteItem[]).length === 0 && !values.comentarios
         ? { field: "comentarios", message: "Agregue productos a su lista o describa lo que necesita" }
         : undefined,
+    // Cotizaciones, calibración y soporte entran a CRM › Prospectos con su área (tipo de oportunidad);
+    // en la cotización, los servicios pedidos suman su línea comercial
+    crm: {
+      opportunityTypes: (values) => {
+        const services = values.servicios as string[];
+        return [
+          "VENTA",
+          ...(services.includes("Calibración acreditada") ? ["CALIBRACIÓN"] : []),
+          ...(services.some((s) => s !== "Calibración acreditada") ? ["SOPORTE TECNICO"] : []),
+        ];
+      },
+    },
   },
 
   calibracion: {
@@ -139,6 +174,7 @@ export const FORMS = {
     },
     fields: [
       NAME,
+      LAST_NAME,
       COMPANY,
       EMAIL,
       PHONE,
@@ -163,6 +199,7 @@ export const FORMS = {
         hint: "Opcional",
       },
     ],
+    crm: { opportunityTypes: () => ["CALIBRACIÓN"] },
   },
 
   soporte: {
@@ -176,10 +213,11 @@ export const FORMS = {
     },
     fields: [
       NAME,
+      LAST_NAME,
       COMPANY,
       EMAIL,
       PHONE,
-      CITY,
+      { ...CITY, required: true },
       {
         name: "equipo",
         label: "Marca y modelo del equipo",
@@ -206,6 +244,7 @@ export const FORMS = {
         hint: "Opcional · hasta 3 imágenes",
       },
     ],
+    crm: { opportunityTypes: () => ["SOPORTE TECNICO"] },
   },
 
   postulacion: {
@@ -218,7 +257,8 @@ export const FORMS = {
       text: "Gracias por su interés en Métrica. Revisaremos su perfil y le contactaremos si se ajusta a una vacante.",
     },
     fields: [
-      { ...NAME, label: "Nombre completo" },
+      NAME,
+      LAST_NAME,
       PHONE,
       EMAIL,
       {
@@ -291,6 +331,7 @@ export const FORMS = {
         options: options("Laboratorio de calibración", "Soporte técnico", "Venta de equipos", "Atención al cliente", "Otra"),
       },
       NAME,
+      LAST_NAME,
       COMPANY,
       EMAIL,
       PHONE,
