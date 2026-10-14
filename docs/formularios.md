@@ -84,6 +84,11 @@ entrante**, regenerar el código y actualizar `BITRIX24_WEBHOOK_URL` en el servi
 Los formularios corren en el servidor de Next.js (acciones de servidor), así que el plan debe
 ejecutar **aplicaciones Node.js 22 o superior** (lo exige el SDK del asesor virtual; ver
 [asesor-virtual.md](asesor-virtual.md)). El hosting de MegaLink usa **Plesk** (Linux,
-nginx, PHP 8.3); ahí es la extensión *Node.js* de la suscripción. Un hosting solo de archivos
-estáticos y PHP no puede ejecutar los formularios tal como están. En el panel se cargan las mismas
-variables de `.env.example` con sus valores reales.
+nginx, PHP 8.3); ahí es la extensión *Node.js* de la suscripción, ya activa en el plan. En el
+panel se cargan las mismas variables de `.env.example` con sus valores reales. La instalación paso
+a paso está en [despliegue.md](despliegue.md).
+
+**Conexiones salientes:** MegaLink las bloquea salvo que se pidan. Sin ellas no llega nada: hay
+que solicitar HTTPS (443) hacia `b24-nxcf6f.bitrix24.es`, SMTP con TLS (465) hacia
+`mail.metrica.com.bo` y, para el asesor virtual, HTTPS (443) hacia
+`generativelanguage.googleapis.com`.

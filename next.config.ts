@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Servidor autosuficiente (.next/standalone/server.js) para la extensión Node.js de Plesk:
+  // el hosting no instala dependencias ni compila (ver docs/despliegue.md)
+  output: "standalone",
   images: {
     formats: ["image/avif", "image/webp"],
   },
