@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, FileUp } from "lucide-react";
+import { FileUp } from "lucide-react";
 import { acceptAttr, FILE_KINDS, type FieldDef } from "@/lib/forms/schema";
 import { useQuoteItems } from "@/lib/quote-store";
 import { cn } from "@/lib/utils";
+import { Select } from "./Select";
 
 export const controlCls = (invalid?: boolean) =>
   cn(
@@ -130,19 +131,15 @@ function Control({ field, id, describedBy, invalid, defaultValue }: ControlProps
       );
     case "select":
       return (
-        <div className="relative">
-          <select id={id} name={field.name} defaultValue="" className={cn(controlCls(invalid), "appearance-none pr-10")} {...aria}>
-            <option value="" disabled={field.required}>
-              {field.placeholder ?? "Seleccione"}
-            </option>
-            {field.options.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400" aria-hidden />
-        </div>
+        <Select
+          id={id}
+          name={field.name}
+          options={field.options}
+          placeholder={field.placeholder ?? "Seleccione"}
+          className={controlCls(invalid)}
+          describedBy={describedBy}
+          invalid={invalid}
+        />
       );
     case "radio":
     case "checkbox":

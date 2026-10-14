@@ -71,8 +71,14 @@ function FormRound({ id, className, onSuccess, onReset }: SiteFormProps & { onRe
 
     if (!result.ok) {
       setErrors(result.errors);
+      // El control visible del campo (id) o, en los grupos de opciones, su primera opción
       const first = form.fields.find((field) => result.errors[field.name]);
-      element.querySelector<HTMLElement>(`[name="${first?.name}"]`)?.focus();
+      if (first) {
+        const control =
+          element.querySelector<HTMLElement>(`#${CSS.escape(`${id}-${first.name}`)}`) ??
+          element.querySelector<HTMLElement>(`[name="${first.name}"]`);
+        control?.focus();
+      }
       return;
     }
     setErrors({});
