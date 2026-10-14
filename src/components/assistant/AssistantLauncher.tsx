@@ -8,7 +8,7 @@ import { X } from "lucide-react";
 import { EASE_OUT } from "@/lib/motion";
 import { LAUNCHER_ID, PANEL_ID, assistantPanel, useAssistantEngagement, useAssistantOpen } from "@/lib/assistant/panel";
 import { cn } from "@/lib/utils";
-import { AssistantAvatar, TypingDots } from "./AssistantAvatar";
+import { AssistantAvatar, OnlineDot, TypingDots } from "./AssistantAvatar";
 import { invitationFor, type Invitation as InvitationContent } from "./prompts";
 
 const loadPanel = () => import("./AssistantPanel");
@@ -108,11 +108,11 @@ export function AssistantLauncher() {
             className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-500 ease-out-expo group-hover:grid-cols-[1fr] group-focus-visible:grid-cols-[1fr]"
           >
             <span className="overflow-hidden">
-              <span className="block whitespace-nowrap pl-5 pr-1 text-sm font-semibold">{open ? "Cerrar" : "Asistente de Métrica"}</span>
+              <span className="block whitespace-nowrap pl-4 pr-1 text-sm font-semibold">{open ? "Cerrar" : "Asistente de Métrica"}</span>
             </span>
           </span>
 
-          <span className="relative size-14 sm:size-[3.75rem]">
+          <span className="relative size-12 sm:size-[3.25rem]">
             <AnimatePresence initial={false} mode="popLayout">
               {open ? (
                 <motion.span
@@ -123,7 +123,7 @@ export function AssistantLauncher() {
                   transition={{ duration: 0.35, ease: EASE_OUT }}
                   className="absolute inset-0 flex items-center justify-center"
                 >
-                  <X className="size-6" aria-hidden />
+                  <X className="size-5" aria-hidden />
                 </motion.span>
               ) : (
                 <motion.span
@@ -143,12 +143,12 @@ export function AssistantLauncher() {
               (pending ? (
                 <span
                   aria-hidden
-                  className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold ring-2 ring-white"
+                  className="absolute -right-1 -top-1 flex size-[1.125rem] items-center justify-center rounded-full bg-red-500 text-[10px] font-bold ring-2 ring-white"
                 >
                   1
                 </span>
               ) : (
-                <span aria-hidden className="absolute bottom-0.5 right-0.5 size-3.5 rounded-full bg-emerald-400 ring-2 ring-mt-800" />
+                <OnlineDot className="bottom-0 right-0" />
               ))}
           </span>
         </button>
@@ -228,7 +228,7 @@ function Invitation({ content, onReply, onOpen, onClose }: InvitationProps) {
       )}
 
       {/* Punta que apunta al botón */}
-      <span aria-hidden className="absolute -bottom-1.5 right-6 size-3 rotate-45 border-b border-r border-neutral-200 bg-white" />
+      <span aria-hidden className="absolute -bottom-1.5 right-5 size-3 rotate-45 border-b border-r border-neutral-200 bg-white" />
     </motion.div>
   );
 }

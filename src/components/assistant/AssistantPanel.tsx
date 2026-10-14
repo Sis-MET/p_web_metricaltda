@@ -21,7 +21,7 @@ import { ASSISTANT_API, MAX_MESSAGE_LENGTH, MAX_MESSAGES, type AssistantFailure 
 import type { AssistantMessage } from "@/lib/assistant/tools";
 import { readStored, writeStored } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { AssistantAvatar, TypingDots } from "./AssistantAvatar";
+import { AssistantAvatar, OnlineDot, TypingDots } from "./AssistantAvatar";
 import { HandoffCard, ProductSuggestions, RichText } from "./parts";
 import { STARTERS } from "./prompts";
 
@@ -143,7 +143,7 @@ export function AssistantPanel({ open }: { open: boolean }) {
       className={cn(
         "fixed inset-0 z-[60] flex origin-bottom flex-col overflow-hidden bg-white transition-[opacity,translate,scale,visibility] duration-400 ease-out-expo",
         // En el escritorio crece desde el botón flotante
-        "sm:inset-auto sm:bottom-24 sm:right-6 sm:h-[min(42rem,calc(100svh-12rem))] sm:w-[26rem] sm:origin-bottom-right sm:rounded-[1.75rem] sm:border sm:border-neutral-200 sm:shadow-[0_40px_80px_-32px_rgba(0,20,46,0.5)]",
+        "sm:inset-auto sm:bottom-[5.5rem] sm:right-6 sm:h-[min(42rem,calc(100svh-12rem))] sm:w-[26rem] sm:origin-bottom-right sm:rounded-[1.75rem] sm:border sm:border-neutral-200 sm:shadow-[0_40px_80px_-32px_rgba(0,20,46,0.5)]",
         open ? "visible translate-y-0 scale-100 opacity-100" : "invisible translate-y-4 scale-95 opacity-0"
       )}
     >
@@ -152,7 +152,7 @@ export function AssistantPanel({ open }: { open: boolean }) {
         <Glow className="-right-80 -top-96" />
         <span className="relative">
           <AssistantAvatar className="size-11" thinking={busy} />
-          <span aria-hidden className="absolute bottom-0 right-0 size-3 rounded-full bg-emerald-400 ring-2 ring-mt-800" />
+          <OnlineDot className="bottom-0 right-0" />
         </span>
         <div className="min-w-0 flex-1">
           <h2 className="font-heading text-base font-bold leading-tight">Asistente de Métrica</h2>

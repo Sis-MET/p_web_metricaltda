@@ -57,3 +57,13 @@ export function TypingDots({ className }: { className?: string }) {
     </span>
   );
 }
+
+/** Punto verde de "en línea", con un pulso suave; la posición la da `className` */
+export function OnlineDot({ className }: { className?: string }) {
+  return (
+    <span aria-hidden className={cn("absolute flex size-3", className)}>
+      <span className="absolute inset-0 rounded-full bg-emerald-400 opacity-75 [animation-duration:2s] motion-safe:animate-ping" />
+      <span className="relative size-full rounded-full bg-emerald-400 ring-2 ring-mt-800" />
+    </span>
+  );
+}
