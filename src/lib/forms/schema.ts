@@ -42,7 +42,7 @@ export type FormDef = {
   check?: (values: FormValues) => { field: string; message: string } | undefined;
   /** Además del correo, la solicitud se registra como prospecto en Bitrix24 */
   crm?: { opportunityTypes: (values: FormValues) => string[] };
-  /** Campo de detalle (textarea) que el asesor virtual puede precargar con el resumen de la conversación */
+  /** Campo de detalle (textarea) que el Asistente de Métrica puede precargar con el resumen de la conversación */
   summaryField?: string;
 };
 

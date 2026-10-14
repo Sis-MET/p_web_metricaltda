@@ -9,7 +9,7 @@ import { QUOTE_HREF } from "@/lib/routes";
 import { compact } from "@/lib/utils";
 
 /**
- * Herramientas del asesor virtual. El modelo conversa; los equipos y los botones que ve el
+ * Herramientas del Asistente de Métrica. El modelo conversa; los equipos y los botones que ve el
  * cliente salen siempre del catálogo real, así una recomendación no puede nombrar un modelo
  * que no existe ni llevar a un formulario equivocado.
  */

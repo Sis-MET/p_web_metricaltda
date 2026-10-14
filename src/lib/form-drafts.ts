@@ -2,7 +2,7 @@ import type { FormId } from "./forms/definitions";
 import { createStoredStore, useStore } from "./store";
 
 /**
- * Texto precargado en el campo de detalle de un formulario (`summaryField`): el asesor virtual
+ * Texto precargado en el campo de detalle de un formulario (`summaryField`): el Asistente de Métrica
  * deja aquí el resumen de la conversación y el cliente lo revisa antes de enviar. Dura la visita.
  */
 

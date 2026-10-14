@@ -21,7 +21,7 @@ type FieldProps = {
   field: FieldDef;
   error?: string;
   idPrefix: string;
-  /** Texto inicial de un campo de texto (borrador del asesor virtual) */
+  /** Texto inicial de un campo de texto (borrador del Asistente de Métrica) */
   defaultValue?: string;
 };
 

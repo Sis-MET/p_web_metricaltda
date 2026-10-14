@@ -1,6 +1,6 @@
-# Asesor virtual (IA)
+# Asistente de Métrica (IA)
 
-El botón **Asesor virtual** (abajo a la derecha, en todas las páginas, y en el bloque
+El botón **Asistente de Métrica** (abajo a la derecha, en todas las páginas, y en el bloque
 "¿Necesita asesoría para elegir su equipo?") abre un chat que:
 
 1. Pregunta por el proceso del cliente: qué pesa, peso máximo, ambiente, pesadas al día.
@@ -17,7 +17,7 @@ segundos aparece una invitación según la página: en una ficha de producto, "�
 indicado para su proceso?"; en calibración, si lo necesita para una auditoría; en soporte, si su
 balanza falla. Sus respuestas rápidas abren el chat y envían la pregunta. La invitación aparece
 una vez por visita y nunca en la cotización ni en contacto. Si el visitante la ignora, el botón
-queda con un "1" de mensaje pendiente; si la cierra, el asesor ya no insiste. Los textos están en
+queda con un "1" de mensaje pendiente; si la cierra, el asistente ya no insiste. Los textos están en
 `src/components/assistant/prompts.ts`.
 
 ## Cómo funciona
@@ -32,11 +32,11 @@ queda con un "1" de mensaje pendiente; si la cierra, el asesor ya no insiste. Lo
 
 - **No inventa equipos.** Las instrucciones se arman con el catálogo, los servicios y los datos de
   la empresa del sitio (`src/content/`). Las tarjetas solo aceptan modelos que existen: si se agrega
-  o cambia un producto, el asesor lo sabe sin tocar nada más.
+  o cambia un producto, el asistente lo sabe sin tocar nada más.
 - **Reglas:** no da precios, plazos ni stock; no inventa certificaciones; la acreditación es solo
   del laboratorio de calibración; solo habla de pesaje y de Métrica; deriva a WhatsApp si el
   cliente quiere hablar con una persona.
-- **Contexto de la página:** en la ficha de un equipo, el asesor sabe cuál está viendo el cliente.
+- **Contexto de la página:** en la ficha de un equipo, el asistente sabe cuál está viendo el cliente.
 - **Sin base de datos:** la conversación vive en el navegador del visitante mientras dura su
   visita (sessionStorage) y se envía completa en cada consulta. El servidor no guarda nada.
 - **La clave nunca llega al navegador:** el chat habla con `/api/asesor`, que llama a Gemini.

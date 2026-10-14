@@ -61,7 +61,7 @@
     }
   }
 
-  /* Asesor virtual: el visor parpadea, mira de lado a lado mientras piensa y el botón emite ondas */
+  /* Asistente de Métrica: el visor parpadea, mira de lado a lado mientras piensa y el botón emite ondas */
   --animate-assistant-blink: assistant-blink 5s ease-in-out infinite;
   --animate-assistant-look: assistant-look 1.6s ease-in-out infinite;
   --animate-assistant-sonar: assistant-sonar 2.8s var(--ease-out-expo) infinite;

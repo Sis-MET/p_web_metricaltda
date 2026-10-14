@@ -28,11 +28,11 @@ import { STARTERS } from "./prompts";
 const STORAGE_KEY = "metrica:asesor";
 
 const GREETING =
-  "¡Hola! Soy el asesor virtual de Métrica. Cuénteme a qué se dedica su empresa y qué necesita pesar: le recomiendo el equipo adecuado. También le oriento sobre calibración y soporte técnico.";
+  "¡Hola! Soy el Asistente de Métrica. Cuénteme a qué se dedica su empresa y qué necesita pesar: le recomiendo el equipo adecuado. También le oriento sobre calibración y soporte técnico.";
 
 const FAILURES: Record<AssistantFailure, string> = {
-  limite: "El asesor virtual alcanzó su límite de consultas por ahora. Un asesor le atiende por WhatsApp.",
-  "no-disponible": "El asesor virtual no está disponible en este momento. Inténtelo de nuevo o escríbanos por WhatsApp.",
+  limite: "El asistente alcanzó su límite de consultas por ahora. Un asesor le atiende por WhatsApp.",
+  "no-disponible": "El asistente no está disponible en este momento. Inténtelo de nuevo o escríbanos por WhatsApp.",
   invalido: "No pudimos continuar esta conversación. Inicie una nueva o escríbanos por WhatsApp.",
 };
 
@@ -136,7 +136,7 @@ export function AssistantPanel({ open }: { open: boolean }) {
     <section
       id={PANEL_ID}
       role="dialog"
-      aria-label="Asesor virtual de Métrica"
+      aria-label="Asistente de Métrica"
       inert={!open}
       onClickCapture={handleClick}
       onKeyDown={(event) => event.key === "Escape" && assistantPanel.close()}
@@ -155,7 +155,7 @@ export function AssistantPanel({ open }: { open: boolean }) {
           <span aria-hidden className="absolute bottom-0 right-0 size-3 rounded-full bg-emerald-400 ring-2 ring-mt-800" />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="font-heading text-base font-bold leading-tight">Asesor virtual</h2>
+          <h2 className="font-heading text-base font-bold leading-tight">Asistente de Métrica</h2>
           <p className="mt-0.5 text-xs text-white/70">{busy ? "Escribiendo…" : "En línea · le ayuda a elegir su equipo"}</p>
         </div>
         {messages.length > 0 && (
@@ -312,7 +312,7 @@ function Notice({ text, children }: { text: string; children?: ReactNode }) {
       <div className="mt-3 flex flex-wrap gap-2">
         {children}
         <Button asChild size="sm" variant="outline">
-          <a href={whatsappUrl("Hola, vengo del asesor virtual del sitio web.")} target="_blank" rel="noopener noreferrer">
+          <a href={whatsappUrl("Hola, vengo del Asistente de Métrica del sitio web.")} target="_blank" rel="noopener noreferrer">
             <MessageCircle /> WhatsApp
           </a>
         </Button>

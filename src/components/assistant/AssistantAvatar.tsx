@@ -7,7 +7,7 @@ type AssistantAvatarProps = {
 };
 
 /**
- * Cara del asesor virtual: el visor de un terminal de pesaje, con ojos que parpadean.
+ * Cara del Asistente de Métrica: el visor de un terminal de pesaje, con ojos que parpadean.
  * El tamaño lo da `className` (size-*); el dibujo ocupa el 62 % del círculo.
  */
 export function AssistantAvatar({ className, thinking = false }: AssistantAvatarProps) {

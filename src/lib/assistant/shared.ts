@@ -1,4 +1,4 @@
-/** Límites y contrato del asesor virtual, compartidos por el chat (navegador) y su API. */
+/** Límites y contrato del Asistente de Métrica, compartidos por el chat (navegador) y su API. */
 
 export const ASSISTANT_API = "/api/asesor";
 

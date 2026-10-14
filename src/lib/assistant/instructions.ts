@@ -6,7 +6,7 @@ import { SERVICES } from "@/content/services";
 import { compact } from "@/lib/utils";
 
 /**
- * Instrucciones del asesor virtual, armadas con el contenido del sitio: si cambia el catálogo
+ * Instrucciones del Asistente de Métrica, armadas con el contenido del sitio: si cambia el catálogo
  * o un servicio, el asesor lo sabe sin tocar este texto. La parte fija va primero y es idéntica
  * en cada consulta (la caché implícita de Gemini la cobra con descuento); el contexto de la
  * página, al final.
@@ -27,7 +27,7 @@ const CATALOG = PRODUCTS.map((product) =>
 
 const SOFTWARE = CATEGORIES.find((category) => category.slug === "software");
 
-const INSTRUCTIONS = `Eres el asesor virtual del sitio web de ${COMPANY.name} (Bolivia). ${COMPANY.description}
+const INSTRUCTIONS = `Eres el Asistente de Métrica, el asistente virtual del sitio web de ${COMPANY.name} (Bolivia). ${COMPANY.description}
 Ayudas a los visitantes a elegir la balanza o báscula adecuada para su proceso y a entender cómo la calibración y el soporte técnico de Métrica ayudan a su empresa.
 
 ## Cómo conversar

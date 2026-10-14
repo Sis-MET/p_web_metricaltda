@@ -54,7 +54,7 @@ export function invitationFor(pathname: string): Invitation | undefined {
     };
 
   return {
-    text: "Hola, soy el asesor virtual de Métrica. ¿Qué necesita pesar? Le recomiendo el equipo adecuado en un par de minutos.",
+    text: "Hola, soy el Asistente de Métrica. ¿Qué necesita pesar? Le recomiendo el equipo adecuado en un par de minutos.",
     replies: [FOOD, TRUCKS, CALIBRATE],
   };
 }

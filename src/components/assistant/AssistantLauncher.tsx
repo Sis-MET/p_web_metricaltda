@@ -26,7 +26,7 @@ const ask = (message: string) => {
   void loadPanel().then((module) => module.askAssistant(message));
 };
 
-/** Botón flotante del asesor virtual, en todas las páginas, con su invitación. */
+/** Botón flotante del Asistente de Métrica, en todas las páginas, con su invitación. */
 export function AssistantLauncher() {
   const open = useAssistantOpen();
   const engagement = useAssistantEngagement();
@@ -56,7 +56,7 @@ export function AssistantLauncher() {
 
   const showInvitation = inviting && !open && invitation !== undefined;
   const pending = engagement === "invitado" && !showInvitation;
-  const label = open ? "Cerrar el asesor virtual" : pending ? "Abrir el asesor virtual (1 mensaje)" : "Abrir el asesor virtual";
+  const label = open ? "Cerrar el Asistente de Métrica" : pending ? "Abrir el Asistente de Métrica (1 mensaje)" : "Abrir el Asistente de Métrica";
 
   return (
     <>
@@ -108,7 +108,7 @@ export function AssistantLauncher() {
             className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-500 ease-out-expo group-hover:grid-cols-[1fr] group-focus-visible:grid-cols-[1fr]"
           >
             <span className="overflow-hidden">
-              <span className="block whitespace-nowrap pl-5 pr-1 text-sm font-semibold">{open ? "Cerrar" : "Asesor virtual"}</span>
+              <span className="block whitespace-nowrap pl-5 pr-1 text-sm font-semibold">{open ? "Cerrar" : "Asistente de Métrica"}</span>
             </span>
           </span>
 
@@ -186,7 +186,7 @@ function Invitation({ content, onReply, onOpen, onClose }: InvitationProps) {
       <div className="flex items-center gap-2.5">
         <AssistantAvatar className="size-9" thinking={typing} />
         <div className="min-w-0 flex-1">
-          <p className="font-heading text-sm font-bold leading-tight text-ink-950">Asesor virtual</p>
+          <p className="font-heading text-sm font-bold leading-tight text-ink-950">Asistente de Métrica</p>
           <p className="flex items-center gap-1.5 text-xs text-neutral-500">
             <span aria-hidden className="size-1.5 rounded-full bg-emerald-500" />
             {typing ? "Escribiendo…" : "En línea"}

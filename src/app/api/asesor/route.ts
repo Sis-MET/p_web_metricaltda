@@ -14,7 +14,7 @@ import { MAX_MESSAGE_LENGTH, MAX_MESSAGES, type AssistantFailure } from "@/lib/a
 import { assistantTools, type AssistantMessage } from "@/lib/assistant/tools";
 
 /**
- * API del asesor virtual: recibe la conversación desde el chat del sitio (el servidor no guarda
+ * API del Asistente de Métrica: recibe la conversación desde el chat del sitio (el servidor no guarda
  * nada) y responde en streaming. La clave de Gemini nunca sale del servidor.
  */
 

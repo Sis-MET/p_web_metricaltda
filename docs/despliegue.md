@@ -56,7 +56,7 @@ instalado, pídales:
 > Para el sitio de metrica.com.bo (aplicación Node.js en Plesk) necesitamos habilitar estas
 > conexiones salientes:
 > 1. HTTPS (443) hacia `b24-nxcf6f.bitrix24.es`: nuestro CRM, donde se registran las solicitudes.
-> 2. HTTPS (443) hacia `generativelanguage.googleapis.com`: la API de Google Gemini del asesor virtual.
+> 2. HTTPS (443) hacia `generativelanguage.googleapis.com`: la API de Google Gemini del Asistente de Métrica.
 > 3. SMTP con TLS (465) hacia `mail.metrica.com.bo` (h22.megalink.com): los correos de los formularios.
 >
 > Los dos primeros usan IPs variables: necesitamos la regla por dominio o el 443 saliente en general.
@@ -64,7 +64,7 @@ instalado, pídales:
 Hasta entonces los formularios muestran el error de envío con los canales directos y el asesor
 avisa que no está disponible. Cuando las habiliten, pruebe en el subdominio:
 
-- el asesor virtual (una conversación corta);
+- el Asistente de Métrica (una conversación corta);
 - una cotización de prueba: debe llegar el correo a comercial@ y asistencia@ y crearse el
   prospecto en Bitrix24 (bórrelo después).
 

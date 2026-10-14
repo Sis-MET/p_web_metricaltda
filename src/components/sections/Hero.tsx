@@ -215,7 +215,7 @@ export function Hero() {
             })}
           </div>
 
-          {/* Móvil: indicadores y flechas (a la derecha queda el botón del asesor virtual) */}
+          {/* Móvil: indicadores y flechas (a la derecha queda el botón del Asistente de Métrica) */}
           <div className="flex items-center justify-between pr-16 sm:pr-[4.5rem] lg:hidden">
             <div className="flex items-center gap-2">
               {SLIDES.map((s, i) => {
