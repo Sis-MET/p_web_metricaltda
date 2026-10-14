@@ -12,15 +12,15 @@ import {
 } from "react";
 import { Chat, useChat } from "@ai-sdk/react";
 import { APICallError, DefaultChatTransport } from "ai";
-import { ArrowUp, ArrowUpRight, MessageCircle, MessageSquareText, RotateCcw, Square, X } from "lucide-react";
-import { Glow, GridPattern } from "@/components/ui/Backdrop";
+import { ArrowUp, ArrowUpRight, MessageCircle, RotateCcw, Square } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { whatsappUrl } from "@/content/company";
-import { PANEL_ID, assistantPanel } from "@/lib/assistant/panel";
+import { assistantPanel } from "@/lib/assistant/panel";
 import { ASSISTANT_API, MAX_MESSAGE_LENGTH, MAX_MESSAGES, type AssistantFailure } from "@/lib/assistant/shared";
 import type { AssistantMessage } from "@/lib/assistant/tools";
 import { readStored, writeStored } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { HeaderButton, PanelFrame } from "./PanelFrame";
 import { HandoffCard, ProductSuggestions, RichText } from "./parts";
 import { STARTERS } from "./prompts";
 
@@ -132,39 +132,18 @@ export function AssistantPanel({ open }: { open: boolean }) {
   };
 
   return (
-    <section
-      id={PANEL_ID}
-      role="dialog"
-      aria-label="Asistente de Métrica"
-      inert={!open}
+    <PanelFrame
+      open={open}
       onClickCapture={handleClick}
-      onKeyDown={(event) => event.key === "Escape" && assistantPanel.close()}
-      className={cn(
-        "fixed inset-0 z-[60] flex origin-bottom flex-col overflow-hidden bg-white transition-[opacity,translate,scale,visibility] duration-400 ease-out-expo",
-        // En el escritorio crece desde el botón flotante
-        "sm:inset-auto sm:bottom-[5.5rem] sm:right-6 sm:h-[min(42rem,calc(100svh-12rem))] sm:w-[26rem] sm:origin-bottom-right sm:rounded-[1.75rem] sm:border sm:border-neutral-200 sm:shadow-[0_40px_80px_-32px_rgba(0,20,46,0.5)]",
-        open ? "visible translate-y-0 scale-100 opacity-100" : "invisible translate-y-4 scale-95 opacity-0"
-      )}
-    >
-      <header className="relative isolate flex items-center gap-3 overflow-hidden bg-mt-800 px-4 py-4 text-white">
-        <GridPattern size={22} className="[mask-image:linear-gradient(to_bottom,black,transparent)]" />
-        <Glow className="-right-80 -top-96" />
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15">
-          <MessageSquareText className="size-5" aria-hidden />
-        </span>
-        <div className="min-w-0 flex-1">
-          <h2 className="font-heading text-base font-bold leading-tight">Asistente de Métrica</h2>
-          <p className="mt-0.5 text-xs text-white/70">{busy ? "Preparando la respuesta…" : "Asesoría en pesaje, calibración y soporte"}</p>
-        </div>
-        {messages.length > 0 && (
+      subtitle={busy ? "Preparando la respuesta…" : "Asesoría en pesaje, calibración y soporte"}
+      actions={
+        messages.length > 0 && (
           <HeaderButton label="Nueva conversación" onClick={reset}>
             <RotateCcw />
           </HeaderButton>
-        )}
-        <HeaderButton label="Cerrar el asistente" onClick={assistantPanel.close}>
-          <X />
-        </HeaderButton>
-      </header>
+        )
+      }
+    >
 
       <div
         ref={scroller}
@@ -243,7 +222,7 @@ export function AssistantPanel({ open }: { open: boolean }) {
           sensibles.
         </p>
       </form>
-    </section>
+    </PanelFrame>
   );
 }
 
@@ -311,16 +290,6 @@ function Notice({ text, children }: { text: string; children?: ReactNode }) {
 }
 
 type IconButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { label: string };
-
-const HeaderButton = ({ label, className, ...props }: IconButtonProps) => (
-  <button
-    type="button"
-    aria-label={label}
-    title={label}
-    className={cn("flex size-9 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white [&_svg]:size-[1.125rem]", className)}
-    {...props}
-  />
-);
 
 const SendButton = ({ label, className, type = "button", ...props }: IconButtonProps) => (
   <button

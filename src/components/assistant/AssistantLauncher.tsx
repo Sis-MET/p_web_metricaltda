@@ -8,12 +8,17 @@ import { MessageSquareText, X } from "lucide-react";
 import { EASE_OUT } from "@/lib/motion";
 import { LAUNCHER_ID, PANEL_ID, assistantPanel, useAssistantOpen, useInvitationPending } from "@/lib/assistant/panel";
 import { cn } from "@/lib/utils";
+import { PanelLoading } from "./PanelFrame";
 import { invitationFor, type Invitation as InvitationContent } from "./prompts";
 
 const loadPanel = () => import("./AssistantPanel");
 
-// El chat y el SDK de IA se descargan recién cuando el visitante muestra interés
-const AssistantPanel = dynamic(() => loadPanel().then((module) => module.AssistantPanel), { ssr: false });
+// El chat y el SDK de IA se descargan recién cuando el visitante muestra interés; mientras tanto,
+// el panel ya está abierto con el aviso de carga
+const AssistantPanel = dynamic(() => loadPanel().then((module) => module.AssistantPanel), {
+  ssr: false,
+  loading: PanelLoading,
+});
 
 /** La invitación aparece una vez por visita, cuando el visitante ya miró la página */
 const INVITE_AFTER_MS = 7000;
@@ -42,6 +47,8 @@ export function AssistantLauncher() {
     const timer = setTimeout(() => {
       setInviting(true);
       assistantPanel.invited();
+      // Quien ve la invitación probablemente abra el chat: que ya esté descargado
+      void loadPanel();
     }, INVITE_AFTER_MS);
     return () => clearTimeout(timer);
   }, [canInvite]);
