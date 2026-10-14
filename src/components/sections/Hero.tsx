@@ -215,8 +215,8 @@ export function Hero() {
             })}
           </div>
 
-          {/* Móvil: indicadores y flechas */}
-          <div className="flex items-center justify-between lg:hidden">
+          {/* Móvil: indicadores y flechas (a la derecha queda el botón del asesor virtual) */}
+          <div className="flex items-center justify-between pr-16 sm:pr-[4.5rem] lg:hidden">
             <div className="flex items-center gap-2">
               {SLIDES.map((s, i) => {
                 const isActive = i === index;
