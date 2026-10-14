@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useState, type FormEvent } from "react";
+import { startTransition, useActionState, useState, useSyncExternalStore, type FormEvent } from "react";
 import { CircleAlert, CircleCheck, Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "./fields";
@@ -11,6 +11,14 @@ import { EMAILS, SALES_PHONE, whatsappUrl } from "@/content/company";
 import { cn } from "@/lib/utils";
 
 const IDLE: FormState = { status: "idle" };
+
+const noSubscribe = () => () => {};
+
+/**
+ * true cuando React ya tomó el control del formulario. Antes de eso el navegador haría un envío
+ * nativo (GET: los datos en la URL y la solicitud perdida), así que el botón espera.
+ */
+const useHydrated = () => useSyncExternalStore(noSubscribe, () => true, () => false);
 
 type SiteFormProps = {
   id: FormId;
@@ -31,6 +39,7 @@ export function SiteForm(props: SiteFormProps) {
 
 function FormRound({ id, className, onSuccess, onReset }: SiteFormProps & { onReset: () => void }) {
   const form = FORMS[id];
+  const hydrated = useHydrated();
   const [state, dispatch, pending] = useActionState(async (previous: FormState, data: FormData) => {
     const next = await submitForm(id, previous, data);
     if (next.status === "success") onSuccess?.();
@@ -95,7 +104,8 @@ function FormRound({ id, className, onSuccess, onReset }: SiteFormProps & { onRe
         <p className="text-xs leading-relaxed text-neutral-500 sm:max-w-xs">
           Usamos sus datos solo para atender esta solicitud. Los campos con * son obligatorios.
         </p>
-        <Button type="submit" size="lg" disabled={pending} className="shrink-0">
+        {/* Con el botón deshabilitado tampoco hay envío implícito con Enter */}
+        <Button type="submit" size="lg" disabled={pending || !hydrated} className="shrink-0">
           {pending ? (
             <>
               <Loader2 className="animate-spin" /> Enviando…
