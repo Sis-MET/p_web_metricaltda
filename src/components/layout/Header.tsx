@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronDown, ClipboardList, Menu, MessageCircle, Phone, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { loadingMessage, useNavigationStatus } from "@/lib/navigation";
 import { NAV, QUOTE_HREF, isActivePath, type NavItem } from "@/lib/routes";
 import { useQuoteItems } from "@/lib/quote-store";
 import { SALES_PHONE, whatsappUrl } from "@/content/company";
@@ -256,6 +257,9 @@ function DropdownPanel({ item }: { item: NavItem }) {
 
 export function Header() {
   const pathname = usePathname();
+  // La sección pedida se marca apenas se hace clic, sin esperar a que llegue la página
+  const { pendingPath, slowPath } = useNavigationStatus();
+  const activePath = pendingPath ?? pathname;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const dropdown = useDropdown();
@@ -331,7 +335,7 @@ export function Header() {
           <nav aria-label="Principal" className="hidden lg:block">
             <ul className="flex items-center gap-0.5">
               {NAV.map((item) => {
-                const isActive = isActivePath(pathname, item.href);
+                const isActive = isActivePath(activePath, item.href);
                 const isOpen = dropdown.open === item.href;
                 const textCls = isDark
                   ? isActive || isOpen
@@ -361,7 +365,7 @@ export function Header() {
                     )}
                     <Link
                       href={item.href}
-                      aria-current={isActive ? "page" : undefined}
+                      aria-current={isActivePath(pathname, item.href) ? "page" : undefined}
                       className={cn(
                         "block rounded-full py-2 text-sm font-medium transition-colors duration-200",
                         item.children ? "pl-3.5 pr-1" : "px-3.5",
@@ -442,6 +446,32 @@ export function Header() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Aviso de carga bajo la barra, en el mismo tono que ella, si la página pedida tarda */}
+      <AnimatePresence>
+        {slowPath && !mobileOpen && !openItem && (
+          <motion.p
+            key="cargando"
+            role="status"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            transition={{ duration: 0.3, ease: EASE_OUT }}
+            className="pointer-events-none absolute inset-x-0 top-full mt-2.5 text-center text-xs font-semibold tracking-wide"
+          >
+            <span
+              className={cn(
+                "bg-[length:200%_100%] bg-clip-text text-transparent motion-safe:animate-text-shimmer",
+                tone === "dark"
+                  ? "bg-[linear-gradient(90deg,rgba(255,255,255,0.5)_25%,#fff_50%,rgba(255,255,255,0.5)_75%)] drop-shadow-[0_1px_2px_rgba(0,20,46,0.6)]"
+                  : "bg-[linear-gradient(90deg,var(--color-ink-400)_25%,var(--color-ink-900)_50%,var(--color-ink-400)_75%)]"
+              )}
+            >
+              {loadingMessage(slowPath)}
+            </span>
+          </motion.p>
+        )}
+      </AnimatePresence>
 
       {/* Menú móvil */}
       <AnimatePresence>

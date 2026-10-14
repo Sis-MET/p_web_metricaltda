@@ -67,6 +67,18 @@
   --animate-assistant-sonar: assistant-sonar 2.8s var(--ease-out-expo) infinite;
   --animate-message-in: message-in 0.4s var(--ease-out-expo) both;
 
+  /* Aviso de carga entre páginas: un brillo recorre el texto */
+  --animate-text-shimmer: text-shimmer 1.8s linear infinite;
+
+  @keyframes text-shimmer {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: -100% 0;
+    }
+  }
+
   @keyframes assistant-blink {
     0%,
     90%,
