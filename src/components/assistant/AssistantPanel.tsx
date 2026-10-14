@@ -61,6 +61,14 @@ function getChat() {
   return chat;
 }
 
+/** Envía una pregunta desde fuera del chat (las respuestas rápidas de la invitación) */
+export function askAssistant(message: string) {
+  const current = getChat();
+  const busy = current.status === "submitted" || current.status === "streaming";
+  if (busy || current.messages.length >= MAX_MESSAGES - 1) return;
+  void current.sendMessage({ text: message });
+}
+
 /** La respuesta ya muestra algo: texto o una tarjeta */
 const hasContent = (message?: AssistantMessage) =>
   message?.role === "assistant" &&

@@ -12,6 +12,14 @@ El botón **Asesor virtual** (abajo a la derecha, en todas las páginas, y en el
    cantidades en la lista. El cliente completa sus datos y envía; de ahí sigue el camino normal
    (correo y prospecto en Bitrix24, ver [formularios.md](formularios.md)).
 
+**Para que se note:** mientras el visitante no lo conoce, el botón emite ondas suaves. A los 7
+segundos aparece una invitación según la página: en una ficha de producto, "¿Este equipo es el
+indicado para su proceso?"; en calibración, si lo necesita para una auditoría; en soporte, si su
+balanza falla. Sus respuestas rápidas abren el chat y envían la pregunta. La invitación aparece
+una vez por visita y nunca en la cotización ni en contacto. Si el visitante la ignora, el botón
+queda con un "1" de mensaje pendiente; si la cierra, el asesor ya no insiste. Los textos están en
+`src/components/assistant/prompts.ts`.
+
 ## Cómo funciona
 
 | Pieza | Archivo |

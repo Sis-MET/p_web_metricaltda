@@ -60,6 +60,58 @@
       transform: scale(1);
     }
   }
+
+  /* Asesor virtual: el visor parpadea, mira de lado a lado mientras piensa y el botón emite ondas */
+  --animate-assistant-blink: assistant-blink 5s ease-in-out infinite;
+  --animate-assistant-look: assistant-look 1.6s ease-in-out infinite;
+  --animate-assistant-sonar: assistant-sonar 2.8s var(--ease-out-expo) infinite;
+  --animate-message-in: message-in 0.4s var(--ease-out-expo) both;
+
+  @keyframes assistant-blink {
+    0%,
+    90%,
+    100% {
+      transform: scaleY(1);
+    }
+    94% {
+      transform: scaleY(0.15);
+    }
+  }
+
+  @keyframes assistant-look {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    30% {
+      transform: translateX(-1.5px);
+    }
+    70% {
+      transform: translateX(1.5px);
+    }
+  }
+
+  @keyframes assistant-sonar {
+    from {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+    to {
+      transform: scale(1.9);
+      opacity: 0;
+    }
+  }
+
+  @keyframes message-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 /* Barra de progreso del carrusel del hero (se usa con style inline) */
