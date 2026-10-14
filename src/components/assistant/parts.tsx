@@ -51,7 +51,7 @@ const inline = (line: string) =>
 
 export function RichText({ text }: { text: string }) {
   return (
-    <div className="max-w-[92%] space-y-2 rounded-2xl rounded-bl-md bg-neutral-100 px-3.5 py-2.5 text-[15px] leading-relaxed text-ink-800">
+    <div className="max-w-[92%] space-y-2 rounded-2xl rounded-tl-md bg-neutral-100 px-3.5 py-2.5 text-[15px] leading-relaxed text-ink-800">
       {toBlocks(text).map(({ kind, lines }, i) => {
         if (kind === "p")
           return (

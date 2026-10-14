@@ -12,7 +12,8 @@ import {
 } from "react";
 import { Chat, useChat } from "@ai-sdk/react";
 import { APICallError, DefaultChatTransport } from "ai";
-import { ArrowUp, MessageCircle, RotateCcw, Sparkles, Square, X } from "lucide-react";
+import { ArrowUp, MessageCircle, RotateCcw, Square, X } from "lucide-react";
+import { Glow, GridPattern } from "@/components/ui/Backdrop";
 import { Button } from "@/components/ui/Button";
 import { whatsappUrl } from "@/content/company";
 import { PANEL_ID, assistantPanel } from "@/lib/assistant/panel";
@@ -20,19 +21,14 @@ import { ASSISTANT_API, MAX_MESSAGE_LENGTH, MAX_MESSAGES, type AssistantFailure 
 import type { AssistantMessage } from "@/lib/assistant/tools";
 import { readStored, writeStored } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { AssistantAvatar, TypingDots } from "./AssistantAvatar";
 import { HandoffCard, ProductSuggestions, RichText } from "./parts";
+import { STARTERS } from "./prompts";
 
 const STORAGE_KEY = "metrica:asesor";
 
-const STARTERS = [
-  "Tengo una planta de alimentos y necesito pesar mi producción",
-  "Necesito pesar camiones con carga",
-  "Quiero calibrar mis balanzas",
-  "Mi balanza presenta una falla",
-];
-
 const GREETING =
-  "¡Hola! Soy el asesor virtual de Métrica. Cuénteme a qué se dedica su empresa y qué necesita pesar, y le recomiendo el equipo adecuado. También puedo orientarle sobre calibración y soporte técnico.";
+  "¡Hola! Soy el asesor virtual de Métrica. Cuénteme a qué se dedica su empresa y qué necesita pesar: le recomiendo el equipo adecuado. También le oriento sobre calibración y soporte técnico.";
 
 const FAILURES: Record<AssistantFailure, string> = {
   limite: "El asesor virtual alcanzó su límite de consultas por ahora. Un asesor le atiende por WhatsApp.",
@@ -97,7 +93,8 @@ export function AssistantPanel({ open }: { open: boolean }) {
 
   useEffect(() => {
     const element = scroller.current;
-    if (element && stickToBottom.current) element.scrollTop = element.scrollHeight;
+    // Sin conversación, la bienvenida se lee desde arriba
+    if (element && stickToBottom.current && messages.length > 0) element.scrollTop = element.scrollHeight;
   }, [messages, status, error]);
 
   const send = (text: string) => {
@@ -144,18 +141,22 @@ export function AssistantPanel({ open }: { open: boolean }) {
       onClickCapture={handleClick}
       onKeyDown={(event) => event.key === "Escape" && assistantPanel.close()}
       className={cn(
-        "fixed inset-0 z-[60] flex flex-col overflow-hidden bg-white transition-[opacity,translate,visibility] duration-300 ease-out-expo",
-        "sm:inset-auto sm:bottom-24 sm:right-6 sm:h-[min(42rem,calc(100svh-12rem))] sm:w-[26rem] sm:rounded-[1.75rem] sm:border sm:border-neutral-200 sm:shadow-[0_40px_80px_-32px_rgba(0,20,46,0.5)]",
-        open ? "visible translate-y-0 opacity-100" : "invisible translate-y-4 opacity-0"
+        "fixed inset-0 z-[60] flex origin-bottom flex-col overflow-hidden bg-white transition-[opacity,translate,scale,visibility] duration-400 ease-out-expo",
+        // En el escritorio crece desde el botón flotante
+        "sm:inset-auto sm:bottom-24 sm:right-6 sm:h-[min(42rem,calc(100svh-12rem))] sm:w-[26rem] sm:origin-bottom-right sm:rounded-[1.75rem] sm:border sm:border-neutral-200 sm:shadow-[0_40px_80px_-32px_rgba(0,20,46,0.5)]",
+        open ? "visible translate-y-0 scale-100 opacity-100" : "invisible translate-y-4 scale-95 opacity-0"
       )}
     >
-      <header className="flex items-center gap-3 bg-mt-800 px-4 py-3.5 text-white">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15">
-          <Sparkles className="size-5" aria-hidden />
+      <header className="relative isolate flex items-center gap-3 overflow-hidden bg-mt-800 px-4 py-4 text-white">
+        <GridPattern size={22} className="[mask-image:linear-gradient(to_bottom,black,transparent)]" />
+        <Glow className="-right-80 -top-96" />
+        <span className="relative">
+          <AssistantAvatar className="size-11" thinking={busy} />
+          <span aria-hidden className="absolute bottom-0 right-0 size-3 rounded-full bg-emerald-400 ring-2 ring-mt-800" />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="font-heading text-[15px] font-bold leading-tight">Asesor virtual</h2>
-          <p className="text-xs text-white/65">Le ayudo a elegir su equipo de pesaje</p>
+          <h2 className="font-heading text-base font-bold leading-tight">Asesor virtual</h2>
+          <p className="mt-0.5 text-xs text-white/70">{busy ? "Escribiendo…" : "En línea · le ayuda a elegir su equipo"}</p>
         </div>
         {messages.length > 0 && (
           <HeaderButton label="Nueva conversación" onClick={reset}>
@@ -174,20 +175,26 @@ export function AssistantPanel({ open }: { open: boolean }) {
         }}
         className="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-5"
       >
-        <RichText text={GREETING} />
+        <AssistantRow>
+          <RichText text={GREETING} />
+        </AssistantRow>
 
         {messages.length === 0 && (
-          <div>
+          <div className="pl-[2.375rem]">
             <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Puede empezar con</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {STARTERS.map((starter) => (
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {STARTERS.map(({ icon: Icon, label, message }, i) => (
                 <button
-                  key={starter}
+                  key={label}
                   type="button"
-                  onClick={() => send(starter)}
-                  className="rounded-full border border-neutral-200 bg-white px-3.5 py-2 text-left text-sm text-ink-800 transition-colors hover:border-mt-400 hover:bg-mt-50"
+                  onClick={() => send(message)}
+                  style={{ animationDelay: `${150 + i * 70}ms` }}
+                  className="group flex flex-col items-start gap-2.5 rounded-2xl border border-neutral-200 bg-white p-3 text-left text-sm font-semibold leading-snug text-ink-900 transition-[border-color,box-shadow,translate] duration-300 ease-out-expo hover:-translate-y-0.5 hover:border-mt-300 hover:shadow-[0_14px_28px_-18px_rgba(0,42,90,0.55)] motion-safe:animate-message-in"
                 >
-                  {starter}
+                  <span className="flex size-9 items-center justify-center rounded-xl bg-mt-50 text-mt-700 transition-colors duration-300 group-hover:bg-mt-800 group-hover:text-white">
+                    <Icon className="size-[1.125rem]" aria-hidden />
+                  </span>
+                  {label}
                 </button>
               ))}
             </div>
@@ -250,43 +257,53 @@ function MessageView({ message }: { message: AssistantMessage }) {
   if (message.role === "user") {
     const text = message.parts.map((part) => (part.type === "text" ? part.text : "")).join("");
     return (
-      <p className="ml-auto w-fit max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-mt-800 px-3.5 py-2.5 text-[15px] leading-relaxed text-white">
+      <p className="ml-auto w-fit max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-tr-md bg-mt-800 px-3.5 py-2.5 text-[15px] leading-relaxed text-white motion-safe:animate-message-in">
         {text}
       </p>
     );
   }
 
-  return message.parts.map((part, i) => {
+  const content = message.parts.map((part, i) => {
     switch (part.type) {
       case "text":
         return part.text.trim() ? <RichText key={i} text={part.text} /> : null;
       case "tool-mostrar_equipos":
         if (part.state === "output-available") return <ProductSuggestions key={i} products={part.output} />;
-        return part.state === "output-error" ? null : <Typing key={i} label="Buscando equipos en el catálogo…" />;
+        return part.state === "output-error" ? null : <Status key={i} label="Buscando equipos en el catálogo…" />;
       case "tool-siguiente_paso":
         return part.state === "output-available" ? <HandoffCard key={i} handoff={part.output} /> : null;
       default:
         return null;
     }
   });
+
+  return content.some(Boolean) ? <AssistantRow>{content}</AssistantRow> : null;
 }
 
-function Typing({ label = "El asesor está escribiendo…" }: { label?: string }) {
+/** Mensaje del asesor: su cara a la izquierda y el contenido al lado */
+function AssistantRow({ children, thinking }: { children: ReactNode; thinking?: boolean }) {
   return (
-    <div className="flex w-fit items-center gap-2.5 rounded-2xl rounded-bl-md bg-neutral-100 px-3.5 py-3" role="status">
-      <span className="flex gap-1" aria-hidden>
-        {[0, 150, 300].map((delay) => (
-          <span
-            key={delay}
-            className="size-1.5 rounded-full bg-neutral-400 motion-safe:animate-bounce"
-            style={{ animationDelay: `${delay}ms` }}
-          />
-        ))}
-      </span>
+    <div className="flex items-start gap-2.5 motion-safe:animate-message-in">
+      <AssistantAvatar className="mt-0.5 size-7" thinking={thinking} />
+      <div className="min-w-0 flex-1 space-y-3">{children}</div>
+    </div>
+  );
+}
+
+function Status({ label }: { label: string }) {
+  return (
+    <div role="status" className="flex w-fit items-center gap-2.5 rounded-2xl rounded-tl-md bg-neutral-100 px-3.5 py-2.5">
+      <TypingDots />
       <span className="text-xs text-neutral-500">{label}</span>
     </div>
   );
 }
+
+const Typing = () => (
+  <AssistantRow thinking>
+    <Status label="Escribiendo…" />
+  </AssistantRow>
+);
 
 function Notice({ text, children }: { text: string; children?: ReactNode }) {
   return (
