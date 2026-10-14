@@ -58,7 +58,7 @@ Sin clave, el chat se abre igual pero avisa que no está disponible y ofrece Wha
 ## Protección contra abusos
 
 - Solo responde a pedidos del propio sitio (encabezado `Origin`).
-- Por visitante (IP): 20 mensajes cada 10 minutos.
+- Por visitante (IP): 20 mensajes cada 10 minutos. Si el hosting no informa la IP, solo rige el tope diario.
 - Del sitio entero: `ASSISTANT_DAILY_LIMIT` consultas por día (hora de Bolivia).
 - Por conversación: 40 mensajes y 1500 caracteres por mensaje. Después, el chat deriva a un asesor.
 - Si se agota la cuota (del sitio o de Google), el chat lo dice y ofrece WhatsApp.
