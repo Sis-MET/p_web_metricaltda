@@ -161,6 +161,7 @@ export const FORMS = {
         ];
       },
     },
+    summaryField: "comentarios",
   },
 
   calibracion: {
@@ -200,6 +201,7 @@ export const FORMS = {
       },
     ],
     crm: { opportunityTypes: () => ["CALIBRACIÓN"] },
+    summaryField: "equipos",
   },
 
   soporte: {
@@ -245,6 +247,7 @@ export const FORMS = {
       },
     ],
     crm: { opportunityTypes: () => ["SOPORTE TECNICO"] },
+    summaryField: "problema",
   },
 
   postulacion: {

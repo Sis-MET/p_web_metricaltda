@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "./fields";
 import { submitForm } from "@/lib/forms/actions";
 import { FORMS, type FormId } from "@/lib/forms/definitions";
-import { HONEYPOT, parseSubmission, type FieldErrors, type FormState } from "@/lib/forms/schema";
+import { HONEYPOT, parseSubmission, type FieldErrors, type FormDef, type FormState } from "@/lib/forms/schema";
 import { EMAILS, SALES_PHONE, whatsappUrl } from "@/content/company";
+import { formDrafts, useFormDraft } from "@/lib/form-drafts";
 import { cn } from "@/lib/utils";
 
 const IDLE: FormState = { status: "idle" };
@@ -38,11 +39,15 @@ export function SiteForm(props: SiteFormProps) {
 }
 
 function FormRound({ id, className, onSuccess, onReset }: SiteFormProps & { onReset: () => void }) {
-  const form = FORMS[id];
+  const form: FormDef = FORMS[id];
   const hydrated = useHydrated();
+  const draft = useFormDraft(id);
   const [state, dispatch, pending] = useActionState(async (previous: FormState, data: FormData) => {
     const next = await submitForm(id, previous, data);
-    if (next.status === "success") onSuccess?.();
+    if (next.status === "success") {
+      formDrafts.clear(id);
+      onSuccess?.();
+    }
     return next;
   }, IDLE);
 
@@ -88,9 +93,14 @@ function FormRound({ id, className, onSuccess, onReset }: SiteFormProps & { onRe
   return (
     <form onSubmit={handleSubmit} onChange={handleChange} noValidate className={cn("relative", className)}>
       <fieldset disabled={pending} className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
-        {form.fields.map((field) => (
-          <FormField key={field.name} field={field} error={errors[field.name]} idPrefix={id} />
-        ))}
+        {form.fields.map((field) =>
+          field.name === form.summaryField ? (
+            // La key cambia con el borrador: el campo se vuelve a montar con el resumen del asesor
+            <FormField key={`${field.name}:${draft}`} field={field} error={errors[field.name]} idPrefix={id} defaultValue={draft} />
+          ) : (
+            <FormField key={field.name} field={field} error={errors[field.name]} idPrefix={id} />
+          )
+        )}
       </fieldset>
 
       {/* Trampa para bots: fuera de la pantalla y fuera del orden de tabulación */}

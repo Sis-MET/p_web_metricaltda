@@ -16,7 +16,15 @@ export const controlCls = (invalid?: boolean) =>
 /** Campos que ocupan siempre las dos columnas */
 const FULL_WIDTH = new Set<FieldDef["type"]>(["textarea", "file", "checkbox"]);
 
-type FieldProps = { field: FieldDef; error?: string; idPrefix: string };
+type FieldProps = {
+  field: FieldDef;
+  error?: string;
+  idPrefix: string;
+  /** Texto inicial de un campo de texto (borrador del asesor virtual) */
+  defaultValue?: string;
+};
+
+type ControlProps = { field: FieldDef; id: string; describedBy?: string; invalid: boolean; defaultValue?: string };
 
 function Message({ id, error, hint }: { id: string; error?: string; hint?: string }) {
   if (error)
@@ -87,7 +95,7 @@ function FileInput({ field, id, describedBy, invalid }: { field: Extract<FieldDe
   );
 }
 
-function Control({ field, id, describedBy, invalid }: { field: FieldDef; id: string; describedBy?: string; invalid: boolean }) {
+function Control({ field, id, describedBy, invalid, defaultValue }: ControlProps) {
   const aria = { "aria-invalid": invalid || undefined, "aria-describedby": describedBy };
 
   switch (field.type) {
@@ -102,6 +110,7 @@ function Control({ field, id, describedBy, invalid }: { field: FieldDef; id: str
           autoComplete={field.autoComplete}
           placeholder={field.placeholder}
           maxLength={field.maxLength}
+          defaultValue={defaultValue}
           className={controlCls(invalid)}
           {...aria}
         />
@@ -114,6 +123,7 @@ function Control({ field, id, describedBy, invalid }: { field: FieldDef; id: str
           rows={field.rows ?? 4}
           placeholder={field.placeholder}
           maxLength={field.maxLength}
+          defaultValue={defaultValue}
           className={cn(controlCls(invalid), "h-auto resize-y py-3")}
           {...aria}
         />
@@ -161,7 +171,7 @@ function Control({ field, id, describedBy, invalid }: { field: FieldDef; id: str
 }
 
 /** Un campo del formulario con su etiqueta, ayuda y error */
-export function FormField({ field, error, idPrefix }: FieldProps) {
+export function FormField({ field, error, idPrefix, defaultValue }: FieldProps) {
   if (field.type === "quote") return <Control field={field} id="" invalid={false} />;
 
   const id = `${idPrefix}-${field.name}`;
@@ -172,7 +182,7 @@ export function FormField({ field, error, idPrefix }: FieldProps) {
   return (
     <Wrapper className={cn("min-w-0", (field.full || FULL_WIDTH.has(field.type)) && "sm:col-span-2")}>
       <Label field={field} htmlFor={isGroup ? undefined : id} as={isGroup ? "legend" : "label"} />
-      <Control field={field} id={id} describedBy={describedBy} invalid={Boolean(error)} />
+      <Control field={field} id={id} describedBy={describedBy} invalid={Boolean(error)} defaultValue={defaultValue} />
       <div className="mt-1.5 empty:hidden">
         <Message id={id} error={error} hint={field.hint} />
       </div>
