@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronDown, ClipboardList, Menu, MessageCircle, Phone, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { ShimmerText } from "@/components/ui/ShimmerText";
 import { loadingMessage, useNavigationStatus } from "@/lib/navigation";
 import { NAV, QUOTE_HREF, isActivePath, type NavItem } from "@/lib/routes";
 import { useQuoteItems } from "@/lib/quote-store";
@@ -14,17 +15,33 @@ import { SALES_PHONE, whatsappUrl } from "@/content/company";
 import { EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
-// Altura (px desde arriba) donde se mide qué sección hay detrás de la barra
+// Alturas (px desde arriba) donde se mide qué sección hay detrás: la barra y el aviso de carga bajo ella
 const HEADER_PROBE_Y = 44;
+const NOTICE_PROBE_Y = 98;
 const CLOSE_DELAY_MS = 150;
 
 // Las páginas empiezan con una cabecera azul, salvo las fichas de producto (fondo claro).
 // Sirve para el primer render, antes de poder medir qué hay detrás de la barra.
 const LIGHT_TOP = /^\/productos\/[^/]+\/[^/]+$/;
 
-/** Tono de la barra según la sección que tiene detrás (data-header-theme). */
+type Tone = "dark" | "light";
+
+/** Tono de la sección que hay a esa altura de la pantalla (data-header-theme); claro si no declara uno */
+function toneAt(sections: HTMLElement[], y: number): Tone {
+  const section = sections.find((candidate) => {
+    const rect = candidate.getBoundingClientRect();
+    return rect.top <= y && rect.bottom > y;
+  });
+  return section?.dataset.headerTheme === "dark" ? "dark" : "light";
+}
+
+/**
+ * Tono de la barra según la sección que tiene detrás y, aparte, el de la franja de abajo, donde va
+ * el aviso de carga: al terminar una sección azul, la barra puede seguir sobre azul y el aviso ya no.
+ */
 function useHeaderTone(pathname: string) {
-  const [tone, setTone] = useState<"dark" | "light">(() => (LIGHT_TOP.test(pathname) ? "light" : "dark"));
+  const [tone, setTone] = useState<Tone>(() => (LIGHT_TOP.test(pathname) ? "light" : "dark"));
+  const [noticeTone, setNoticeTone] = useState<Tone>(tone);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -33,16 +50,9 @@ function useHeaderTone(pathname: string) {
     const update = () => {
       frame = 0;
       setScrolled(window.scrollY > 8);
-
-      let next: "dark" | "light" = "light";
-      for (const section of document.querySelectorAll<HTMLElement>("[data-header-theme]")) {
-        const rect = section.getBoundingClientRect();
-        if (rect.top <= HEADER_PROBE_Y && rect.bottom > HEADER_PROBE_Y) {
-          next = section.dataset.headerTheme === "dark" ? "dark" : "light";
-          break;
-        }
-      }
-      setTone(next);
+      const sections = [...document.querySelectorAll<HTMLElement>("[data-header-theme]")];
+      setTone(toneAt(sections, HEADER_PROBE_Y));
+      setNoticeTone(toneAt(sections, NOTICE_PROBE_Y));
     };
 
     const schedule = () => {
@@ -59,7 +69,7 @@ function useHeaderTone(pathname: string) {
     };
   }, [pathname]);
 
-  return { tone, scrolled };
+  return { tone, noticeTone, scrolled };
 }
 
 /** Menú desplegable de escritorio: se abre al pasar el mouse o con el botón, y tolera el paso al panel. */
@@ -263,7 +273,7 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const dropdown = useDropdown();
-  const { tone, scrolled } = useHeaderTone(pathname);
+  const { tone, noticeTone, scrolled } = useHeaderTone(pathname);
 
   // Al cambiar de página se cierran los menús
   const [lastPath, setLastPath] = useState(pathname);
@@ -447,7 +457,7 @@ export function Header() {
         </AnimatePresence>
       </div>
 
-      {/* Aviso de carga bajo la barra, en el mismo tono que ella, si la página pedida tarda */}
+      {/* Aviso de carga bajo la barra, en el tono del fondo que tiene detrás, si la página pedida tarda */}
       <AnimatePresence>
         {slowPath && !mobileOpen && !openItem && (
           <motion.p
@@ -459,16 +469,7 @@ export function Header() {
             transition={{ duration: 0.3, ease: EASE_OUT }}
             className="pointer-events-none absolute inset-x-0 top-full mt-2.5 text-center text-xs font-semibold tracking-wide"
           >
-            <span
-              className={cn(
-                "bg-[length:200%_100%] bg-clip-text text-transparent motion-safe:animate-text-shimmer",
-                tone === "dark"
-                  ? "bg-[linear-gradient(90deg,rgba(255,255,255,0.5)_25%,#fff_50%,rgba(255,255,255,0.5)_75%)] drop-shadow-[0_1px_2px_rgba(0,20,46,0.6)]"
-                  : "bg-[linear-gradient(90deg,var(--color-ink-400)_25%,var(--color-ink-900)_50%,var(--color-ink-400)_75%)]"
-              )}
-            >
-              {loadingMessage(slowPath)}
-            </span>
+            <ShimmerText tone={noticeTone}>{loadingMessage(slowPath)}</ShimmerText>
           </motion.p>
         )}
       </AnimatePresence>
