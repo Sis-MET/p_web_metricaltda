@@ -12,7 +12,7 @@ import {
 } from "react";
 import { Chat, useChat } from "@ai-sdk/react";
 import { APICallError, DefaultChatTransport } from "ai";
-import { ArrowUp, MessageCircle, RotateCcw, Square, X } from "lucide-react";
+import { ArrowUp, ArrowUpRight, MessageCircle, MessageSquareText, RotateCcw, Square, X } from "lucide-react";
 import { Glow, GridPattern } from "@/components/ui/Backdrop";
 import { Button } from "@/components/ui/Button";
 import { whatsappUrl } from "@/content/company";
@@ -21,7 +21,6 @@ import { ASSISTANT_API, MAX_MESSAGE_LENGTH, MAX_MESSAGES, type AssistantFailure 
 import type { AssistantMessage } from "@/lib/assistant/tools";
 import { readStored, writeStored } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { AssistantAvatar, OnlineDot, TypingDots } from "./AssistantAvatar";
 import { HandoffCard, ProductSuggestions, RichText } from "./parts";
 import { STARTERS } from "./prompts";
 
@@ -150,20 +149,19 @@ export function AssistantPanel({ open }: { open: boolean }) {
       <header className="relative isolate flex items-center gap-3 overflow-hidden bg-mt-800 px-4 py-4 text-white">
         <GridPattern size={22} className="[mask-image:linear-gradient(to_bottom,black,transparent)]" />
         <Glow className="-right-80 -top-96" />
-        <span className="relative">
-          <AssistantAvatar className="size-11" thinking={busy} />
-          <OnlineDot className="bottom-0 right-0" />
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15">
+          <MessageSquareText className="size-5" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
           <h2 className="font-heading text-base font-bold leading-tight">Asistente de Métrica</h2>
-          <p className="mt-0.5 text-xs text-white/70">{busy ? "Escribiendo…" : "En línea · le ayuda a elegir su equipo"}</p>
+          <p className="mt-0.5 text-xs text-white/70">{busy ? "Preparando la respuesta…" : "Asesoría en pesaje, calibración y soporte"}</p>
         </div>
         {messages.length > 0 && (
           <HeaderButton label="Nueva conversación" onClick={reset}>
             <RotateCcw />
           </HeaderButton>
         )}
-        <HeaderButton label="Cerrar el asesor" onClick={assistantPanel.close}>
+        <HeaderButton label="Cerrar el asistente" onClick={assistantPanel.close}>
           <X />
         </HeaderButton>
       </header>
@@ -175,29 +173,25 @@ export function AssistantPanel({ open }: { open: boolean }) {
         }}
         className="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-5"
       >
-        <AssistantRow>
-          <RichText text={GREETING} />
-        </AssistantRow>
+        <RichText text={GREETING} />
 
         {messages.length === 0 && (
-          <div className="pl-[2.375rem]">
-            <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Puede empezar con</p>
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              {STARTERS.map(({ icon: Icon, label, message }, i) => (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => send(message)}
-                  style={{ animationDelay: `${150 + i * 70}ms` }}
-                  className="group flex flex-col items-start gap-2.5 rounded-2xl border border-neutral-200 bg-white p-3 text-left text-sm font-semibold leading-snug text-ink-900 transition-[border-color,box-shadow,translate] duration-300 ease-out-expo hover:-translate-y-0.5 hover:border-mt-300 hover:shadow-[0_14px_28px_-18px_rgba(0,42,90,0.55)] motion-safe:animate-message-in"
-                >
-                  <span className="flex size-9 items-center justify-center rounded-xl bg-mt-50 text-mt-700 transition-colors duration-300 group-hover:bg-mt-800 group-hover:text-white">
-                    <Icon className="size-[1.125rem]" aria-hidden />
-                  </span>
-                  {label}
-                </button>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Mensajes sugeridos</p>
+            <ul className="mt-2 space-y-2">
+              {STARTERS.map(({ message }) => (
+                <li key={message}>
+                  <button
+                    type="button"
+                    onClick={() => send(message)}
+                    className="group flex w-full items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-left text-sm text-ink-800 transition-colors hover:border-mt-300 hover:bg-mt-50"
+                  >
+                    {message}
+                    <ArrowUpRight className="size-4 shrink-0 text-neutral-400 transition-colors group-hover:text-mt-700" aria-hidden />
+                  </button>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         )}
 
@@ -277,33 +271,28 @@ function MessageView({ message }: { message: AssistantMessage }) {
     }
   });
 
-  return content.some(Boolean) ? <AssistantRow>{content}</AssistantRow> : null;
+  return content.some(Boolean) ? <div className="space-y-3 motion-safe:animate-message-in">{content}</div> : null;
 }
 
-/** Mensaje del asesor: su cara a la izquierda y el contenido al lado */
-function AssistantRow({ children, thinking }: { children: ReactNode; thinking?: boolean }) {
-  return (
-    <div className="flex items-start gap-2.5 motion-safe:animate-message-in">
-      <AssistantAvatar className="mt-0.5 size-7" thinking={thinking} />
-      <div className="min-w-0 flex-1 space-y-3">{children}</div>
-    </div>
-  );
-}
-
+/** Mientras el asistente prepara la respuesta o busca equipos */
 function Status({ label }: { label: string }) {
   return (
     <div role="status" className="flex w-fit items-center gap-2.5 rounded-2xl rounded-tl-md bg-neutral-100 px-3.5 py-2.5">
-      <TypingDots />
+      <span className="flex h-5 items-center gap-1" aria-hidden>
+        {[0, 160, 320].map((delay) => (
+          <span
+            key={delay}
+            className="size-1.5 rounded-full bg-neutral-400 motion-safe:animate-bounce"
+            style={{ animationDelay: `${delay}ms` }}
+          />
+        ))}
+      </span>
       <span className="text-xs text-neutral-500">{label}</span>
     </div>
   );
 }
 
-const Typing = () => (
-  <AssistantRow thinking>
-    <Status label="Escribiendo…" />
-  </AssistantRow>
-);
+const Typing = () => <Status label="Preparando la respuesta…" />;
 
 function Notice({ text, children }: { text: string; children?: ReactNode }) {
   return (

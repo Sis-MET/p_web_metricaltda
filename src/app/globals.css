@@ -61,10 +61,7 @@
     }
   }
 
-  /* Asistente de Métrica: el visor parpadea, mira de lado a lado mientras piensa y el botón emite ondas */
-  --animate-assistant-blink: assistant-blink 5s ease-in-out infinite;
-  --animate-assistant-look: assistant-look 1.6s ease-in-out infinite;
-  --animate-assistant-sonar: assistant-sonar 2.8s var(--ease-out-expo) infinite;
+  /* Asistente de Métrica: los mensajes entran con un desplazamiento corto */
   --animate-message-in: message-in 0.4s var(--ease-out-expo) both;
 
   /* Aviso de carga entre páginas: un brillo recorre el texto */
@@ -76,41 +73,6 @@
     }
     to {
       background-position: -100% 0;
-    }
-  }
-
-  @keyframes assistant-blink {
-    0%,
-    90%,
-    100% {
-      transform: scaleY(1);
-    }
-    94% {
-      transform: scaleY(0.15);
-    }
-  }
-
-  @keyframes assistant-look {
-    0%,
-    100% {
-      transform: translateX(0);
-    }
-    30% {
-      transform: translateX(-1.5px);
-    }
-    70% {
-      transform: translateX(1.5px);
-    }
-  }
-
-  @keyframes assistant-sonar {
-    from {
-      transform: scale(1);
-      opacity: 0.5;
-    }
-    to {
-      transform: scale(1.9);
-      opacity: 0;
     }
   }
 

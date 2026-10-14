@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
+import { MessageSquareText, X } from "lucide-react";
 import { EASE_OUT } from "@/lib/motion";
-import { LAUNCHER_ID, PANEL_ID, assistantPanel, useAssistantEngagement, useAssistantOpen } from "@/lib/assistant/panel";
+import { LAUNCHER_ID, PANEL_ID, assistantPanel, useAssistantOpen, useInvitationPending } from "@/lib/assistant/panel";
 import { cn } from "@/lib/utils";
-import { AssistantAvatar, OnlineDot, TypingDots } from "./AssistantAvatar";
 import { invitationFor, type Invitation as InvitationContent } from "./prompts";
 
 const loadPanel = () => import("./AssistantPanel");
@@ -29,9 +28,8 @@ const ask = (message: string) => {
 /** Botón flotante del Asistente de Métrica, en todas las páginas, con su invitación. */
 export function AssistantLauncher() {
   const open = useAssistantOpen();
-  const engagement = useAssistantEngagement();
   const invitation = invitationFor(usePathname());
-  const canInvite = engagement === "nuevo" && invitation !== undefined;
+  const canInvite = useInvitationPending() && invitation !== undefined;
 
   // Una vez abierto, el chat queda montado: cerrar no borra la conversación
   const [mounted, setMounted] = useState(open);
@@ -54,9 +52,7 @@ export function AssistantLauncher() {
     return () => clearTimeout(timer);
   }, [inviting]);
 
-  const showInvitation = inviting && !open && invitation !== undefined;
-  const pending = engagement === "invitado" && !showInvitation;
-  const label = open ? "Cerrar el Asistente de Métrica" : pending ? "Abrir el Asistente de Métrica (1 mensaje)" : "Abrir el Asistente de Métrica";
+  const label = open ? "Cerrar el Asistente de Métrica" : "Abrir el Asistente de Métrica";
 
   return (
     <>
@@ -69,20 +65,12 @@ export function AssistantLauncher() {
         )}
       >
         <AnimatePresence>
-          {showInvitation && (
-            <Invitation
-              content={invitation}
-              onReply={ask}
-              onOpen={assistantPanel.open}
-              onClose={() => {
-                setInviting(false);
-                assistantPanel.dismissInvitation();
-              }}
-            />
+          {inviting && !open && invitation && (
+            <Invitation content={invitation} onReply={ask} onOpen={assistantPanel.open} onClose={() => setInviting(false)} />
           )}
         </AnimatePresence>
 
-        <button
+        <motion.button
           id={LAUNCHER_ID}
           type="button"
           onClick={assistantPanel.toggle}
@@ -92,66 +80,37 @@ export function AssistantLauncher() {
           title={label}
           aria-expanded={open}
           aria-controls={mounted ? PANEL_ID : undefined}
-          className="group relative flex items-center rounded-full bg-mt-800 text-white shadow-[0_18px_40px_-14px_rgba(0,20,46,0.8)] ring-1 ring-white/15 transition-[translate,box-shadow] duration-300 ease-out-expo hover:-translate-y-0.5 hover:shadow-[0_22px_44px_-14px_rgba(0,20,46,0.9)]"
+          // Entra con la página, sin animaciones que distraigan después
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.5, ease: EASE_OUT }}
+          className="group flex items-center rounded-full bg-mt-800 text-white shadow-[0_16px_36px_-14px_rgba(0,20,46,0.75)] ring-1 ring-white/10 transition-[background-color,box-shadow] duration-300 hover:bg-mt-700 hover:shadow-[0_20px_40px_-14px_rgba(0,20,46,0.85)]"
         >
-          {/* Ondas mientras el visitante aún no conoce el asesor */}
-          {engagement === "nuevo" && !open && (
-            <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 aspect-square">
-              <span className="absolute inset-0 rounded-full bg-mt-500 motion-safe:animate-assistant-sonar" />
-              <span className="absolute inset-0 rounded-full bg-mt-500 [animation-delay:1.4s] motion-safe:animate-assistant-sonar" />
-            </span>
-          )}
-
           {/* La etiqueta se despliega al pasar el mouse o con el teclado */}
           <span
             aria-hidden
             className="grid grid-cols-[0fr] transition-[grid-template-columns] duration-500 ease-out-expo group-hover:grid-cols-[1fr] group-focus-visible:grid-cols-[1fr]"
           >
             <span className="overflow-hidden">
-              <span className="block whitespace-nowrap pl-4 pr-1 text-sm font-semibold">{open ? "Cerrar" : "Asistente de Métrica"}</span>
+              <span className="block whitespace-nowrap pl-5 pr-1 text-sm font-semibold">{open ? "Cerrar" : "Asistente de Métrica"}</span>
             </span>
           </span>
 
           <span className="relative size-12 sm:size-[3.25rem]">
             <AnimatePresence initial={false} mode="popLayout">
-              {open ? (
-                <motion.span
-                  key="cerrar"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.35, ease: EASE_OUT }}
-                  className="absolute inset-0 flex items-center justify-center"
-                >
-                  <X className="size-5" aria-hidden />
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="asesor"
-                  initial={{ rotate: 90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: -90, opacity: 0 }}
-                  transition={{ duration: 0.35, ease: EASE_OUT }}
-                  className="absolute inset-0"
-                >
-                  <AssistantAvatar className="size-full ring-0" />
-                </motion.span>
-              )}
+              <motion.span
+                key={open ? "cerrar" : "abrir"}
+                initial={{ rotate: open ? -90 : 90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: open ? 90 : -90, opacity: 0 }}
+                transition={{ duration: 0.3, ease: EASE_OUT }}
+                className="absolute inset-0 flex items-center justify-center"
+              >
+                {open ? <X className="size-5" aria-hidden /> : <MessageSquareText className="size-[1.375rem]" aria-hidden />}
+              </motion.span>
             </AnimatePresence>
-
-            {!open &&
-              (pending ? (
-                <span
-                  aria-hidden
-                  className="absolute -right-1 -top-1 flex size-[1.125rem] items-center justify-center rounded-full bg-red-500 text-[10px] font-bold ring-2 ring-white"
-                >
-                  1
-                </span>
-              ) : (
-                <OnlineDot className="bottom-0 right-0" />
-              ))}
           </span>
-        </button>
+        </motion.button>
       </div>
     </>
   );
@@ -164,68 +123,49 @@ type InvitationProps = {
   onClose: () => void;
 };
 
-/** Burbuja del asesor: primero "escribe", luego invita y ofrece respuestas de un toque */
+/** Invitación del asistente con respuestas sugeridas de un toque */
 function Invitation({ content, onReply, onOpen, onClose }: InvitationProps) {
-  const [typing, setTyping] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setTyping(false), 1300);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <motion.div
       role="status"
-      initial={{ opacity: 0, y: 14, scale: 0.94 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 8, scale: 0.97 }}
-      transition={{ type: "spring", stiffness: 380, damping: 28 }}
-      style={{ transformOrigin: "bottom right" }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 6, transition: { duration: 0.2 } }}
+      transition={{ duration: 0.4, ease: EASE_OUT }}
       className="relative w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-neutral-200 bg-white p-4 text-ink-900 shadow-[0_24px_60px_-24px_rgba(0,20,46,0.45)]"
     >
-      <div className="flex items-center gap-2.5">
-        <AssistantAvatar className="size-9" thinking={typing} />
+      <div className="flex items-start gap-3">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-mt-800 text-white">
+          <MessageSquareText className="size-4" aria-hidden />
+        </span>
         <div className="min-w-0 flex-1">
-          <p className="font-heading text-sm font-bold leading-tight text-ink-950">Asistente de Métrica</p>
-          <p className="flex items-center gap-1.5 text-xs text-neutral-500">
-            <span aria-hidden className="size-1.5 rounded-full bg-emerald-500" />
-            {typing ? "Escribiendo…" : "En línea"}
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-mt-700">Asistente de Métrica</p>
+          <button type="button" onClick={onOpen} className="mt-1 block text-left text-sm leading-snug text-ink-800">
+            {content.text}
+          </button>
         </div>
         <button
           type="button"
           onClick={onClose}
           aria-label="Cerrar la invitación"
-          className="flex size-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-ink-900"
+          className="-mr-1 -mt-1 flex size-8 shrink-0 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-ink-900"
         >
           <X className="size-4" aria-hidden />
         </button>
       </div>
 
-      {typing ? (
-        <TypingDots className="mt-3" />
-      ) : (
-        <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: EASE_OUT }}>
-          <button type="button" onClick={onOpen} className="mt-3 block text-left text-[15px] leading-snug text-ink-800">
-            {content.text}
+      <div className="mt-3 flex flex-wrap gap-2 pl-11">
+        {content.replies.map((reply) => (
+          <button
+            key={reply.label}
+            type="button"
+            onClick={() => onReply(reply.message)}
+            className="rounded-full border border-mt-200 bg-white px-3.5 py-1.5 text-sm font-medium text-mt-800 transition-colors hover:border-mt-400 hover:bg-mt-50"
+          >
+            {reply.label}
           </button>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {content.replies.map((reply, i) => (
-              <motion.button
-                key={reply.label}
-                type="button"
-                onClick={() => onReply(reply.message)}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 + i * 0.08, duration: 0.35, ease: EASE_OUT }}
-                className="rounded-full border border-mt-200 bg-mt-50 px-3.5 py-1.5 text-sm font-medium text-mt-800 transition-colors hover:border-mt-400 hover:bg-mt-100"
-              >
-                {reply.label}
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
-      )}
+        ))}
+      </div>
 
       {/* Punta que apunta al botón */}
       <span aria-hidden className="absolute -bottom-1.5 right-5 size-3 rotate-45 border-b border-r border-neutral-200 bg-white" />

@@ -1,16 +1,16 @@
-import { ClipboardCheck, Truck, Wheat, Wrench, type LucideIcon } from "lucide-react";
 import { categoryHref } from "@/content/categories";
 import { SERVICES } from "@/content/services";
 import { QUOTE_HREF } from "@/lib/routes";
 
-/** Lo que el cliente puede pedirle al asesor con un toque: `label` en el botón, `message` en el chat */
+/** Lo que el cliente puede pedirle al asistente con un toque: `label` en el botón, `message` en el chat */
 export type Prompt = { label: string; message: string };
 
-export const STARTERS: (Prompt & { icon: LucideIcon })[] = [
-  { icon: Wheat, label: "Planta de alimentos", message: "Tengo una planta de alimentos y necesito pesar mi producción" },
-  { icon: Truck, label: "Pesar camiones", message: "Necesito pesar camiones con carga" },
-  { icon: ClipboardCheck, label: "Calibrar mis balanzas", message: "Quiero calibrar mis balanzas" },
-  { icon: Wrench, label: "Mi balanza falla", message: "Mi balanza presenta una falla" },
+/** Mensajes sugeridos al abrir el chat */
+export const STARTERS: Prompt[] = [
+  { label: "Planta de alimentos", message: "Tengo una planta de alimentos y necesito pesar mi producción" },
+  { label: "Pesar camiones", message: "Necesito pesar camiones con carga" },
+  { label: "Calibrar mis balanzas", message: "Quiero calibrar mis balanzas" },
+  { label: "Mi balanza falla", message: "Mi balanza presenta una falla" },
 ];
 
 const [FOOD, TRUCKS, CALIBRATE, FAILURE] = STARTERS;
@@ -20,7 +20,7 @@ export type Invitation = { text: string; replies: Prompt[] };
 const PRODUCT_PAGE = /^\/productos\/[^/]+\/[^/]+$/;
 
 /**
- * Invitación del asesor según la página que mira el cliente. Ninguna donde ya está completando
+ * Invitación del asistente según la página que mira el cliente. Ninguna donde ya está completando
  * un formulario: ahí solo distraería.
  */
 export function invitationFor(pathname: string): Invitation | undefined {
@@ -54,7 +54,7 @@ export function invitationFor(pathname: string): Invitation | undefined {
     };
 
   return {
-    text: "Hola, soy el Asistente de Métrica. ¿Qué necesita pesar? Le recomiendo el equipo adecuado en un par de minutos.",
+    text: "¿Necesita ayuda para elegir su equipo de pesaje? Cuénteme su proceso y le recomiendo la solución adecuada.",
     replies: [FOOD, TRUCKS, CALIBRATE],
   };
 }

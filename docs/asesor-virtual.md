@@ -12,12 +12,12 @@ El botón **Asistente de Métrica** (abajo a la derecha, en todas las páginas, 
    cantidades en la lista. El cliente completa sus datos y envía; de ahí sigue el camino normal
    (correo y prospecto en Bitrix24, ver [formularios.md](formularios.md)).
 
-**Para que se note:** mientras el visitante no lo conoce, el botón emite ondas suaves. A los 7
-segundos aparece una invitación según la página: en una ficha de producto, "¿Este equipo es el
-indicado para su proceso?"; en calibración, si lo necesita para una auditoría; en soporte, si su
-balanza falla. Sus respuestas rápidas abren el chat y envían la pregunta. La invitación aparece
-una vez por visita y nunca en la cotización ni en contacto. Si el visitante la ignora, el botón
-queda con un "1" de mensaje pendiente; si la cierra, el asistente ya no insiste. Los textos están en
+**Para que se note:** el botón entra con la página, sin animaciones en bucle. A los 7 segundos
+aparece una invitación según la página (en una ficha de producto, "¿Este equipo es el indicado para
+su proceso?"; en calibración, si lo necesita para una auditoría; en soporte, si su balanza falla)
+con respuestas sugeridas que abren el chat y envían la pregunta. Al abrir el chat sin conversación
+se ofrecen mensajes sugeridos. La invitación aparece una vez por visita, se retira sola a los 25
+segundos y nunca se muestra en la cotización ni en contacto. Los textos están en
 `src/components/assistant/prompts.ts`.
 
 ## Cómo funciona
