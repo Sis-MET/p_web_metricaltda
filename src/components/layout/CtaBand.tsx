@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, MessageCircle, Phone } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { AskAssistantButton } from "@/components/assistant/AskAssistantButton";
 import { Reveal } from "@/components/animations/Reveal";
 import { GridPattern } from "@/components/ui/Backdrop";
 import { SALES_PHONE, whatsappUrl } from "@/content/company";
@@ -30,13 +31,14 @@ export function CtaBand({
           <h2 className="font-heading text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl">{title}</h2>
           <p className="mt-4 text-base leading-relaxed text-neutral-600 sm:text-lg">{description}</p>
         </div>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center lg:flex-col lg:items-end">
+        <div className="flex shrink-0 flex-col gap-4 sm:flex-row sm:items-center lg:flex-col lg:items-end">
           <div className="flex flex-wrap gap-3">
             <Button asChild size="lg">
               <Link href={primary.href}>
                 {primary.label} <ArrowRight />
               </Link>
             </Button>
+            <AskAssistantButton size="lg" variant="frost" />
             <Button asChild size="lg" variant="frost">
               <a href={whatsappUrl(whatsappMessage)} target="_blank" rel="noopener noreferrer">
                 <MessageCircle /> WhatsApp

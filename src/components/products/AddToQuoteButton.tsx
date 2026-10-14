@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 type AddToQuoteButtonProps = {
   slug: string;
   model: string;
-  /** `icon`: botón redondo para tarjetas; `full`: botón principal de la ficha */
-  variant?: "icon" | "full";
+  /** `icon`: botón redondo para tarjetas; `compact`: botón chico con texto (chat); `full`: botón principal de la ficha */
+  variant?: "icon" | "compact" | "full";
   /** Fondo sobre el que va el botón `full` */
   tone?: "light" | "dark";
   /** Enlace "Ver lista" junto al botón `full` */
@@ -56,6 +56,22 @@ export function AddToQuoteButton({
       >
         {inList ? <Check aria-hidden /> : <Plus aria-hidden />}
       </button>
+    );
+  }
+
+  if (variant === "compact") {
+    return (
+      <Button size="sm" variant={inList ? "outline" : "primary"} onClick={toggle} aria-pressed={inList} className={className}>
+        {inList ? (
+          <>
+            <Check /> En su lista
+          </>
+        ) : (
+          <>
+            <Plus /> Cotizar
+          </>
+        )}
+      </Button>
     );
   }
 

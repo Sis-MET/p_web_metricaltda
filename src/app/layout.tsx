@@ -3,6 +3,7 @@ import { Manrope, Work_Sans } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { AssistantLauncher } from "@/components/assistant/AssistantLauncher";
 import { MotionProvider } from "@/components/providers/MotionProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { COMPANY, EMAILS, OFFICES, SITE_URL } from "@/content/company";
@@ -76,6 +77,7 @@ export default function RootLayout({
           <Header />
           {children}
           <Footer />
+          <AssistantLauncher />
         </MotionProvider>
         <JsonLd data={ORGANIZATION} />
       </body>
