@@ -179,3 +179,17 @@
     animation: none;
   }
 }
+
+/* Reveal: se oculta al instante (sin transición) y aparece al entrar en pantalla */
+@layer components {
+  [data-reveal="hidden"] {
+    opacity: 0;
+    translate: 0 var(--reveal-y);
+  }
+
+  [data-reveal="shown"] {
+    transition:
+      opacity 0.5s var(--ease-out-expo) var(--reveal-delay),
+      translate 0.5s var(--ease-out-expo) var(--reveal-delay);
+  }
+}
