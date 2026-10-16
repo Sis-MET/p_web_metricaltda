@@ -39,7 +39,8 @@ export default function ProductsPage() {
             {CATEGORIES.map((category, i) => (
               <li key={category.slug} className={i === 2 ? "sm:col-span-2 lg:col-span-1" : undefined}>
                 <Reveal delay={i * 0.06} className="h-full">
-                  <CategoryCard category={category} />
+                  {/* La primera tarjeta es lo más grande en pantalla al llegar (sobre todo en el celular) */}
+                  <CategoryCard category={category} preload={i === 0} />
                 </Reveal>
               </li>
             ))}

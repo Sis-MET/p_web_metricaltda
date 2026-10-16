@@ -8,7 +8,9 @@ falta el botón *NPM install* ni SSH.
 ## 1. Descargar el paquete
 
 Cada push a `main` ejecuta el flujo **Paquete para Plesk** (`.github/workflows/paquete-plesk.yml`):
-revisa el código, compila y deja el archivo `metrica-web.zip` (unos 30 MB).
+revisa el código, compila y deja el archivo `metrica-web.zip` (unos 35 MB). El paquete trae las
+imágenes ya optimizadas (AVIF, en `.next/cache/images`): el servidor no las codifica al primer
+visitante.
 
 1. En GitHub: **Actions → Paquete para Plesk** → la ejecución más reciente en verde.
 2. En **Artifacts**, descargue `metrica-web.zip`. Se guarda 30 días; para generarlo de nuevo:

@@ -92,6 +92,11 @@ export function Hero() {
   const next = () => goTo(index + 1);
   const prev = () => goTo(index - 1);
 
+  // Fondos ya descargados: quedan montados para que volver a ellos no parpadee
+  const [visited, setVisited] = useState<ReadonlySet<number>>(() => new Set([0]));
+  if (!visited.has(index)) setVisited(new Set(visited).add(index));
+  const upcoming = (index + 1) % SLIDES.length;
+
   // Pausar cuando la pestaña no está visible
   useEffect(() => {
     const onVisibility = () => setIsHidden(document.hidden);
@@ -119,7 +124,8 @@ export function Hero() {
         touchStartX.current = null;
       }}
     >
-      {/* Fondos: todos montados, solo cambia la opacidad (sin parpadeos) */}
+      {/* Fondos: solo cambia la opacidad (sin parpadeos). El primero llega con la página; el siguiente
+          se adelanta con prioridad baja y los demás se descargan al llegar su turno, sin competir con la carga */}
       <div aria-hidden className="absolute inset-0 -z-10">
         {SLIDES.map((s, i) => (
           <div
@@ -129,15 +135,18 @@ export function Hero() {
               i === index ? "opacity-100" : "opacity-0"
             )}
           >
-            <Image
-              src={s.image}
-              alt=""
-              fill
-              sizes="100vw"
-              preload={i === 0}
-              loading="eager"
-              className={cn("object-cover", i === index && "animate-hero-zoom")}
-            />
+            {(visited.has(i) || i === upcoming) && (
+              <Image
+                src={s.image}
+                alt=""
+                fill
+                sizes="100vw"
+                preload={i === 0}
+                loading="eager"
+                fetchPriority={i === index ? "high" : "low"}
+                className={cn("object-cover", i === index && "animate-hero-zoom")}
+              />
+            )}
           </div>
         ))}
         {/* Degradado azul METTLER para leer el texto sobre la foto */}

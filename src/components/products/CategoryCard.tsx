@@ -5,8 +5,8 @@ import { Spotlight } from "@/components/animations/Spotlight";
 import { categoryHref, type Category, type CategorySlug } from "@/content/categories";
 import { productsIn } from "@/content/products";
 
-/** Tarjeta de un tipo de producto (inicio y catálogo). */
-export function CategoryCard({ category }: { category: Category & { slug: CategorySlug } }) {
+/** Tarjeta de un tipo de producto (inicio y catálogo). `preload`: su imagen es la principal de la página. */
+export function CategoryCard({ category, preload }: { category: Category & { slug: CategorySlug }; preload?: boolean }) {
   const count = productsIn(category.slug).length;
 
   return (
@@ -22,6 +22,7 @@ export function CategoryCard({ category }: { category: Category & { slug: Catego
             alt=""
             fill
             sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+            preload={preload}
             className="object-contain p-7 transition-transform duration-700 ease-out-expo group-hover:scale-[1.03]"
           />
           {count > 0 && (

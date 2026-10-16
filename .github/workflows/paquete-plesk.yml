@@ -44,7 +44,14 @@ jobs:
             rm -rf "$out/node_modules/$module"
             cp -r "node_modules/$module" "$out/node_modules/$module"
           done
-          (cd "$out" && zip -qr "$GITHUB_WORKSPACE/metrica-web.zip" .)
+
+      # Arranca el paquete y deja en su caché las imágenes ya optimizadas: así ningún visitante espera
+      # su primera codificación. Si el servidor del paquete no arranca, falla aquí y no en el hosting.
+      - name: Precalentar las imágenes
+        run: pnpm images:warm .next/standalone
+
+      - name: Comprimir
+        run: cd .next/standalone && zip -qr "$GITHUB_WORKSPACE/metrica-web.zip" .
 
       - uses: actions/upload-artifact@v7
         with:
