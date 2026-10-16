@@ -245,7 +245,7 @@ export default async function ProductPage({ params }: Props) {
       />
 
       {/* Móvil: acciones de compra siempre a mano mientras se lee la ficha */}
-      <div className="sticky bottom-0 z-40 border-t border-neutral-200 bg-white/95 px-4 py-3 backdrop-blur-md lg:hidden">
+      <div className="sticky bottom-0 z-40 border-t border-neutral-200 bg-white px-4 py-3 lg:hidden">
         <div className="flex items-center gap-3">
           <AddToQuoteButton slug={product.slug} model={product.model} listLink={false} className="flex-1 [&>button]:w-full" />
           <a

@@ -320,7 +320,9 @@ export function Header() {
       <div onPointerLeave={(event) => isMouse(event) && dropdown.hide()}>
         <div
           className={cn(
-            "mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 rounded-2xl border pl-4 pr-2 backdrop-blur-xl backdrop-saturate-150 sm:pl-5",
+            // Desenfoque moderado: la barra es fija y el navegador lo recalcula en cada cuadro del scroll
+            // (lo costoso es el radio; la saturación es barata y mantiene el tono azul sobre fotos)
+            "mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 rounded-2xl border pl-4 pr-2 backdrop-blur-md backdrop-saturate-150 sm:pl-5",
             "transition-[background-color,border-color,box-shadow] duration-300 ease-out",
             isDark
               ? scrolled
@@ -436,7 +438,7 @@ export function Header() {
               transition={{ duration: 0.2, ease: EASE_OUT }}
               onPointerEnter={(event) => isMouse(event) && dropdown.show(openItem.href)}
               onClick={(event) => (event.target as HTMLElement).closest("a") && dropdown.close()}
-              className="mx-auto mt-2 hidden max-w-7xl rounded-2xl border border-ink-950/[0.06] bg-white/95 p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] backdrop-blur-xl lg:block"
+              className="mx-auto mt-2 hidden max-w-7xl rounded-2xl border border-ink-950/[0.06] bg-white p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] lg:block"
             >
               <AutoHeight>
                 {/* popLayout saca de flujo el contenido que sale: el que entra define la altura */}
@@ -485,7 +487,7 @@ export function Header() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.2, ease: EASE_OUT }}
-            className="mx-auto mt-2 max-h-[calc(100svh-6.5rem)] max-w-7xl origin-top overflow-y-auto rounded-2xl border border-ink-950/[0.06] bg-white/95 p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] backdrop-blur-xl lg:hidden"
+            className="mx-auto mt-2 max-h-[calc(100svh-6.5rem)] max-w-7xl origin-top overflow-y-auto rounded-2xl border border-ink-950/[0.06] bg-white p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] lg:hidden"
           >
             <ul className="flex flex-col">
               {NAV.map((item) => {
