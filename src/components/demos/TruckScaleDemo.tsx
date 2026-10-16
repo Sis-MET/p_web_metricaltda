@@ -31,11 +31,9 @@ import {
 } from "./DemoShell";
 import { cn } from "@/lib/utils";
 
-// three.js se descarga aparte, con la página inactiva o al acercarse a la sección
-const TruckScaleScene = dynamic(() => import("@/components/three/scenes").then((m) => m.TruckScaleScene), {
-  ssr: false,
-  loading: () => <ViewerPlaceholder />,
-});
+// three.js se descarga aparte, al acercarse a la sección. El aviso de carga lo pone el demo:
+// cubre la descarga y la compilación de shaders
+const TruckScaleScene = dynamic(() => import("@/components/three/scenes").then((m) => m.TruckScaleScene), { ssr: false });
 
 const TRUCK_SCALE = { category: "basculas-de-camiones", slug: "powercell-pdx" } as const;
 
@@ -225,7 +223,7 @@ export function TruckScaleDemo() {
   const reducedMotion = useReducedMotion();
   const isDesktop = useIsDesktop();
   const viewerRef = useRef<HTMLDivElement>(null);
-  const { shouldMount, isActive } = useDemoActivation(viewerRef);
+  const { shouldMount, isActive, isReady, onReady } = useDemoActivation(viewerRef);
   const [readings] = useState(() => createStore<TruckReading>(EMPTY_READING));
   const hotspotElements = useRef<(HTMLElement | null)[]>([]);
   const cellLabelElements = useRef<(HTMLElement | null)[]>([]);
@@ -294,12 +292,14 @@ export function TruckScaleDemo() {
             xray={xray}
             step={step}
             active={isActive}
+            onReady={onReady}
             shift={isDesktop ? SHIFT_DESKTOP : SHIFT_MOBILE}
             readings={readings}
             hotspotElements={hotspotElements}
             cellLabelElements={cellLabelElements}
           />
         )}
+        {!isReady && <ViewerPlaceholder />}
       </div>
 
       {/* Degradados para leer el texto sobre el modelo */}

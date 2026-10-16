@@ -19,10 +19,8 @@ import {
 } from "./DemoShell";
 import { cn } from "@/lib/utils";
 
-const BenchScaleScene = dynamic(() => import("@/components/three/scenes").then((m) => m.BenchScaleScene), {
-  ssr: false,
-  loading: () => <ViewerPlaceholder />,
-});
+// El aviso de carga lo pone el demo: cubre la descarga y la compilación de shaders
+const BenchScaleScene = dynamic(() => import("@/components/three/scenes").then((m) => m.BenchScaleScene), { ssr: false });
 
 const INTRO = "Se desmonta por partes para su limpieza y, al volver a armarla, sigue pesando con la misma exactitud.";
 
@@ -154,7 +152,7 @@ export function BenchScaleDemo({ actions }: { actions?: ReactNode }) {
   const reducedMotion = useReducedMotion();
   const isDesktop = useIsDesktop();
   const viewerRef = useRef<HTMLDivElement>(null);
-  const { shouldMount, isActive } = useDemoActivation(viewerRef);
+  const { shouldMount, isActive, isReady, onReady } = useDemoActivation(viewerRef);
   const [states] = useState(() => createStore<BenchSceneState>(INITIAL));
   const labelElements = useRef<(HTMLElement | null)[]>([]);
 
@@ -194,11 +192,13 @@ export function BenchScaleDemo({ actions }: { actions?: ReactNode }) {
             seek={seek}
             resetView={resetView}
             active={isActive}
+            onReady={onReady}
             shift={isDesktop ? SHIFT_DESKTOP : SHIFT_MOBILE}
             states={states}
             labelElements={labelElements}
           />
         )}
+        {!isReady && <ViewerPlaceholder />}
       </div>
 
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-mt-900 via-mt-900/70 to-transparent lg:hidden" />

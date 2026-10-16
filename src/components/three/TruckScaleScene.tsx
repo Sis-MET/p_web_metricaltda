@@ -33,6 +33,7 @@ import {
 } from "./truckScaleModel";
 import { ADAPTIVE_DPR, scaleView, useResponsiveFraming, type Shift, type View } from "./useResponsiveFraming";
 import { ScreenAnchors } from "./ScreenAnchors";
+import { useSceneLoop, type SceneLoopProps } from "./useSceneLoop";
 import type { Store } from "@/lib/store";
 
 /* ─── Constantes de escena ──────────────────────────────────────────────── */
@@ -72,12 +73,11 @@ const CAMERA_PRESETS: View[] = [
   { position: [18, 2.8, 1], target: [12.6, 1.1, -4.8] },
 ];
 
-export type SceneProps = {
+export type SceneProps = SceneLoopProps & {
   truck: TruckConfig;
   playing: boolean;
   xray: boolean;
   step: number;
-  active: boolean;
   /** Desplazamiento de la imagen para dejar espacio al texto superpuesto */
   shift: Shift;
   /** Lecturas para el panel del terminal (se publican ~10 veces por segundo) */
@@ -480,7 +480,7 @@ function World({
   readings,
   hotspotElements,
   cellLabelElements,
-}: Omit<SceneProps, "active">) {
+}: Omit<SceneProps, keyof SceneLoopProps>) {
   const materials = useMaterials();
   const controls = useRef<CameraControls>(null);
 
@@ -648,7 +648,8 @@ function World({
   );
 }
 
-export default function TruckScaleScene({ active, ...props }: SceneProps) {
+export default function TruckScaleScene({ active, onReady, ...props }: SceneProps) {
+  const { frameloop, onCreated } = useSceneLoop({ active, onReady });
   // Resolución según los fps; si el equipo no da abasto, además se apagan las sombras dinámicas
   const [dpr, setDpr] = useState(ADAPTIVE_DPR.initial);
   const [shadows, setShadows] = useState(true);
@@ -656,10 +657,12 @@ export default function TruckScaleScene({ active, ...props }: SceneProps) {
 
   return (
     <Canvas
-      shadows={shadows}
+      // PCF explícito: con `true` r3f pide PCFSoft, que three convierte a PCF al dibujar la primera
+      // sombra, y los shaders ya compilados (con el otro tipo) se volvían a compilar
+      shadows={shadows && "percentage"}
       dpr={[1, dpr]}
-      // Fuera de pantalla: "demand" renderiza solo al montar (compila shaders por adelantado) y luego se detiene
-      frameloop={active ? "always" : "demand"}
+      frameloop={frameloop}
+      onCreated={onCreated}
       camera={{ position: initial.position, fov: 38, near: 0.1, far: 220 }}
       gl={{ antialias: true, powerPreference: "high-performance", stencil: false }}
       aria-label="Modelo 3D interactivo de una báscula de camiones"

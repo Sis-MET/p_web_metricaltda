@@ -7,15 +7,17 @@ import { cn } from "@/lib/utils";
 
 /**
  * Cuándo montar y animar una escena 3D:
- * - `shouldMount`: con la página inactiva (o si el usuario se acerca antes) se descarga y monta.
- *   Así la compilación de shaders ocurre en segundo plano y no al llegar a la sección.
+ * - `shouldMount`: cuando el usuario se acerca a la sección y el navegador está libre. Quien no
+ *   baja hasta el demo no descarga three.js ni compila shaders (congelaba la página al cargar).
  * - `isActive`: está visible y la pestaña también → se anima; si no, queda en pausa.
+ * - `isReady`: la escena terminó de compilar sus shaders (`onReady`); hasta entonces, el aviso de carga.
  */
 export function useDemoActivation(ref: RefObject<HTMLElement | null>) {
   const isNear = useInView(ref, { once: true, margin: "800px 0px" });
   const isVisible = useInView(ref);
   const [pageVisible, setPageVisible] = useState(true);
   const [idle, setIdle] = useState(false);
+  const [isReady, setReady] = useState(false);
 
   useEffect(() => {
     const onVisibility = () => setPageVisible(!document.hidden);
@@ -23,7 +25,7 @@ export function useDemoActivation(ref: RefObject<HTMLElement | null>) {
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
-  // Precarga cuando el navegador está libre, un momento después de cargar la página
+  // Si el demo ya está cerca al cargar la página, espera a que termine de cargar lo principal
   useEffect(() => {
     const ready = () => setIdle(true);
     if ("requestIdleCallback" in window) {
@@ -34,7 +36,12 @@ export function useDemoActivation(ref: RefObject<HTMLElement | null>) {
     return () => clearTimeout(id);
   }, []);
 
-  return { shouldMount: isNear || idle, isActive: isVisible && pageVisible };
+  return {
+    shouldMount: isNear && idle,
+    isActive: isVisible && pageVisible,
+    isReady,
+    onReady: () => setReady(true),
+  };
 }
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
@@ -56,9 +63,9 @@ export function useIsDesktop() {
 export type Surface = "dark" | "light";
 
 export function ViewerPlaceholder() {
-  // Toma el color de texto de la sección (claro u oscuro)
+  // Sobre el visor mientras la escena se descarga y compila; toma el color de texto de la sección
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 text-sm opacity-60">
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-sm opacity-60">
       <Loader2 className="size-5 animate-spin" aria-hidden />
       Cargando modelo 3D…
     </div>

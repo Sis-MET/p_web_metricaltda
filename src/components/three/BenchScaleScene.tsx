@@ -31,6 +31,7 @@ import {
 import { PANEL_H, PANEL_W, drawPanel } from "./benchPanel";
 import { ADAPTIVE_DPR, scaleView, useResponsiveFraming, type Shift, type View } from "./useResponsiveFraming";
 import { ScreenAnchors } from "./ScreenAnchors";
+import { useSceneLoop, type SceneLoopProps } from "./useSceneLoop";
 import type { Store } from "@/lib/store";
 
 const EXPLODED = {
@@ -68,12 +69,11 @@ export type BenchSceneState = {
   after: number | null;
 };
 
-export type BenchSceneProps = {
+export type BenchSceneProps = SceneLoopProps & {
   playing: boolean;
   /** Saltar a un paso: cambia `id` para repetir el mismo paso */
   seek: { phase: number; id: number };
   resetView: number;
-  active: boolean;
   /** Desplazamiento de la imagen para dejar espacio al texto superpuesto */
   shift: Shift;
   /** Estado para el panel (solo se publica cuando cambia) */
@@ -286,7 +286,7 @@ function Water({ intensityRef, explodeRef }: { intensityRef: React.RefObject<num
 
 /* ─── Mundo ─────────────────────────────────────────────────────────────── */
 
-function World({ playing, seek, resetView, shift, states, labelElements }: Omit<BenchSceneProps, "active">) {
+function World({ playing, seek, resetView, shift, states, labelElements }: Omit<BenchSceneProps, keyof SceneLoopProps>) {
   const controls = useRef<CameraControls>(null);
   const pan = useRef<THREE.Group>(null);
   const support = useRef<THREE.Group>(null);
@@ -501,14 +501,15 @@ function World({ playing, seek, resetView, shift, states, labelElements }: Omit<
   );
 }
 
-export default function BenchScaleScene({ active, ...props }: BenchSceneProps) {
+export default function BenchScaleScene({ active, onReady, ...props }: BenchSceneProps) {
+  const { frameloop, onCreated } = useSceneLoop({ active, onReady });
   const [dpr, setDpr] = useState(ADAPTIVE_DPR.initial);
 
   return (
     <Canvas
       dpr={[1, dpr]}
-      // Fuera de pantalla: "demand" renderiza solo al montar (compila shaders por adelantado) y luego se detiene
-      frameloop={active ? "always" : "demand"}
+      frameloop={frameloop}
+      onCreated={onCreated}
       camera={{ position: [...CAMERA.close.position], fov: 35, near: 0.1, far: 80 }}
       gl={{ antialias: true, powerPreference: "high-performance", stencil: false }}
       aria-label="Modelo 3D interactivo de la balanza de mesa BPA121"
