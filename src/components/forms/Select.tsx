@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { Check, ChevronDown } from "lucide-react";
 import { EASE_OUT } from "@/lib/motion";
 import type { Option } from "@/lib/forms/schema";
@@ -152,7 +152,7 @@ export function Select({ id, name, options, placeholder, className, describedBy,
 
       <AnimatePresence>
         {open && (
-          <motion.ul
+          <m.ul
             id={listId}
             role="listbox"
             aria-labelledby={id}
@@ -189,7 +189,7 @@ export function Select({ id, name, options, placeholder, className, describedBy,
                 </li>
               );
             })}
-          </motion.ul>
+          </m.ul>
         )}
       </AnimatePresence>
 

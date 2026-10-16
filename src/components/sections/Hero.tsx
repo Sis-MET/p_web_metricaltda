@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { QUOTE_HREF } from "@/lib/routes";
@@ -157,7 +157,7 @@ export function Hero() {
       <div className="mx-auto flex min-h-svh max-w-7xl flex-col justify-center px-4 pb-32 pt-28 sm:px-6 lg:px-8 lg:pb-40">
         <div className="min-h-[29rem] max-w-2xl sm:min-h-[26rem]" {...hoverHandlers}>
           <AnimatePresence mode="wait" initial={false}>
-            <motion.div
+            <m.div
               key={slide.id}
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE_OUT } }}
@@ -186,7 +186,7 @@ export function Hero() {
                   <Link href={slide.secondary.href}>{slide.secondary.label}</Link>
                 </Button>
               </div>
-            </motion.div>
+            </m.div>
           </AnimatePresence>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronDown, ClipboardList, Menu, MessageCircle, Phone, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ShimmerText } from "@/components/ui/ShimmerText";
@@ -194,11 +194,11 @@ function AutoHeight({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <motion.div animate={{ height }} transition={{ duration: 0.28, ease: EASE_OUT }} className="overflow-hidden">
+    <m.div animate={{ height }} transition={{ duration: 0.28, ease: EASE_OUT }} className="overflow-hidden">
       <div ref={contentRef} className="relative">
         {children}
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -304,7 +304,7 @@ export function Header() {
       {/* Fondo para cerrar el menú móvil al tocar fuera */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
+          <m.div
             key="backdrop"
             aria-hidden
             onClick={() => setMobileOpen(false)}
@@ -368,7 +368,7 @@ export function Header() {
                     }}
                   >
                     {isActive && (
-                      <motion.span
+                      <m.span
                         layoutId="nav-pill"
                         aria-hidden
                         className={cn("absolute inset-0 -z-10 rounded-full", isDark ? "bg-white/15" : "bg-ink-800/[0.08]")}
@@ -429,7 +429,7 @@ export function Header() {
         {/* Menú desplegable de escritorio: un solo panel; al cambiar de sección se cruza el contenido y se anima la altura */}
         <AnimatePresence>
           {openItem && (
-            <motion.div
+            <m.div
               key="menu-desktop"
               id={menuId(openItem)}
               initial={{ opacity: 0, y: -6 }}
@@ -443,7 +443,7 @@ export function Header() {
               <AutoHeight>
                 {/* popLayout saca de flujo el contenido que sale: el que entra define la altura */}
                 <AnimatePresence initial={false} mode="popLayout">
-                  <motion.div
+                  <m.div
                     key={openItem.href}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -451,10 +451,10 @@ export function Header() {
                     transition={{ duration: 0.18, ease: EASE_OUT }}
                   >
                     <DropdownPanel item={openItem} />
-                  </motion.div>
+                  </m.div>
                 </AnimatePresence>
               </AutoHeight>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </div>
@@ -462,7 +462,7 @@ export function Header() {
       {/* Aviso de carga bajo la barra, en el tono del fondo que tiene detrás, si la página pedida tarda */}
       <AnimatePresence>
         {slowPath && !mobileOpen && !openItem && (
-          <motion.p
+          <m.p
             key="cargando"
             role="status"
             initial={{ opacity: 0, y: -4 }}
@@ -472,14 +472,14 @@ export function Header() {
             className="pointer-events-none absolute inset-x-0 top-full mt-2.5 text-center text-xs font-semibold tracking-wide"
           >
             <ShimmerText tone={noticeTone}>{loadingMessage(slowPath)}</ShimmerText>
-          </motion.p>
+          </m.p>
         )}
       </AnimatePresence>
 
       {/* Menú móvil */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.nav
+          <m.nav
             key="menu"
             id="menu-movil"
             aria-label="Principal"
@@ -543,7 +543,7 @@ export function Header() {
               })}
             </ul>
             <QuoteButton className="mt-2 h-11 w-full text-sm" onNavigate={() => setMobileOpen(false)} />
-          </motion.nav>
+          </m.nav>
         )}
       </AnimatePresence>
     </header>

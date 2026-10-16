@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { m, useInView } from "framer-motion";
 import { HmiPanel, StatusLed } from "@/components/demos/DemoShell";
 import { EASE_OUT } from "@/lib/motion";
 
@@ -77,7 +77,7 @@ export function CalibrationChart() {
           <line x1={X0} x2={X0} y1={y(1.6)} y2={y(-1.6)} stroke={COLORS.axis} />
 
           {/* EMP escalonado */}
-          <motion.polygon
+          <m.polygon
             points={EMP_BAND}
             fill={COLORS.empFill}
             stroke={COLORS.empStroke}
@@ -88,7 +88,7 @@ export function CalibrationChart() {
           />
 
           {/* Curva de error */}
-          <motion.polyline
+          <m.polyline
             points={CURVE}
             fill="none"
             stroke={COLORS.curve}
@@ -100,7 +100,7 @@ export function CalibrationChart() {
 
           {/* Puntos con incertidumbre U (k = 2) */}
           {POINTS.map((p, i) => (
-            <motion.g
+            <m.g
               key={p.load}
               initial={{ opacity: 0 }}
               animate={inView ? { opacity: 1 } : undefined}
@@ -110,7 +110,7 @@ export function CalibrationChart() {
               <line x1={x(p.load) - 4} x2={x(p.load) + 4} y1={y(p.error + p.u)} y2={y(p.error + p.u)} stroke={COLORS.uncertainty} />
               <line x1={x(p.load) - 4} x2={x(p.load) + 4} y1={y(p.error - p.u)} y2={y(p.error - p.u)} stroke={COLORS.uncertainty} />
               <circle cx={x(p.load)} cy={y(p.error)} r={3.5} fill="#ffffff" stroke={COLORS.curve} strokeWidth={1.5} />
-            </motion.g>
+            </m.g>
           ))}
 
           {/* Ejes */}

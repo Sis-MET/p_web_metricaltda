@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { MessageSquareText, X } from "lucide-react";
 import { EASE_OUT } from "@/lib/motion";
 import { LAUNCHER_ID, PANEL_ID, assistantPanel, useAssistantOpen, useInvitationPending } from "@/lib/assistant/panel";
@@ -77,7 +77,7 @@ export function AssistantLauncher() {
           )}
         </AnimatePresence>
 
-        <motion.button
+        <m.button
           id={LAUNCHER_ID}
           type="button"
           onClick={assistantPanel.toggle}
@@ -105,7 +105,7 @@ export function AssistantLauncher() {
 
           <span className="relative size-12 sm:size-[3.25rem]">
             <AnimatePresence initial={false} mode="popLayout">
-              <motion.span
+              <m.span
                 key={open ? "cerrar" : "abrir"}
                 initial={{ rotate: open ? -90 : 90, opacity: 0 }}
                 animate={{ rotate: 0, opacity: 1 }}
@@ -114,10 +114,10 @@ export function AssistantLauncher() {
                 className="absolute inset-0 flex items-center justify-center"
               >
                 {open ? <X className="size-5" aria-hidden /> : <MessageSquareText className="size-[1.375rem]" aria-hidden />}
-              </motion.span>
+              </m.span>
             </AnimatePresence>
           </span>
-        </motion.button>
+        </m.button>
       </div>
     </>
   );
@@ -133,7 +133,7 @@ type InvitationProps = {
 /** Invitación del asistente con respuestas sugeridas de un toque */
 function Invitation({ content, onReply, onOpen, onClose }: InvitationProps) {
   return (
-    <motion.div
+    <m.div
       role="status"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -176,6 +176,6 @@ function Invitation({ content, onReply, onOpen, onClose }: InvitationProps) {
 
       {/* Punta que apunta al botón */}
       <span aria-hidden className="absolute -bottom-1.5 right-5 size-3 rotate-45 border-b border-r border-neutral-200 bg-white" />
-    </motion.div>
+    </m.div>
   );
 }

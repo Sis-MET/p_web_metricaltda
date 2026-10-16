@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { CalendarDays, ChevronLeft, ChevronRight, ClipboardCheck, Wrench } from "lucide-react";
 import { SCHEDULE } from "@/content/schedule";
 import { cn } from "@/lib/utils";
@@ -142,7 +142,7 @@ function Calendar() {
       {/* Day summary */}
       <div className="mt-3 min-h-14">
         <AnimatePresence mode="wait" initial={false}>
-          <motion.div
+          <m.div
             key={selectedKey ?? (monthHasEvents ? "hint" : "empty")}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { duration: 0.2 } }}
@@ -183,7 +183,7 @@ function Calendar() {
                   : "No hay servicios programados este mes."}
               </p>
             )}
-          </motion.div>
+          </m.div>
         </AnimatePresence>
       </div>
     </div>
