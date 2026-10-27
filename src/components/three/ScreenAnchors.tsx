@@ -17,19 +17,19 @@ export function ScreenAnchors({
 }: {
   points: Vec3[];
   elements: RefObject<(HTMLElement | null)[]>;
-  isVisible?: () => boolean;
+  /** Por elemento: `i` es su posición en `points` */
+  isVisible?: (i: number) => boolean;
 }) {
   const vector = useRef(new THREE.Vector3());
 
   useFrame(({ camera, size }) => {
     const els = elements.current;
     if (!els) return;
-    const visible = isVisible();
     points.forEach((p, i) => {
       const el = els[i];
       if (!el) return;
       const v = vector.current.set(p[0], p[1], p[2]).project(camera);
-      const shown = visible && v.z < 1;
+      const shown = isVisible(i) && v.z < 1;
       el.style.opacity = shown ? "1" : "0";
       el.style.visibility = shown ? "visible" : "hidden";
       el.style.transform = `translate3d(${((v.x + 1) / 2) * size.width}px, ${((1 - v.y) / 2) * size.height}px, 0) translate(-50%, -50%)`;
