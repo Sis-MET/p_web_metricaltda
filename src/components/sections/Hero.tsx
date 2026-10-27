@@ -6,6 +6,7 @@ import Link from "next/link";
 import { m, AnimatePresence } from "framer-motion";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { PROJECT_SECTION_ID } from "@/content/truckScaleProject";
 import { QUOTE_HREF } from "@/lib/routes";
 import { EASE_IN, EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
@@ -40,7 +41,7 @@ const SLIDES: Slide[] = [
     description:
       "La tecnología avanzada, durabilidad y exactitud de las básculas de camiones Powercell PDX de Mettler Toledo permiten controlar grandes volúmenes transportados por los camiones con la más alta precisión.",
     image: "/images/hero/basculas-camion.jpg",
-    primary: { label: "Ver cómo funciona", href: "#demo-camion" },
+    primary: { label: "Ver el proyecto", href: `#${PROJECT_SECTION_ID}` },
     secondary: { label: "Asesoría", href: "/contacto" },
   },
   {
