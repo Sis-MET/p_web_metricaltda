@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useSyncExternalStore, type ReactNode, type RefObject } from "react";
 import { useInView } from "framer-motion";
-import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -61,16 +60,6 @@ export function useIsDesktop() {
 
 /** Fondo del demo: `dark` (azul METTLER) o `light` (fondos claros del sitio). */
 export type Surface = "dark" | "light";
-
-export function ViewerPlaceholder() {
-  // Sobre el visor mientras la escena se descarga y compila; toma el color de texto de la sección
-  return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-sm opacity-60">
-      <Loader2 className="size-5 animate-spin" aria-hidden />
-      Cargando modelo 3D…
-    </div>
-  );
-}
 
 export function ViewerButton({
   label,

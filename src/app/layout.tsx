@@ -66,8 +66,11 @@ const ORGANIZATION = {
 
 export default function RootLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode;
+  /** Demo 3D abierto sobre la página (ver app/@modal) */
+  modal: React.ReactNode;
 }>) {
   return (
     // Las variables de fuente van en <html>: Tailwind resuelve --font-heading/--font-body en :root
@@ -76,6 +79,7 @@ export default function RootLayout({
         <MotionProvider>
           <Header />
           {children}
+          {modal}
           <Footer />
           <AssistantLauncher />
         </MotionProvider>

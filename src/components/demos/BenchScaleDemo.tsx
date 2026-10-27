@@ -13,10 +13,10 @@ import {
   StepChips,
   StepList,
   ViewerButton,
-  ViewerPlaceholder,
   useDemoActivation,
   useIsDesktop,
 } from "./DemoShell";
+import { ViewerPlaceholder } from "./ViewerPlaceholder";
 import { cn } from "@/lib/utils";
 
 // El aviso de carga lo pone el demo: cubre la descarga y la compilación de shaders
