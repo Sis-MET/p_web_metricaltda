@@ -71,6 +71,8 @@ export default async function CategoryPage({ params }: Props) {
             <Reveal>
               <Link
                 href={category.demo.href}
+                // El demo se abre encima de la página: sin saltar al inicio
+                scroll={false}
                 className="group mb-10 flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-4 transition-colors hover:border-neutral-300 sm:p-5"
               >
                 <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-ink-900 text-white">

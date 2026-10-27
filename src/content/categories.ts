@@ -2,6 +2,7 @@ import type { StaticImageData } from "next/image";
 import industrialScales from "@/assets/categories/balanzas-industriales.png";
 import softwareScreen from "@/assets/categories/software.svg";
 import truckScale from "@/assets/products/powercell-pdx.png";
+import { DEMO_HREF } from "./truckScaleProject";
 
 /**
  * Tipos de producto. Archivo liviano a propósito: lo usa el menú del header (cliente),
@@ -51,7 +52,7 @@ const CATEGORY_LIST = [
     description:
       "La tecnología, durabilidad y exactitud de las básculas de camiones POWERCELL PDX de METTLER TOLEDO permiten controlar grandes volúmenes transportados con la más alta precisión.",
     image: truckScale,
-    demo: { href: "/#demo-camion", label: "Vea en 3D cómo una báscula POWERCELL PDX reparte el peso entre sus celdas" },
+    demo: { href: DEMO_HREF, label: "Vea en 3D cómo instalamos una báscula camionera VTS200, de la excavación al montaje" },
     highlights: [
       {
         title: "Celdas digitales",
