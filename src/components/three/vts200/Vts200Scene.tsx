@@ -13,6 +13,7 @@ import { Foundation } from "./Foundation";
 import { Landscape, SUN } from "./Landscape";
 import { COLORS, useMaterials } from "./materials";
 import { MOUNT_STEP, cellTagPoints, viewsFor, type Label, type Layout, type TruckReading } from "./model";
+import { ProviderSign } from "./ProviderSign";
 import { Scale } from "./Scale";
 import { Site } from "./Site";
 import { Truck } from "./Truck";
@@ -151,6 +152,7 @@ function World({
       <Walls layout={layout} materials={materials} />
       <Scale layout={layout} materials={materials} reading={reading} activity={activity} cellView={cellView} />
       <Truck truckRef={truckRef} spinRef={spin} materials={materials} />
+      <ProviderSign distance={21} />
 
       <ScreenAnchors points={points} elements={labelElements} isVisible={labelVisible} />
       <ScreenAnchors points={cellPoints} elements={cellTagElements} isVisible={inCellView} />

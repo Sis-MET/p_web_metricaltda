@@ -13,6 +13,7 @@ import { GradientEnvironment, type GradientStops } from "./environment";
 import { Foundation } from "./Foundation";
 import { useMaterials } from "./materials";
 import { MOUNT_STEP, cellTagPoints, weighingViewsFor, type Layout, type TruckReading } from "./model";
+import { ProviderSign } from "./ProviderSign";
 import { Scale } from "./Scale";
 import { Truck } from "./Truck";
 import { useTruckRun } from "./useTruckRun";
@@ -177,6 +178,7 @@ function World({
       <Walls layout={layout} materials={materials} />
       <Scale layout={layout} materials={materials} reading={reading} activity={activity} cellView={xray} />
       <Truck truckRef={truckRef} spinRef={spin} materials={materials} />
+      <ProviderSign distance={19} />
 
       <ScreenAnchors points={cellPoints} elements={cellTagElements} isVisible={() => live.current.xray} />
 
