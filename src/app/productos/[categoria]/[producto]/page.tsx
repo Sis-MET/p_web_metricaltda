@@ -19,7 +19,7 @@ import { PRODUCTS, getProduct, relatedProducts } from "@/content/products";
 import { SERVICES } from "@/content/services";
 import { SITE_URL, whatsappUrl } from "@/content/company";
 import { trailFor } from "@/lib/routes";
-import { compact } from "@/lib/utils";
+import { cn, compact } from "@/lib/utils";
 
 type Props = { params: Promise<{ categoria: string; producto: string }> };
 
@@ -95,7 +95,13 @@ export default async function ProductPage({ params }: Props) {
               <p className="mt-5 text-lg leading-relaxed text-neutral-600">{product.summary}</p>
 
               {facts.length > 0 && (
-                <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-200 sm:grid-cols-3">
+                <dl
+                  className={cn(
+                    "mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-200",
+                    // Una columna por dato: sin celdas vacías cuando hay menos de tres
+                    facts.length >= 3 && "sm:grid-cols-3"
+                  )}
+                >
                   {facts.map((fact) => (
                     <div key={fact.label} className="bg-white px-4 py-3">
                       <dt className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">{fact.label}</dt>

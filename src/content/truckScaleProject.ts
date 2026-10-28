@@ -10,7 +10,7 @@ export const DEMO_TITLE = "Demo 3D: instalación de una báscula camionera VTS20
 export const WEIGHING_SECTION_ID = "demo-pesaje";
 
 /** Báscula de camiones del catálogo: su ficha y la cotización del proyecto */
-export const TRUCK_SCALE_PRODUCT = { category: "basculas-de-camiones", slug: "powercell-pdx" } as const;
+export const TRUCK_SCALE_PRODUCT = { category: "basculas-de-camiones", slug: "vts200" } as const;
 
 /** Paso (0 a 5) de `?paso=` en la dirección del demo; el primero si falta o no es válido */
 export function stepFromQuery(value: string | null) {

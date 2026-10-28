@@ -48,23 +48,23 @@ const CATEGORY_LIST = [
   {
     slug: "basculas-de-camiones",
     name: "Básculas de camiones",
-    short: "Pesaje de alto tonelaje con celdas digitales POWERCELL PDX",
+    short: "Báscula VTS200 de acero con celdas digitales POWERCELL PDX",
     description:
-      "La tecnología, durabilidad y exactitud de las básculas de camiones POWERCELL PDX de METTLER TOLEDO permiten controlar grandes volúmenes transportados con la más alta precisión.",
+      "La báscula de camiones VTS200 de METTLER TOLEDO une un puente de acero ortotrópico, diseñado para durar, con celdas digitales POWERCELL PDX: pesa camiones en tráfico medio a pesado con exactitud y bajo costo de mantenimiento.",
     image: truckScale,
     demo: { href: DEMO_HREF, label: "Vea en 3D cómo instalamos una báscula camionera VTS200, de la excavación al montaje" },
     highlights: [
       {
+        title: "Diseñada para durar",
+        text: "Probada en fábrica con 3,1 millones de ciclos: el equivalente a 20 años con 250 camiones cargados por día.",
+      },
+      {
         title: "Celdas digitales",
-        text: "Cada celda convierte su señal a digital: sin cajas de conexión analógicas que fallen o se descalibren.",
+        text: "Cada celda convierte su señal a digital y avisa ante una anomalía antes de que afecte la medición.",
       },
       {
-        title: "Diagnóstico continuo",
-        text: "El terminal supervisa cada celda y alerta ante una anomalía antes de que afecte la medición.",
-      },
-      {
-        title: "Instalación y mantenimiento",
-        text: "Nuestro equipo de alta capacidad instala, mantiene y renueva básculas de cualquier fabricante.",
+        title: "Proyecto llave en mano",
+        text: "Hacemos la obra civil, montamos la báscula y la caseta, y la calibramos y mantenemos con técnicos locales.",
       },
     ],
   },

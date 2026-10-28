@@ -22,6 +22,12 @@ const nextConfig: NextConfig = {
       { source: "/contacto/trabaja-con-nostros", destination: "/contacto/trabaja-con-nosotros", permanent: true },
       // La acreditación pertenece solo al laboratorio de calibración
       { source: "/certificaciones", destination: "/servicios/calibracion", permanent: true },
+      // La báscula de camiones se publicó primero con el nombre de sus celdas
+      {
+        source: "/productos/basculas-de-camiones/powercell-pdx",
+        destination: "/productos/basculas-de-camiones/vts200",
+        permanent: true,
+      },
     ];
   },
 };

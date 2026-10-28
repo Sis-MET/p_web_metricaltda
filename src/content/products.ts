@@ -1,5 +1,6 @@
 import type { CategorySlug } from "./categories";
 import type { Brochure, Product } from "./catalog";
+import { SCALE_SIZES, TRUCK_SCALE_PRODUCT, VTS200 } from "./truckScaleProject";
 
 import bba211 from "@/assets/products/bba211.png";
 import bba231 from "@/assets/products/bba231.png";
@@ -529,26 +530,49 @@ export const PRODUCTS: Product[] = [
 
   /* Básculas de camiones */
   {
-    slug: "powercell-pdx",
-    category: "basculas-de-camiones",
-    model: "POWERCELL PDX",
+    slug: TRUCK_SCALE_PRODUCT.slug,
+    category: TRUCK_SCALE_PRODUCT.category,
+    model: "VTS200",
     type: "Báscula de camiones",
     image: powercellPdx,
-    summary: "Básculas de camiones con celdas digitales POWERCELL PDX para controlar grandes volúmenes con la más alta precisión.",
-    description:
-      "La tecnología, durabilidad y exactitud de las básculas de camiones POWERCELL PDX de METTLER TOLEDO permiten controlar grandes volúmenes transportados con la más alta precisión. Cada celda digitaliza su propia señal y se conecta en red con el terminal, que supervisa el sistema y alerta ante cualquier anomalía antes de que afecte la medición.",
+    summary: `Báscula de camiones de acero ortotrópico con celdas digitales ${VTS200.cells}: pesa camiones en tráfico medio a pesado con exactitud y bajo costo de mantenimiento.`,
+    description: `La VTS200 de METTLER TOLEDO es una báscula de camiones multimódulo de acero, diseñada para pesar con exactitud camiones de ruta en tráfico medio a pesado y reducir sus costos de servicio a largo plazo. Su puente ortotrópico, el mismo principio de construcción de grandes puentes como el Golden Gate, aprovecha cada kilogramo de acero: nervaduras soldadas en continuo por robot en lugar de vigas «I». Se configura de 4 a 48 m con módulos estándar y pesa con celdas digitales ${VTS200.cells} que avisan ante cualquier error de pesaje. Métrica ejecuta el proyecto completo: obra civil, montaje, caseta de control, calibración y mantenimiento.`,
+    capacity: { min: SCALE_SIZES[0].capacity, max: SCALE_SIZES[SCALE_SIZES.length - 1].capacity },
+    protection: "IP68 / IP69K",
     environments: [],
     features: [
-      "Celdas que convierten la señal a digital, sin cajas de conexión analógicas",
-      "Supervisión de cada celda con alertas antes de que una falla afecte la medición",
-      "Peso estable integrado a sus sistemas para emitir tickets y reportes",
-      "Instalación, mantenimiento y renovación a cargo de nuestro equipo técnico",
+      "Probada en fábrica con 3,1 millones de ciclos: el equivalente a 20 años con 250 camiones cargados por día",
+      "Puente ortotrópico sin vigas «I», con nervaduras soldadas por arco sumergido en una costura continua",
+      `Celdas digitales ${VTS200.cells} de acero inoxidable, IP68 / IP69K, que informan sus propios errores de pesaje`,
+      "Retenciones en la fundación y no en las celdas: menos desgaste y una exactitud que se mantiene",
+      "Superficie antideslizante extra ancha con el centro cerrado; las celdas se revisan por tapas laterales",
+      "Pintura epoxi horneada, más durable que el fondo o el esmalte y conforme a la directiva RoHS",
+      "Protección contra rayos probada a 100 000 V y 10 000 A",
+      "Módulos de menos de 3 t: viajan en un contenedor estándar o en un camión plataforma y se trasladan sin grúas pesadas",
+      "Perfil bajo: sobre el suelo, los camiones suben a la plataforma con facilidad",
     ],
     specs: [
-      { label: "Celdas de carga", value: "POWERCELL PDX digitales" },
-      { label: "Conexión", value: "Red digital en cadena hacia el terminal" },
-      { label: "Diagnóstico", value: "Supervisión continua de cada celda" },
-      { label: "Integración", value: "Tickets, reportes y conexión con sus sistemas" },
+      { label: "Tipo", value: "Multimódulo de acero ortotrópico, con nervaduras soldadas en continuo" },
+      { label: "Largo", value: "De 4 a 48 m, con módulos estándar de 4, 5 y 6 m" },
+      { label: "Ancho", value: `${String(VTS200.width).replace(".", ",")} m (2,10 m para transporte)` },
+      {
+        label: "Capacidad",
+        value: new Intl.ListFormat("es", { type: "conjunction" }).format(
+          SCALE_SIZES.map((size) => `${size.capacity / 1000} t con ${size.length} m`)
+        ),
+      },
+      { label: "Carga por eje", value: "28 t por eje tándem doble, con una separación mínima de 1,2 m" },
+      { label: "Resolución", value: "3000, 4000 o 6000 divisiones" },
+      { label: "Altura", value: "30 cm (41 cm instalada sobre sus celdas)" },
+      { label: "Superficie", value: "Chapa antideslizante" },
+      { label: "Acabado", value: "Pintura epoxi acrílica horneada, RAL 7038" },
+      { label: "Material", value: "Acero ST 37-2 (ASTM A-36); componentes de pesaje en acero inoxidable 17-4" },
+      { label: "Peso", value: "530 kg por metro de plataforma" },
+      { label: "Celdas de carga", value: `${VTS200.cells} digitales, IP68 / IP69K (NEMA 6P)` },
+      { label: "Protección contra rayos", value: "Probada a 100 000 V y 10 000 A" },
+      { label: "Fundación", value: "Sobre el suelo, en foso poco profundo o en foso profundo" },
+      { label: "Temperatura", value: "De −60 a +50 °C en operación; de −10 a +40 °C en uso legal" },
+      { label: "Opciones", value: "Barandas laterales, rampas de acero, elevadores, tapas de acceso para foso y garantía extendida" },
     ],
   },
 ];
