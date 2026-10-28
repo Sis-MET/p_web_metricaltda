@@ -32,7 +32,7 @@ export const SERVICES = {
     name: "Calibración",
     icon: ClipboardCheck,
     short: "Laboratorio acreditado por IBMETRO",
-    label: "Laboratorio de calibración",
+    label: "Laboratorio acreditado de calibración",
     headline: "Precisión que puede certificar.",
     description:
       "Laboratorio acreditado bajo NB/ISO/IEC 17025:2018 para calibrar balanzas y pesas patrón, con certificados trazables y reconocidos para auditorías y entes reguladores.",
