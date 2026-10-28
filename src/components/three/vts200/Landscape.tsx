@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { TUFT, random, segment } from "./build";
+import { GradientEnvironment, type GradientStops } from "./environment";
 import { COLORS, type Materials } from "./materials";
 import type { Layout } from "./model";
 import type { Vec3 } from "../useResponsiveFraming";
@@ -176,32 +176,12 @@ const skyMaterial = () =>
  * Reflejos del cielo para metales, vidrio y pintura. El mapa es diminuto (64 px de alto): se filtra
  * en milisegundos, a diferencia del entorno de drei, cuyo filtro congelaba la página al montarse.
  */
-function useSkyEnvironment() {
-  const gl = useThree((state) => state.gl);
-  const target = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 128;
-    canvas.height = 64;
-    const ctx = canvas.getContext("2d")!;
-    const gradient = ctx.createLinearGradient(0, 0, 0, 64);
-    gradient.addColorStop(0, `#${SKY_COLORS.zenith.getHexString(THREE.SRGBColorSpace)}`);
-    gradient.addColorStop(0.48, `#${SKY_COLORS.horizon.getHexString(THREE.SRGBColorSpace)}`);
-    gradient.addColorStop(0.56, `#${SKY_COLORS.ground.getHexString(THREE.SRGBColorSpace)}`);
-    gradient.addColorStop(1, "#6f6656");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 128, 64);
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.mapping = THREE.EquirectangularReflectionMapping;
-    texture.colorSpace = THREE.SRGBColorSpace;
-    const pmrem = new THREE.PMREMGenerator(gl);
-    const result = pmrem.fromEquirectangular(texture);
-    pmrem.dispose();
-    texture.dispose();
-    return result;
-  }, [gl]);
-  useEffect(() => () => target.dispose(), [target]);
-  return target.texture;
-}
+const SKY_REFLECTION: GradientStops = [
+  [0, SKY_COLORS.zenith],
+  [0.48, SKY_COLORS.horizon],
+  [0.56, SKY_COLORS.ground],
+  [1, "#6f6656"],
+];
 
 /* ─── Instalaciones mineras ─────────────────────────────────────────────── */
 
@@ -385,14 +365,13 @@ const ROCK_SIZE: [number, number] = [0.5, 1.6];
 /* ─── Conjunto ──────────────────────────────────────────────────────────── */
 
 export function Landscape({ layout, materials }: { layout: Layout; materials: Materials }) {
-  const environment = useSkyEnvironment();
   const sky = useMemo(() => skyMaterial(), []);
   const mountains = useMemo(() => mountainsGeometry(), []);
   const x = layout.site.x;
 
   return (
     <group>
-      <primitive object={environment} attach="environment" />
+      <GradientEnvironment stops={SKY_REFLECTION} />
       <mesh material={sky} renderOrder={-1}>
         <sphereGeometry args={[4500, 32, 16]} />
       </mesh>

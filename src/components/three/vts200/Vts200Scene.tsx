@@ -1,42 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { CameraControls, PerformanceMonitor } from "@react-three/drei";
-import * as THREE from "three";
+import { useEffect, useMemo, useRef, type RefObject } from "react";
+import { useFrame } from "@react-three/fiber";
+import { CameraControls } from "@react-three/drei";
 import type { Store } from "@/lib/store";
 import { ScreenAnchors } from "../ScreenAnchors";
-import { ADAPTIVE_DPR, scaleView, useResponsiveFraming, type Shift } from "../useResponsiveFraming";
-import { useSceneLoop, type SceneLoopProps } from "../useSceneLoop";
+import { scaleView, useResponsiveFraming, type Shift } from "../useResponsiveFraming";
+import type { SceneLoopProps } from "../useSceneLoop";
 import { BuildContext, type Build } from "./build";
 import { Drainage } from "./Drainage";
 import { Foundation } from "./Foundation";
 import { Landscape, SUN } from "./Landscape";
 import { COLORS, useMaterials } from "./materials";
-import {
-  APPROACH_LENGTH,
-  CELL,
-  LEVEL,
-  TRUCK_SPAN,
-  TRUCK_STOP,
-  computeReading,
-  viewsFor,
-  type Label,
-  type Layout,
-  type ScaleReading,
-} from "./model";
+import { MOUNT_STEP, cellTagPoints, viewsFor, type Label, type Layout, type TruckReading } from "./model";
 import { Scale } from "./Scale";
 import { Site } from "./Site";
 import { Truck } from "./Truck";
+import { useTruckRun } from "./useTruckRun";
+import { Vts200Canvas } from "./Vts200Canvas";
 import { Walls } from "./Walls";
 
 /** Duración de la animación de cada paso (s) */
 const STEP_SECONDS = [6, 7, 8, 8, 7, 10];
 
-const MAX_SPEED = 5.5; // m/s
-const HOLD_SECONDS = 3.5;
-
-export type TruckReading = ScaleReading & { displayed: number; stable: boolean };
+export type { TruckReading } from "./model";
 
 export type Vts200SceneProps = SceneLoopProps & {
   layout: Layout;
@@ -63,11 +50,6 @@ export type Vts200SceneProps = SceneLoopProps & {
   cellTagElements: RefObject<(HTMLElement | null)[]>;
 };
 
-/** Paso del montaje: su acción es la vista de celdas */
-const MOUNT_STEP = 5;
-
-type Phase = "approach" | "weigh" | "exit";
-
 function World({
   layout,
   step,
@@ -87,7 +69,6 @@ function World({
 }: Omit<Vts200SceneProps, keyof SceneLoopProps> & { castShadows: boolean }) {
   const materials = useMaterials();
   const controls = useRef<CameraControls>(null);
-  const { half } = layout;
 
   // Lo que cambia con la interfaz se lee en cada cuadro desde refs, sin re-renderizar la escena
   const live = useRef({ step, action, playing, weighing, onWeighed });
@@ -115,82 +96,21 @@ function World({
     controls.current?.setLookAt(...scaleView(view, cellView && !overview ? 1 : distance), !still);
   }, [cellView, distance, overview, step, still, views]);
 
-  /* Camión: entra, se detiene centrado, se pesa y sale */
-  const truckRef = useRef<THREE.Group>(null);
-  const startX = -(half + APPROACH_LENGTH + 16);
-  const endX = half + APPROACH_LENGTH + 16 + TRUCK_SPAN;
-  const sim = useRef({ phase: "approach" as Phase, x: startX, speed: MAX_SPEED, hold: 0 });
-  const spin = useRef(0);
-  const reading = useRef<ScaleReading>(computeReading(layout, startX));
-  const displayed = useRef(0);
-  const activity = useRef(0);
-  const emitClock = useRef(0);
-  const parked = still && step === 5;
-
-  useEffect(() => {
-    sim.current = parked
-      ? { phase: "weigh", x: TRUCK_STOP, speed: 0, hold: 0 }
-      : { phase: "approach", x: startX, speed: MAX_SPEED, hold: 0 };
-    if (!weighing) readings.set({ ...computeReading(layout, startX), displayed: 0, stable: false });
-  }, [layout, parked, readings, startX, weighing]);
-
-  useFrame((_, rawDt) => {
-    const dt = Math.min(rawDt, 0.05);
-    const now = live.current;
-
-    // Avance de la obra
-    if (now.playing && !still) {
-      const p = progress.get();
-      if (p < 1) progress.set(Math.min(1, p + dt / STEP_SECONDS[now.step]));
-    }
-
-    const truckOn = now.weighing || parked;
-    if (truckRef.current) truckRef.current.visible = truckOn;
-    if (!truckOn) {
-      reading.current = computeReading(layout, startX);
-      activity.current = THREE.MathUtils.damp(activity.current, 0, 3, dt);
-      return;
-    }
-
-    const s = sim.current;
-    const prevX = s.x;
-    if (!parked) {
-      if (s.phase === "approach") {
-        const remaining = TRUCK_STOP - s.x;
-        s.speed = MAX_SPEED * THREE.MathUtils.clamp(remaining / 7, 0.06, 1);
-        s.x = Math.min(TRUCK_STOP, s.x + s.speed * dt);
-        if (TRUCK_STOP - s.x < 0.005) Object.assign(s, { x: TRUCK_STOP, phase: "weigh", hold: 0, speed: 0 });
-      } else if (s.phase === "weigh") {
-        s.hold += dt;
-        if (s.hold > HOLD_SECONDS) s.phase = "exit";
-      } else {
-        s.speed = Math.min(MAX_SPEED, s.speed + 2.2 * dt);
-        s.x += s.speed * dt;
-        if (s.x > endX) {
-          Object.assign(s, { phase: "approach", x: startX, speed: MAX_SPEED });
-          now.onWeighed();
-        }
-      }
-    }
-    const moved = s.x - prevX;
-    spin.current += Math.max(moved, 0);
-    truckRef.current?.position.set(s.x, 0, 0);
-
-    // El indicador se estabiliza como en un terminal real
-    const r = computeReading(layout, s.x);
-    const changed = r.total !== reading.current.total;
-    reading.current = r;
-    displayed.current = parked ? r.total : THREE.MathUtils.damp(displayed.current, r.total, 5, dt);
-    if (Math.abs(displayed.current - r.total) < 1) displayed.current = r.total;
-    activity.current = THREE.MathUtils.damp(activity.current, changed || moved > 0.001 ? 1 : 0, 3, dt);
-    const stable = s.phase === "weigh" && r.total > 0 && Math.abs(displayed.current - r.total) < 10;
-
-    emitClock.current += dt;
-    if (emitClock.current > 0.1) {
-      emitClock.current = 0;
-      readings.set({ ...r, displayed: displayed.current, stable });
-    }
+  /* Avance de la obra */
+  useFrame((_, dt) => {
+    if (!live.current.playing || still) return;
+    const p = progress.get();
+    if (p < 1) progress.set(Math.min(1, p + Math.min(dt, 0.05) / STEP_SECONDS[live.current.step]));
   });
+
+  /* Camión: entra, se detiene centrado, se pesa y sale (en la imagen fija del montaje, detenido) */
+  const parked = still && step === MOUNT_STEP;
+  const { truckRef, spin, reading, activity } = useTruckRun(
+    layout,
+    readings,
+    () => ({ on: live.current.weighing || parked, moving: !parked, onExit: live.current.onWeighed }),
+    parked
+  );
 
   /* Etiquetas: las del paso en curso, cuando su pieza ya está construida */
   const points = useMemo(() => labels.map((label) => label.position), [labels]);
@@ -204,10 +124,7 @@ function World({
       (label.action === undefined || label.action === live.current.action)
     );
   };
-  const cellPoints = useMemo(
-    () => layout.cells.map((cell) => [cell.x, LEVEL.pier + CELL.plate + CELL.cup * 2 + CELL.body + 0.05, cell.z] as [number, number, number]),
-    [layout.cells]
-  );
+  const cellPoints = useMemo(() => cellTagPoints(layout), [layout]);
   const inCellView = () => !still && live.current.step === MOUNT_STEP && live.current.action;
 
   return (
@@ -258,39 +175,16 @@ function World({
 }
 
 export default function Vts200Scene({ active, onReady, ...props }: Vts200SceneProps) {
-  const { frameloop, onCreated } = useSceneLoop({ active, onReady });
-  // Resolución según los fps; si el equipo no da abasto, además se apagan las sombras dinámicas
-  const [dpr, setDpr] = useState(ADAPTIVE_DPR.initial);
-  const [shadows, setShadows] = useState(true);
   const initial = viewsFor(props.layout).overview;
-
   return (
-    <Canvas
-      // PCF explícito: con `true` r3f pide PCFSoft y three recompila los shaders al dibujar la primera sombra
-      shadows="percentage"
-      dpr={props.still ? 1 : [1, dpr]}
-      frameloop={frameloop}
-      onCreated={onCreated}
+    <Vts200Canvas
+      active={active}
+      onReady={onReady}
+      still={props.still}
       camera={{ position: initial.position, fov: 42, near: 0.05, far: 6000 }}
-      gl={{ antialias: true, powerPreference: "high-performance", stencil: false }}
-      aria-label="Modelo 3D interactivo de la instalación de una báscula camionera VTS200"
-      fallback={
-        <div className="flex h-full items-center justify-center p-8 text-center text-sm text-white/70">
-          Su navegador no admite gráficos 3D (WebGL).
-        </div>
-      }
+      label="Modelo 3D interactivo de la instalación de una báscula camionera VTS200"
     >
-      {!props.still && (
-        <PerformanceMonitor
-          flipflops={3}
-          onChange={({ factor }) => setDpr(ADAPTIVE_DPR.fromFactor(factor))}
-          onFallback={() => {
-            setDpr(ADAPTIVE_DPR.min);
-            setShadows(false);
-          }}
-        />
-      )}
-      <World {...props} castShadows={shadows} />
-    </Canvas>
+      {(castShadows) => <World {...props} castShadows={castShadows} />}
+    </Vts200Canvas>
   );
 }

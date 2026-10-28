@@ -52,6 +52,9 @@ export const CELL = {
 /** Celda que se abre en la vista de celdas: la segunda línea de apoyo, lado +z */
 export const FOCUS_CELL = 3;
 
+/** Paso del montaje de la báscula: su acción es la vista de celdas (plataforma transparente) */
+export const MOUNT_STEP = 5;
+
 // Cámara de la vista de celdas respecto de la celda abierta (sin three.js: este archivo también
 // lo usa la interfaz del demo, que se carga antes que la escena)
 const CELL_VIEW = { x: -0.55, z: 0.33 };
@@ -124,8 +127,7 @@ export function layoutFor(size: ScaleSize): Layout {
 export function viewsFor({ half, cells }: Layout): { overview: View; steps: View[]; cell: View } {
   const focus = cells[FOCUS_CELL];
   return {
-    // Bajo la plataforma (transparente), junto a la celda abierta
-    // Debajo de la plataforma (transparente), a la altura de la columna
+    // Debajo de la plataforma (transparente), a la altura de la columna de la celda abierta
     cell: {
       position: [focus.x + CELL_VIEW.x, LEVEL.pier + 0.08, focus.z + CELL_VIEW.z],
       target: [focus.x, LEVEL.pier + CELL.column + 0.01, focus.z],
@@ -142,6 +144,30 @@ export function viewsFor({ half, cells }: Layout): { overview: View; steps: View
     ],
   };
 }
+
+/**
+ * Demo de pesaje del inicio (la báscula ya instalada): vista general y una por cada parte del
+ * recorrido de la señal, en el orden de WEIGHING_STEPS (plataforma, celdas, red e indicador).
+ */
+export function weighingViewsFor({ half, spots }: Layout): { overview: View; parts: View[] } {
+  const [bx, , bz] = spots.booth;
+  return {
+    overview: { position: [-half - 14, 10.5, 23], target: [2, 0, -2] },
+    parts: [
+      { position: [-half - 10, 8, 17], target: [0, 0, -0.5] },
+      // Desde arriba y del lado +z: las celdas de ese lado quedan fuera de la sombra del camión
+      { position: [-half + 1, 8.5, 9.5], target: [-half * 0.25, -0.4, 0.9] },
+      // De frente: el tendido corre por el lado -z hasta la caseta, al fondo
+      { position: [half * 0.1, 11, 14], target: [half * 0.6, 0, -3.2] },
+      // Más allá del frente del camión detenido, para que no tape la caseta
+      { position: [bx + 3, 8, bz + 12], target: [bx - 0.5, 1.2, bz + 0.5] },
+    ],
+  };
+}
+
+/** Lectura de cada celda sobre el modelo: justo encima de su placa superior */
+export const cellTagPoints = ({ cells }: Layout): Vec3[] =>
+  cells.map((cell) => [cell.x, LEVEL.pier + CELL.plate + CELL.cup * 2 + CELL.body + 0.05, cell.z]);
 
 /* ─── Etiquetas sobre el modelo ─────────────────────────────────────────── */
 
@@ -228,6 +254,11 @@ export type ScaleReading = {
   cells: number[];
   axlesOnDeck: number;
 };
+
+/** Lo que muestra el indicador: la lectura, el valor que se va estabilizando y si ya está estable */
+export type TruckReading = ScaleReading & { displayed: number; stable: boolean };
+
+export const EMPTY_READING: TruckReading = { total: 0, cells: [], axlesOnDeck: 0, displayed: 0, stable: false };
 
 /**
  * Cada módulo apoya en las dos líneas que lo rodean: la carga de un eje se reparte entre ellas

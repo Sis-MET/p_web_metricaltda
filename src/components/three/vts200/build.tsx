@@ -142,6 +142,20 @@ export function Blocks({
   );
 }
 
+/** Rectángulo en planta (m) */
+export type Rect = { x0: number; x1: number; z0: number; z1: number };
+
+// La forma se dibuja en el plano XY y se acuesta: (x, y) pasa a (x, 0, -y)
+const toPath = (path: THREE.Path, { x0, x1, z0, z1 }: Rect) =>
+  path.moveTo(x0, -z0).lineTo(x1, -z0).lineTo(x1, -z1).lineTo(x0, -z1).closePath();
+
+/** Plano horizontal (suelos), con un hueco opcional; sus coordenadas de textura quedan en metros */
+export function plane(outer: Rect, hole?: Rect) {
+  const shape = toPath(new THREE.Shape(), outer) as THREE.Shape;
+  if (hole) shape.holes.push(toPath(new THREE.Path(), hole));
+  return new THREE.ShapeGeometry(shape).rotateX(-Math.PI / 2);
+}
+
 const UP = new THREE.Vector3(0, 1, 0);
 
 /**
