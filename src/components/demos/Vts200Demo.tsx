@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode, type RefObject } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, type ComponentProps, type KeyboardEvent, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -23,19 +23,18 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import type { TruckReading } from "@/components/three/vts200/Vts200Scene";
-import { FOCUS_CELL, labelsFor, layoutFor, type Cell, type Layout } from "@/components/three/vts200/model";
+import { EMPTY_READING, labelsFor, layoutFor, type Layout } from "@/components/three/vts200/model";
 import {
   DEFAULT_SIZE,
   DEMO_TITLE,
   LOAD_CELL_NOTE,
   LOAD_CELL_STEPS,
   PHASES,
-  PROJECT_SECTION_ID,
   PROJECT_STEPS,
   SCALE_SIZES,
   TRUCK_SCALE_PRODUCT,
   VTS200,
+  WEIGHING_SECTION_ID,
   phaseOf,
   quoteSummary,
   sizeLabel,
@@ -47,7 +46,8 @@ import { QUOTE_HREF } from "@/lib/routes";
 import { createStore, useStore, type Store } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { DemoDialog } from "./DemoDialog";
-import { HmiPanel, StatusLed, ViewerButton, useDemoActivation, useIsDesktop } from "./DemoShell";
+import { ActionButton, ViewerButton, useDemoActivation, useIsDesktop } from "./DemoShell";
+import { CellTags, ScaleIndicator } from "./ScaleReadout";
 import { ViewerPlaceholder } from "./ViewerPlaceholder";
 
 // three.js se descarga al abrir el demo, nunca con la página
@@ -65,14 +65,6 @@ const TOGGLES: ({ label: string; icon: LucideIcon; hint: string } | null)[] = [
   { label: "Ver celdas de carga", icon: Gauge, hint: "La plataforma se vuelve transparente y una celda se abre por dentro" },
 ];
 
-/** Imagen fija de cada paso (capturas de la página): el momento que mejor lo muestra */
-const STILL_PROGRESS = [1, 1, 0.76, 0.8, 1, 1];
-
-const EMPTY_READING: TruckReading = { total: 0, cells: [], axlesOnDeck: 0, displayed: 0, stable: false };
-
-const kg = new Intl.NumberFormat("es-BO", { maximumFractionDigits: 0 });
-const tonnes = new Intl.NumberFormat("es-BO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const toDivision = (value: number) => Math.round(value / VTS200.division) * VTS200.division;
 const width = String(VTS200.width).replace(".", ",");
 
 function factsFor(step: number, layout: Layout): string[] {
@@ -86,7 +78,6 @@ function factsFor(step: number, layout: Layout): string[] {
 // Escritorio: el texto va a la izquierda, así que el modelo se corre a la derecha
 const SHIFT_DESKTOP = { x: 0.14, y: 0 };
 const SHIFT_MOBILE = { x: 0, y: 0.04 };
-const NO_SHIFT = { x: 0, y: 0 };
 
 /* ─── Avance del paso ───────────────────────────────────────────────────── */
 
@@ -262,96 +253,10 @@ function SizeSelector({ sizeIndex, onSize }: { sizeIndex: number; onSize: (i: nu
   );
 }
 
-function ActionButton({
-  icon: Icon,
-  label,
-  pressed,
-  disabled,
-  onClick,
-}: {
-  icon: LucideIcon;
-  label: string;
-  pressed?: boolean;
-  disabled?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={pressed}
-      disabled={disabled}
-      className={cn(
-        "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors duration-200 disabled:opacity-60 [&_svg]:size-4",
-        pressed ? "border-white bg-white text-mt-950" : "border-white/20 bg-mt-950/85 text-white hover:border-white/50 hover:bg-mt-800"
-      )}
-    >
-      <Icon aria-hidden />
-      {label}
-    </button>
-  );
-}
-
-/** Indicador de la caseta: aparece cuando la báscula ya está montada */
-function Indicator({ readings, progress, capacity }: { readings: Store<TruckReading>; progress: Store<number>; capacity: number }) {
-  const r = useStore(readings);
+/** El indicador de la caseta aparece cuando la báscula ya está montada */
+function Indicator({ progress, ...props }: ComponentProps<typeof ScaleIndicator> & { progress: Store<number> }) {
   const ready = useStore(progress) >= 0.9;
-  if (!ready) return null;
-
-  const status = r.stable ? (
-    <StatusLed tone="ok" label="Estable" />
-  ) : r.total > 0 ? (
-    <StatusLed tone="busy" label="En movimiento" />
-  ) : (
-    <StatusLed tone="off" label="Sin carga" />
-  );
-
-  return (
-    <HmiPanel title="Indicador · Caseta" status={status} className="w-full sm:w-80">
-      <div className="flex items-center justify-between gap-3 px-4 py-2 sm:block sm:py-3" aria-live="polite" aria-atomic="true">
-        <p className="text-[10px] uppercase tracking-[0.14em] text-white/45">Peso bruto</p>
-        <p className="text-right text-2xl font-semibold tabular-nums tracking-tight text-white sm:mt-1 sm:text-3xl">
-          {kg.format(toDivision(r.displayed))}
-          <span className="ml-1.5 text-sm font-medium text-white/45">kg</span>
-        </p>
-        <div className="mt-2 hidden items-center justify-between gap-2 text-[10px] uppercase tracking-wider text-white/50 sm:flex">
-          <span className={cn(r.total === 0 && "text-sun-400")}>→0←</span>
-          <span>Ejes {r.axlesOnDeck}/5</span>
-          <span>
-            Máx {kg.format(capacity)} · d {VTS200.division}
-          </span>
-        </div>
-      </div>
-    </HmiPanel>
-  );
-}
-
-/** Lectura de cada celda sobre el modelo (vista de celdas): la escena las posiciona en cada cuadro */
-function CellTags({
-  cells,
-  readings,
-  elements,
-}: {
-  cells: Cell[];
-  readings: Store<TruckReading>;
-  elements: RefObject<(HTMLElement | null)[]>;
-}) {
-  const r = useStore(readings);
-  return cells.map((cell, i) => (
-    <span
-      key={cell.id}
-      ref={(el) => {
-        elements.current[i] = el;
-      }}
-      style={{ opacity: 0, visibility: "hidden" }}
-      className={cn(
-        "absolute left-0 top-0 select-none whitespace-nowrap rounded bg-mt-950/90 px-1.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums ring-1 transition-[opacity,visibility] duration-300",
-        i === FOCUS_CELL ? "text-sun-200 ring-sun-400/60" : "text-white/85 ring-white/15"
-      )}
-    >
-      {cell.id} · {tonnes.format((r.cells[i] ?? 0) / 1000)} t
-    </span>
-  ));
+  return ready ? <ScaleIndicator {...props} /> : null;
 }
 
 /* ─── Demo ──────────────────────────────────────────────────────────────── */
@@ -360,9 +265,8 @@ function CellTags({
  * Demo 3D del proyecto de una báscula camionera VTS200: seis pasos en tres fases, de la
  * preparación del terreno al montaje. Cada paso se construye con su animación (que se puede
  * recorrer con la barra de avance) y tiene una acción propia.
- * `still`: imagen fija de un paso para las capturas de la página (sin interfaz).
  */
-function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
+function Demo({ initialStep }: { initialStep: number }) {
   const reducedMotion = useReducedMotion();
   const isDesktop = useIsDesktop();
   const viewerRef = useRef<HTMLDivElement>(null);
@@ -372,11 +276,11 @@ function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
 
   const [step, setStep] = useState(() => Math.min(LAST, Math.max(0, initialStep)));
   const [sizeIndex, setSizeIndex] = useState(DEFAULT_SIZE);
-  const [progress] = useState(() => createStore(still ? STILL_PROGRESS[step] : 0));
+  const [progress] = useState(() => createStore(0));
   const [readings] = useState(() => createStore(EMPTY_READING));
   const [userPlaying, setPlaying] = useState<boolean | null>(null);
   // Con "reducir movimiento" el paso queda en pausa hasta que el usuario lo reproduzca
-  const playing = !still && (userPlaying ?? !reducedMotion);
+  const playing = userPlaying ?? !reducedMotion;
   const [action, setAction] = useState(false);
   const [weighing, setWeighing] = useState(false);
   const [overview, setOverview] = useState(false);
@@ -454,8 +358,6 @@ function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
     <div
       className="relative isolate h-full overflow-hidden bg-mt-900 text-white"
       onKeyDown={onKeyDown}
-      // Señal para el script de capturas
-      data-demo-ready={still && isReady ? "" : undefined}
     >
       {/* Escena a pantalla completa */}
       <div ref={viewerRef} className="absolute inset-0">
@@ -470,8 +372,7 @@ function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
             onWeighed={() => setWeighing(false)}
             readings={readings}
             overview={overview}
-            shift={still ? NO_SHIFT : isDesktop ? SHIFT_DESKTOP : SHIFT_MOBILE}
-            still={still}
+            shift={isDesktop ? SHIFT_DESKTOP : SHIFT_MOBILE}
             labels={labels}
             labelElements={labelElements}
             cellTagElements={cellTagElements}
@@ -482,154 +383,150 @@ function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
         {!isReady && <ViewerPlaceholder />}
       </div>
 
-      {!still && (
-        <>
-          {/* Degradados para leer el texto sobre el modelo */}
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[42%] bg-gradient-to-b from-mt-900 via-mt-900/70 to-transparent lg:hidden" />
-          <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 hidden w-[46%] bg-gradient-to-r from-mt-900 via-mt-900/75 to-transparent lg:block" />
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-mt-900 via-mt-900/70 to-transparent" />
+      {/* Degradados para leer el texto sobre el modelo */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[42%] bg-gradient-to-b from-mt-900 via-mt-900/70 to-transparent lg:hidden" />
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 hidden w-[46%] bg-gradient-to-r from-mt-900 via-mt-900/75 to-transparent lg:block" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-mt-900 via-mt-900/70 to-transparent" />
 
-          {/* Etiquetas sobre las piezas: la escena las posiciona en cada cuadro */}
-          <div className="pointer-events-none absolute inset-0">
-            {labels.map((label, i) => (
-              <span
-                key={`${label.step}-${label.text}`}
-                ref={(el) => {
-                  labelElements.current[i] = el;
-                }}
-                style={{ opacity: 0, visibility: "hidden" }}
-                className={cn(
-                  "absolute left-0 top-0 select-none transition-[opacity,visibility] duration-300",
-                  label.callout
-                    ? "flex size-6 items-center justify-center rounded-full bg-sun-400 text-[11px] font-bold text-ink-950 ring-2 ring-mt-950/80"
-                    : "inline-flex items-center gap-1.5 whitespace-nowrap rounded-md bg-mt-950/90 px-2 py-1 text-[11px] font-semibold text-white ring-1 ring-white/15"
-                )}
-              >
-                {label.callout ? (
-                  <>
-                    {label.callout}
-                    <span className="sr-only">{label.text}</span>
-                  </>
-                ) : (
-                  <>
-                    <span aria-hidden className="size-1.5 rounded-full bg-sun-400" />
-                    {label.text}
-                  </>
-                )}
-              </span>
-            ))}
-            <CellTags cells={layout.cells} readings={readings} elements={cellTagElements} />
+      {/* Etiquetas sobre las piezas: la escena las posiciona en cada cuadro */}
+      <div className="pointer-events-none absolute inset-0">
+        {labels.map((label, i) => (
+          <span
+            key={`${label.step}-${label.text}`}
+            ref={(el) => {
+              labelElements.current[i] = el;
+            }}
+            style={{ opacity: 0, visibility: "hidden" }}
+            className={cn(
+              "absolute left-0 top-0 select-none transition-[opacity,visibility] duration-300",
+              label.callout
+                ? "flex size-6 items-center justify-center rounded-full bg-sun-400 text-[11px] font-bold text-ink-950 ring-2 ring-mt-950/80"
+                : "inline-flex items-center gap-1.5 whitespace-nowrap rounded-md bg-mt-950/90 px-2 py-1 text-[11px] font-semibold text-white ring-1 ring-white/15"
+            )}
+          >
+            {label.callout ? (
+              <>
+                {label.callout}
+                <span className="sr-only">{label.text}</span>
+              </>
+            ) : (
+              <>
+                <span aria-hidden className="size-1.5 rounded-full bg-sun-400" />
+                {label.text}
+              </>
+            )}
+          </span>
+        ))}
+        <CellTags cells={layout.cells} readings={readings} elements={cellTagElements} />
+      </div>
+
+      <div className="pointer-events-none relative flex h-full flex-col px-4 pb-4 pt-4 sm:px-6 lg:px-10 lg:pb-6 lg:pt-7">
+        <div className="flex items-center gap-3 pr-14">
+          <p className="font-heading text-[11px] font-bold uppercase tracking-[0.18em] text-mt-200 sm:text-xs">
+            Demo 3D · <span className="hidden sm:inline">Báscula camionera {VTS200.name}</span>
+            <span className="sm:hidden">VTS200</span>
+          </p>
+          <div className="pointer-events-auto ml-auto">
+            <ViewerButton label={overview ? "Volver a la vista del paso" : "Vista general"} pressed={overview} onClick={() => setOverview((o) => !o)}>
+              <Expand />
+            </ViewerButton>
           </div>
+        </div>
 
-          <div className="pointer-events-none relative flex h-full flex-col px-4 pb-4 pt-4 sm:px-6 lg:px-10 lg:pb-6 lg:pt-7">
-            <div className="flex items-center gap-3 pr-14">
-              <p className="font-heading text-[11px] font-bold uppercase tracking-[0.18em] text-mt-200 sm:text-xs">
-                Demo 3D · <span className="hidden sm:inline">Báscula camionera {VTS200.name}</span>
-                <span className="sm:hidden">VTS200</span>
-              </p>
-              <div className="pointer-events-auto ml-auto">
-                <ViewerButton label={overview ? "Volver a la vista del paso" : "Vista general"} pressed={overview} onClick={() => setOverview((o) => !o)}>
-                  <Expand />
-                </ViewerButton>
-              </div>
-            </div>
-
-            {/* Paso en curso */}
-            <section aria-live="polite" className="pointer-events-auto mt-3 max-w-md lg:mt-8">
-              <p className="flex flex-wrap items-center gap-x-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white/55">
-                <span className="text-mt-200">
-                  Fase {phase.number} · {phase.name}
-                </span>
-                <span>
-                  Paso {step + 1} de {PROJECT_STEPS.length}
-                </span>
-              </p>
-              <h2 className="mt-2 font-heading text-2xl font-extrabold leading-[1.08] tracking-tight sm:text-3xl lg:text-4xl">
-                {cellView ? `Celdas de carga ${VTS200.cells}` : current.title}
-              </h2>
-              {cellView ? (
-                // Cómo pesa una celda: cada punto coincide con su número sobre la celda abierta
-                <ol className="mt-3 space-y-2 lg:mt-4 lg:space-y-3">
-                  {LOAD_CELL_STEPS.map((item, i) => (
-                    <li key={item.title} className="flex gap-3">
-                      <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-sun-400 text-[11px] font-bold text-ink-950">
-                        {i + 1}
-                      </span>
-                      <p className="text-sm leading-snug text-white/75">
-                        <span className="font-semibold text-white">{item.title}.</span>{" "}
-                        <span className="hidden lg:inline">{item.text}</span>
-                      </p>
-                    </li>
-                  ))}
-                </ol>
-              ) : (
-                <>
-                  <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-white/75 lg:line-clamp-none lg:text-base">{current.text}</p>
-                  <p className="mt-4 hidden border-l-2 border-sun-400 pl-3 text-sm font-semibold text-white lg:block">
-                    <span className="text-mt-200">Resultado:</span> {current.result}
+        {/* Paso en curso */}
+        <section aria-live="polite" className="pointer-events-auto mt-3 max-w-md lg:mt-8">
+          <p className="flex flex-wrap items-center gap-x-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white/55">
+            <span className="text-mt-200">
+              Fase {phase.number} · {phase.name}
+            </span>
+            <span>
+              Paso {step + 1} de {PROJECT_STEPS.length}
+            </span>
+          </p>
+          <h2 className="mt-2 font-heading text-2xl font-extrabold leading-[1.08] tracking-tight sm:text-3xl lg:text-4xl">
+            {cellView ? `Celdas de carga ${VTS200.cells}` : current.title}
+          </h2>
+          {cellView ? (
+            // Cómo pesa una celda: cada punto coincide con su número sobre la celda abierta
+            <ol className="mt-3 space-y-2 lg:mt-4 lg:space-y-3">
+              {LOAD_CELL_STEPS.map((item, i) => (
+                <li key={item.title} className="flex gap-3">
+                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-sun-400 text-[11px] font-bold text-ink-950">
+                    {i + 1}
+                  </span>
+                  <p className="text-sm leading-snug text-white/75">
+                    <span className="font-semibold text-white">{item.title}.</span>{" "}
+                    <span className="hidden lg:inline">{item.text}</span>
                   </p>
-                </>
-              )}
-              {cellView && <p className="mt-4 hidden text-xs leading-relaxed text-white/55 lg:block">{LOAD_CELL_NOTE}</p>}
-              {!cellView && facts.length > 0 && (
-                <ul className="mt-4 hidden flex-wrap gap-2 lg:flex">
-                  {facts.map((fact) => (
-                    <li key={fact} className="rounded-full border border-white/15 bg-mt-950/60 px-3 py-1 font-mono text-[11px] text-white/80">
-                      {fact}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <div className="mt-6 hidden lg:block">
-                <div className="flex flex-wrap gap-2">{stepAction}</div>
-                {toggle && <p className="mt-2 text-xs text-white/50">{toggle.hint}</p>}
-              </div>
-              <div className="mt-8 hidden lg:block">{quoteLink}</div>
-            </section>
-
-            {/* Pie: indicador, acción (móvil), avance y pasos */}
-            <div className="mt-auto flex flex-col gap-3">
-              {step === LAST && (
-                // En celulares, la vista de celdas ya muestra cada lectura sobre el modelo
-                <div className={cn("pointer-events-auto lg:self-end", cellView && "max-lg:hidden")}>
-                  <Indicator readings={readings} progress={progress} capacity={size.capacity} />
-                </div>
-              )}
-              <div className="pointer-events-auto flex flex-wrap items-center gap-2 lg:hidden">
-                {stepAction}
-                {step === LAST && quoteLink}
-              </div>
-              <div className="pointer-events-auto">
-                <ProgressControls
-                  progress={progress}
-                  playing={playing}
-                  onPlay={setPlaying}
-                  onScrub={scrub}
-                  step={step}
-                  onStep={goTo}
-                />
-              </div>
-              <div className="pointer-events-auto">
-                <Timeline step={step} onStep={goTo} progress={progress} />
-              </div>
-            </div>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <>
+              <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-white/75 lg:line-clamp-none lg:text-base">{current.text}</p>
+              <p className="mt-4 hidden border-l-2 border-sun-400 pl-3 text-sm font-semibold text-white lg:block">
+                <span className="text-mt-200">Resultado:</span> {current.result}
+              </p>
+            </>
+          )}
+          {cellView && <p className="mt-4 hidden text-xs leading-relaxed text-white/55 lg:block">{LOAD_CELL_NOTE}</p>}
+          {!cellView && facts.length > 0 && (
+            <ul className="mt-4 hidden flex-wrap gap-2 lg:flex">
+              {facts.map((fact) => (
+                <li key={fact} className="rounded-full border border-white/15 bg-mt-950/60 px-3 py-1 font-mono text-[11px] text-white/80">
+                  {fact}
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-6 hidden lg:block">
+            <div className="flex flex-wrap gap-2">{stepAction}</div>
+            {toggle && <p className="mt-2 text-xs text-white/50">{toggle.hint}</p>}
           </div>
-        </>
-      )}
+          <div className="mt-8 hidden lg:block">{quoteLink}</div>
+        </section>
+
+        {/* Pie: indicador, acción (móvil), avance y pasos */}
+        <div className="mt-auto flex flex-col gap-3">
+          {step === LAST && (
+            // En celulares, la vista de celdas ya muestra cada lectura sobre el modelo
+            <div className={cn("pointer-events-auto lg:self-end", cellView && "max-lg:hidden")}>
+              <Indicator readings={readings} progress={progress} capacity={size.capacity} />
+            </div>
+          )}
+          <div className="pointer-events-auto flex flex-wrap items-center gap-2 lg:hidden">
+            {stepAction}
+            {step === LAST && quoteLink}
+          </div>
+          <div className="pointer-events-auto">
+            <ProgressControls
+              progress={progress}
+              playing={playing}
+              onPlay={setPlaying}
+              onScrub={scrub}
+              step={step}
+              onStep={goTo}
+            />
+          </div>
+          <div className="pointer-events-auto">
+            <Timeline step={step} onStep={goTo} progress={progress} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-/** El paso inicial sale de `?paso=` (1 a 6); `&captura` deja la imagen fija del paso, sin interfaz */
+/** El paso inicial sale de `?paso=` (1 a 6) */
 function DemoFromQuery() {
   const params = useSearchParams();
-  return <Demo initialStep={stepFromQuery(params.get("paso"))} still={params.has("captura")} />;
+  return <Demo initialStep={stepFromQuery(params.get("paso"))} />;
 }
 
 /** El demo a pantalla completa: sobre la página (`modal`) o en su propia dirección (`page`) */
 export function Vts200DemoDialog({ mode }: { mode: "modal" | "page" }) {
   return (
-    <DemoDialog mode={mode} label={DEMO_TITLE} exitHref={`/#${PROJECT_SECTION_ID}`}>
+    <DemoDialog mode={mode} label={DEMO_TITLE} exitHref={`/#${WEIGHING_SECTION_ID}`}>
       {/* La dirección se lee en el navegador: la página se genera estática */}
       <Suspense fallback={<ViewerPlaceholder />}>
         <DemoFromQuery />

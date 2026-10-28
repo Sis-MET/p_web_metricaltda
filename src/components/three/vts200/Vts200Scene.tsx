@@ -23,8 +23,6 @@ import { Walls } from "./Walls";
 /** Duración de la animación de cada paso (s) */
 const STEP_SECONDS = [6, 7, 8, 8, 7, 10];
 
-export type { TruckReading } from "./model";
-
 export type Vts200SceneProps = SceneLoopProps & {
   layout: Layout;
   step: number;
@@ -41,8 +39,6 @@ export type Vts200SceneProps = SceneLoopProps & {
   overview: boolean;
   /** Desplazamiento de la imagen para dejar espacio al texto superpuesto */
   shift: Shift;
-  /** Imagen fija (capturas para la página): paso completo, sin transiciones */
-  still?: boolean;
   labels: Label[];
   /** Etiquetas (DOM) que la escena posiciona sobre el modelo */
   labelElements: RefObject<(HTMLElement | null)[]>;
@@ -61,7 +57,6 @@ function World({
   readings,
   overview,
   shift,
-  still = false,
   labels,
   labelElements,
   cellTagElements,
@@ -93,30 +88,28 @@ function World({
   useEffect(() => {
     // La vista de celdas va dentro del foso: no se aleja en pantallas angostas
     const view = overview ? views.overview : cellView ? views.cell : (views.steps[step] ?? views.overview);
-    controls.current?.setLookAt(...scaleView(view, cellView && !overview ? 1 : distance), !still);
-  }, [cellView, distance, overview, step, still, views]);
+    controls.current?.setLookAt(...scaleView(view, cellView && !overview ? 1 : distance), true);
+  }, [cellView, distance, overview, step, views]);
 
   /* Avance de la obra */
   useFrame((_, dt) => {
-    if (!live.current.playing || still) return;
+    if (!live.current.playing) return;
     const p = progress.get();
     if (p < 1) progress.set(Math.min(1, p + Math.min(dt, 0.05) / STEP_SECONDS[live.current.step]));
   });
 
-  /* Camión: entra, se detiene centrado, se pesa y sale (en la imagen fija del montaje, detenido) */
-  const parked = still && step === MOUNT_STEP;
-  const { truckRef, spin, reading, activity } = useTruckRun(
-    layout,
-    readings,
-    () => ({ on: live.current.weighing || parked, moving: !parked, onExit: live.current.onWeighed }),
-    parked
-  );
+  /* Camión: entra, se detiene centrado, se pesa y sale */
+  const { truckRef, spin, reading, activity } = useTruckRun(layout, readings, () => ({
+    on: live.current.weighing,
+    moving: true,
+    onExit: live.current.onWeighed,
+  }));
 
   /* Etiquetas: las del paso en curso, cuando su pieza ya está construida */
   const points = useMemo(() => labels.map((label) => label.position), [labels]);
   const labelVisible = (i: number) => {
     const label = labels[i];
-    if (still || label.step !== live.current.step) return false;
+    if (label.step !== live.current.step) return false;
     const p = build.stage(label.step);
     return (
       p >= label.from &&
@@ -125,7 +118,7 @@ function World({
     );
   };
   const cellPoints = useMemo(() => cellTagPoints(layout), [layout]);
-  const inCellView = () => !still && live.current.step === MOUNT_STEP && live.current.action;
+  const inCellView = () => live.current.step === MOUNT_STEP && live.current.action;
 
   return (
     <BuildContext.Provider value={build}>
@@ -180,7 +173,6 @@ export default function Vts200Scene({ active, onReady, ...props }: Vts200ScenePr
     <Vts200Canvas
       active={active}
       onReady={onReady}
-      still={props.still}
       camera={{ position: initial.position, fov: 42, near: 0.05, far: 6000 }}
       label="Modelo 3D interactivo de la instalación de una báscula camionera VTS200"
     >

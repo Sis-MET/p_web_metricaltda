@@ -11,8 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "mail:check": "node --env-file-if-exists=.env.local scripts/mail-check.ts",
-    "images:warm": "node scripts/warm-images.ts",
-    "demo:capture": "node scripts/capture-demo.ts"
+    "images:warm": "node scripts/warm-images.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.94",

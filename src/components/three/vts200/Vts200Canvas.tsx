@@ -9,17 +9,14 @@ import { useSceneLoop, type SceneLoopProps } from "../useSceneLoop";
 /**
  * Lienzo de las escenas de la VTS200: compila los shaders antes de dibujar, anima solo mientras
  * se ve y ajusta la resolución a los fps; si el equipo no da abasto, además apaga las sombras.
- * `still`: imagen fija para las capturas (resolución 1×, sin ajustes).
  */
 export function Vts200Canvas({
   active,
   onReady,
-  still = false,
   camera,
   label,
   children,
 }: SceneLoopProps & {
-  still?: boolean;
   camera: { position: Vec3; fov: number; near: number; far: number };
   label: string;
   /** La escena; `castShadows` pasa a false si el equipo no da abasto */
@@ -33,7 +30,7 @@ export function Vts200Canvas({
     <Canvas
       // PCF explícito: con `true` r3f pide PCFSoft y three recompila los shaders al dibujar la primera sombra
       shadows="percentage"
-      dpr={still ? 1 : [1, dpr]}
+      dpr={[1, dpr]}
       frameloop={frameloop}
       onCreated={onCreated}
       camera={camera}
@@ -45,16 +42,14 @@ export function Vts200Canvas({
         </div>
       }
     >
-      {!still && (
-        <PerformanceMonitor
-          flipflops={3}
-          onChange={({ factor }) => setDpr(ADAPTIVE_DPR.fromFactor(factor))}
-          onFallback={() => {
-            setDpr(ADAPTIVE_DPR.min);
-            setShadows(false);
-          }}
-        />
-      )}
+      <PerformanceMonitor
+        flipflops={3}
+        onChange={({ factor }) => setDpr(ADAPTIVE_DPR.fromFactor(factor))}
+        onFallback={() => {
+          setDpr(ADAPTIVE_DPR.min);
+          setShadows(false);
+        }}
+      />
       {children(shadows)}
     </Canvas>
   );

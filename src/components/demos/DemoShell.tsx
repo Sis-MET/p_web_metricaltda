@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore, type ReactNode, type RefObject } from "react";
+import type { LucideIcon } from "lucide-react";
 import { useInView } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -95,6 +96,37 @@ export function ViewerButton({
       )}
     >
       {children}
+    </button>
+  );
+}
+
+/** Acción del demo con su nombre a la vista (rayos X, pesar un camión…); `pressed` si es un modo */
+export function ActionButton({
+  icon: Icon,
+  label,
+  pressed,
+  disabled,
+  onClick,
+}: {
+  icon: LucideIcon;
+  label: string;
+  pressed?: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={pressed}
+      disabled={disabled}
+      className={cn(
+        "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors duration-200 disabled:opacity-60 [&_svg]:size-4",
+        pressed ? "border-white bg-white text-mt-950" : "border-white/20 bg-mt-950/85 text-white hover:border-white/50 hover:bg-mt-800"
+      )}
+    >
+      <Icon aria-hidden />
+      {label}
     </button>
   );
 }

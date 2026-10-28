@@ -1,19 +1,16 @@
 /**
  * Proyecto llave en mano de una báscula camionera METTLER TOLEDO VTS200, con los datos de su ficha técnica.
- * Lo comparten la sección del inicio, el demo 3D y el Asistente de Métrica.
+ * Lo comparten el demo de pesaje del inicio, el demo 3D de la instalación y el Asistente de Métrica.
  */
 
 export const DEMO_HREF = "/demo/bascula-de-camiones";
 export const DEMO_TITLE = "Demo 3D: instalación de una báscula camionera VTS200";
 
-/** Sección del inicio que presenta el proyecto */
-export const PROJECT_SECTION_ID = "proyecto-bascula";
+/** Sección del inicio con el demo de pesaje (el slide de básculas y la salida del demo llevan ahí) */
+export const WEIGHING_SECTION_ID = "demo-pesaje";
 
 /** Báscula de camiones del catálogo: su ficha y la cotización del proyecto */
 export const TRUCK_SCALE_PRODUCT = { category: "basculas-de-camiones", slug: "powercell-pdx" } as const;
-
-/** Abre el demo en un paso (1 a 6) */
-export const demoStepHref = (step: number) => `${DEMO_HREF}?paso=${step}`;
 
 /** Paso (0 a 5) de `?paso=` en la dirección del demo; el primero si falta o no es válido */
 export function stepFromQuery(value: string | null) {
@@ -46,13 +43,6 @@ export const SCALE_SIZES: ScaleSize[] = [
 ];
 
 export const DEFAULT_SIZE = 1;
-
-export const VTS200_FACTS = [
-  { value: "16 a 24 m", label: "de largo, para 50, 60 u 80 t" },
-  { value: "3,4 m", label: "de ancho, con chapa antideslizante" },
-  { value: "28 t", label: "por eje tándem doble" },
-  { value: "IP68 / IP69K", label: "celdas digitales POWERCELL PDX" },
-];
 
 export const PHASES = [
   { id: "preparacion", name: "Preparación" },
@@ -138,6 +128,26 @@ export const LOAD_CELL_STEPS = [
 
 export const LOAD_CELL_NOTE =
   "Si una celda falla o se sobrecarga, el indicador lo avisa antes de que afecte la medición.";
+
+/** Demo de pesaje del inicio: el recorrido del peso, del eje del camión al indicador de la caseta */
+export const WEIGHING_STEPS = [
+  {
+    title: "Plataforma de acero",
+    text: "Los módulos de la VTS200 reciben cada eje y reparten su peso entre las líneas de apoyo, esté donde esté el camión.",
+  },
+  {
+    title: `Celdas ${VTS200.cells}`,
+    text: "Cada celda mide la fuerza en su apoyo y la convierte en señal digital dentro de la propia celda, sin cajas de conexión analógicas.",
+  },
+  {
+    title: "Red digital",
+    text: "Las celdas van conectadas en cadena hasta la caseta. El indicador supervisa cada una y avisa ante cualquier anomalía.",
+  },
+  {
+    title: "Indicador en la caseta",
+    text: "Suma las celdas, muestra el peso cuando se estabiliza y entrega el ticket o el dato al software del cliente.",
+  },
+];
 
 export const phaseOf = (step: ProjectStep) => {
   const index = PHASES.findIndex((phase) => phase.id === step.phase);
