@@ -1,9 +1,10 @@
 "use client";
 
-import { useLayoutEffect, useRef, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
+import { openDemoDialogs } from "./DemoShell";
 
 const CLOSE_CLASS =
   "absolute right-3 top-3 z-10 flex size-10 items-center justify-center rounded-full border border-white/15 bg-mt-950/85 text-white transition-colors duration-200 hover:border-white/40 hover:bg-mt-800 sm:right-5 sm:top-4 lg:right-8 lg:top-6 [&_svg]:size-5";
@@ -34,6 +35,12 @@ export function DemoDialog({
     if (mode === "modal") router.back();
     else router.push(exitHref);
   };
+
+  // Las escenas de la página quedan tapadas: se pausan mientras el demo está abierto
+  useEffect(() => {
+    openDemoDialogs.set(openDemoDialogs.get() + 1);
+    return () => openDemoDialogs.set(openDemoDialogs.get() - 1);
+  }, []);
 
   // Llega abierto desde el servidor (se ve antes del JavaScript); aquí pasa a modal
   useLayoutEffect(() => {

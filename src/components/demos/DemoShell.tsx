@@ -3,21 +3,27 @@
 import { useEffect, useState, useSyncExternalStore, type ReactNode, type RefObject } from "react";
 import type { LucideIcon } from "lucide-react";
 import { useInView } from "framer-motion";
+import { createStore, useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
+
+/** Demos abiertos en un modal sobre la página: mientras haya uno, las escenas de atrás se pausan */
+export const openDemoDialogs = createStore(0);
 
 /**
  * Cuándo montar y animar una escena 3D:
  * - `shouldMount`: cuando el usuario se acerca a la sección y el navegador está libre. Quien no
  *   baja hasta el demo no descarga three.js ni compila shaders (congelaba la página al cargar).
- * - `isActive`: está visible y la pestaña también → se anima; si no, queda en pausa.
+ * - `isActive`: está visible, la pestaña también y ningún demo en modal la tapa → se anima; si no,
+ *   queda en pausa. `inDialog`: la escena es la del propio modal.
  * - `isReady`: la escena terminó de compilar sus shaders (`onReady`); hasta entonces, el aviso de carga.
  */
-export function useDemoActivation(ref: RefObject<HTMLElement | null>) {
+export function useDemoActivation(ref: RefObject<HTMLElement | null>, { inDialog = false } = {}) {
   const isNear = useInView(ref, { once: true, margin: "800px 0px" });
   const isVisible = useInView(ref);
   const [pageVisible, setPageVisible] = useState(true);
   const [idle, setIdle] = useState(false);
   const [isReady, setReady] = useState(false);
+  const covered = useStore(openDemoDialogs, 0) > 0 && !inDialog;
 
   useEffect(() => {
     const onVisibility = () => setPageVisible(!document.hidden);
@@ -38,7 +44,7 @@ export function useDemoActivation(ref: RefObject<HTMLElement | null>) {
 
   return {
     shouldMount: isNear && idle,
-    isActive: isVisible && pageVisible,
+    isActive: isVisible && pageVisible && !covered,
     isReady,
     onReady: () => setReady(true),
   };

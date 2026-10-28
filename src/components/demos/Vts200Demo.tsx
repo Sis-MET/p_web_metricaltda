@@ -270,7 +270,7 @@ function Demo({ initialStep }: { initialStep: number }) {
   const reducedMotion = useReducedMotion();
   const isDesktop = useIsDesktop();
   const viewerRef = useRef<HTMLDivElement>(null);
-  const { shouldMount, isActive, isReady, onReady } = useDemoActivation(viewerRef);
+  const { shouldMount, isActive, isReady, onReady } = useDemoActivation(viewerRef, { inDialog: true });
   const labelElements = useRef<(HTMLElement | null)[]>([]);
   const cellTagElements = useRef<(HTMLElement | null)[]>([]);
 
