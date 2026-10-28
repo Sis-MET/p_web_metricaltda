@@ -185,16 +185,24 @@
   }
 }
 
-/* Reveal: se oculta al instante (sin transición) y aparece al entrar en pantalla */
+/* Reveal: entra al asomar en pantalla y sale por el lado por el que se va */
 @layer components {
-  [data-reveal="hidden"] {
-    opacity: 0;
-    translate: 0 var(--reveal-y);
-  }
-
-  [data-reveal="shown"] {
+  [data-reveal] {
     transition:
       opacity 0.5s var(--ease-out-expo) var(--reveal-delay),
       translate 0.5s var(--ease-out-expo) var(--reveal-delay);
+  }
+
+  /* Salida: más breve y sin la demora escalonada de la entrada */
+  [data-reveal="above"],
+  [data-reveal="below"] {
+    opacity: 0;
+    translate: 0 var(--reveal-y);
+    transition-duration: 0.35s;
+    transition-delay: 0s;
+  }
+
+  [data-reveal="above"] {
+    translate: 0 calc(var(--reveal-y) * -1);
   }
 }

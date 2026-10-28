@@ -6,7 +6,7 @@ import { Check, Loader2 } from "lucide-react";
 import { HmiPanel, StatusLed } from "@/components/demos/DemoShell";
 import { cn } from "@/lib/utils";
 
-/** Diagnóstico de equipo ilustrativo: los puntos de revisión se van marcando al entrar en pantalla. */
+/** Diagnóstico de equipo ilustrativo: los puntos de revisión se van marcando cada vez que entra en pantalla. */
 
 const CHECKS = [
   { label: "Celdas de carga", result: "OK" },
@@ -20,9 +20,15 @@ const STEP_MS = 650;
 
 export function SupportDiagnostic() {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.4 });
+  const inView = useInView(ref, { amount: 0.4 });
   const reducedMotion = useReducedMotion();
   const [done, setDone] = useState(0);
+  // Al salir de pantalla vuelve a empezar: el diagnóstico se repite al regresar
+  const [wasInView, setWasInView] = useState(inView);
+  if (inView !== wasInView) {
+    setWasInView(inView);
+    if (!inView) setDone(0);
+  }
 
   useEffect(() => {
     if (!inView || reducedMotion || done >= CHECKS.length) return;

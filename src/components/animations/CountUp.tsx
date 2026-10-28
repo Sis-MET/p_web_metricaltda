@@ -6,7 +6,7 @@ import { useInView, useReducedMotion } from "framer-motion";
 /** La curva de EASE_OUT (salida exponencial) como función, para animar cuadro a cuadro */
 const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - 2 ** (-10 * t));
 
-/** Número que cuenta hasta su valor la primera vez que aparece en pantalla. */
+/** Número que cuenta hasta su valor cada vez que aparece en pantalla. */
 export function CountUp({
   value,
   from = 0,
@@ -20,12 +20,17 @@ export function CountUp({
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   // Arranca apenas asoma, mientras el bloque todavía está apareciendo (evita un salto visible)
-  const inView = useInView(ref, { once: true });
+  const inView = useInView(ref);
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || !inView || reducedMotion) return;
+    if (!el || reducedMotion) return;
+    // Fuera de pantalla vuelve al inicio, para contar de nuevo al regresar
+    if (!inView) {
+      el.textContent = `${prefix}${from}`;
+      return;
+    }
     // Sin animate() de framer-motion: traería todo su motor de animación al JavaScript inicial
     const start = performance.now();
     let frame = requestAnimationFrame(function step(now) {

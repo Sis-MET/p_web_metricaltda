@@ -56,7 +56,8 @@ const CURVE = POINTS.map((p) => `${x(p.load)},${y(p.error)}`).join(" ");
 
 export function CalibrationChart() {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.4 });
+  // Se dibuja cada vez que entra en pantalla y se borra al salir
+  const inView = useInView(ref, { amount: 0.4 });
 
   return (
     <div ref={ref}>
@@ -83,7 +84,7 @@ export function CalibrationChart() {
             stroke={COLORS.empStroke}
             strokeDasharray="4 3"
             initial={{ opacity: 0 }}
-            animate={inView ? { opacity: 1 } : undefined}
+            animate={{ opacity: inView ? 1 : 0 }}
             transition={{ duration: 0.6 }}
           />
 
@@ -94,7 +95,7 @@ export function CalibrationChart() {
             stroke={COLORS.curve}
             strokeWidth={1.5}
             initial={{ pathLength: 0 }}
-            animate={inView ? { pathLength: 1 } : undefined}
+            animate={{ pathLength: inView ? 1 : 0 }}
             transition={{ duration: 1.2, ease: EASE_OUT, delay: 0.3 }}
           />
 
@@ -103,7 +104,7 @@ export function CalibrationChart() {
             <m.g
               key={p.load}
               initial={{ opacity: 0 }}
-              animate={inView ? { opacity: 1 } : undefined}
+              animate={{ opacity: inView ? 1 : 0 }}
               transition={{ duration: 0.3, delay: 0.35 + i * 0.16 }}
             >
               <line x1={x(p.load)} x2={x(p.load)} y1={y(p.error + p.u)} y2={y(p.error - p.u)} stroke={COLORS.uncertainty} strokeWidth={1.5} />
