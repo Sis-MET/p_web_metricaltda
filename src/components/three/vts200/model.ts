@@ -32,6 +32,34 @@ export const PEDESTAL = 0.45;
 export const TIE_BEAM = 0.3;
 export const APPROACH_LENGTH = 4;
 
+/**
+ * Celda POWERCELL PDX sobre su pedestal (alturas desde la cara del pedestal, m): placa de apoyo,
+ * copa inferior, cuerpo de acero inoxidable con la columna basculante y la electrónica, y copa
+ * superior. Asoma dentro del bolsillo de la plataforma.
+ */
+export const CELL = {
+  plate: 0.025,
+  cup: 0.02,
+  body: 0.13,
+  radius: 0.052,
+  /** Centro de la columna y altura de la placa electrónica */
+  column: 0.1,
+  pcb: 0.163,
+  /** Prensaestopas del cable de red, del lado -x */
+  gland: 0.07,
+};
+
+/** Celda que se abre en la vista de celdas: la segunda línea de apoyo, lado +z */
+export const FOCUS_CELL = 3;
+
+// Cámara de la vista de celdas respecto de la celda abierta (sin three.js: este archivo también
+// lo usa la interfaz del demo, que se carga antes que la escena)
+const CELL_VIEW = { x: -0.55, z: 0.33 };
+const CELL_VIEW_LENGTH = Math.hypot(CELL_VIEW.x, CELL_VIEW.z);
+
+/** Dirección horizontal desde la celda abierta hacia la cámara de la vista de celdas */
+export const CELL_VIEW_DIRECTION = { x: CELL_VIEW.x / CELL_VIEW_LENGTH, z: CELL_VIEW.z / CELL_VIEW_LENGTH };
+
 export type Cell = { id: string; x: number; z: number; support: number };
 
 /** Dimensiones de una caja apoyada en su base: centro en planta (x, z), base (y) y medidas */
@@ -93,8 +121,16 @@ export function layoutFor(size: ScaleSize): Layout {
 
 /* ─── Recorrido de la cámara ────────────────────────────────────────────── */
 
-export function viewsFor({ half }: Layout): { overview: View; steps: View[] } {
+export function viewsFor({ half, cells }: Layout): { overview: View; steps: View[]; cell: View } {
+  const focus = cells[FOCUS_CELL];
   return {
+    // Bajo la plataforma (transparente), junto a la celda abierta
+    // Debajo de la plataforma (transparente), a la altura de la columna
+    cell: {
+      position: [focus.x + CELL_VIEW.x, LEVEL.pier + 0.08, focus.z + CELL_VIEW.z],
+      target: [focus.x, LEVEL.pier + CELL.column + 0.01, focus.z],
+    },
+    // Vistas bajas: detrás de la obra asoman la mina y los cerros
     overview: { position: [-half - 28, 9, 36], target: [6, 2, -8] },
     steps: [
       { position: [-half - 15, 10, 23], target: [1, 0.5, -2] },
@@ -116,15 +152,23 @@ export type Label = {
   /** Avance del paso desde el que aparece y hasta el que sigue visible */
   from: number;
   until?: number;
-  /** Solo con la acción del paso activa (p. ej., los estratos del suelo) */
+  /** true: solo con la acción del paso activa (estratos, celdas); false: solo sin ella */
   action?: boolean;
+  /** Punto numerado (la explicación va en el panel del demo) */
+  callout?: number;
   position: Vec3;
 };
 
 export function labelsFor(layout: Layout): Label[] {
-  const { half, pit, dig, supports, modules, spots, size } = layout;
+  const { half, pit, dig, supports, modules, spots, size, cells } = layout;
   const [s0, s1] = supports;
   const strataX = -half * 0.45;
+  const focus = cells[FOCUS_CELL];
+  const cellPoint = (height: number, outward = 0): Vec3 => [
+    focus.x + CELL_VIEW_DIRECTION.x * outward,
+    LEVEL.pier + height,
+    focus.z + CELL_VIEW_DIRECTION.z * outward,
+  ];
   return [
     { text: `Replanteo de ${size.length} × ${String(WIDTH).replace(".", ",")} m`, step: 0, from: 0.75, position: [0, 0.7, pit.z] },
     { text: "Camilla de replanteo", step: 0, from: 0.75, position: [-dig.x - 1.3, 1, 0] },
@@ -148,9 +192,14 @@ export function labelsFor(layout: Layout): Label[] {
     { text: "Muro frontal", step: 4, from: 0.5, position: [-pit.x - FRONT_WALL / 2, 0, pit.z * 0.4] },
     { text: "Losa de acceso", step: 4, from: 0.95, position: [-pit.x - FRONT_WALL - APPROACH_LENGTH / 2, 0, 0] },
 
-    { text: "Celdas POWERCELL PDX", step: 5, from: 0.08, until: 0.45, position: [s1, LEVEL.pier + 0.15, CELL_Z] },
-    { text: "Módulo de acero VTS200", step: 5, from: 0.5, position: [modules[0].x, 0, -WIDTH / 2] },
-    { text: "Caseta de control", step: 5, from: 0.88, position: [spots.booth[0], 2.9, spots.booth[2]] },
+    { text: "Celdas POWERCELL PDX", step: 5, from: 0.08, until: 0.45, action: false, position: [s1, LEVEL.pier + 0.15, CELL_Z] },
+    { text: "Módulo de acero VTS200", step: 5, from: 0.5, action: false, position: [modules[0].x, 0, -WIDTH / 2] },
+    { text: "Caseta de control", step: 5, from: 0.88, action: false, position: [spots.booth[0], 2.9, spots.booth[2]] },
+    // Celda abierta: puntos numerados sobre sus partes, en el orden del panel
+    { text: "Columna de acero", callout: 1, step: 5, from: 0, action: true, position: cellPoint(0.135, 0.022) },
+    { text: "Galgas extensométricas", callout: 2, step: 5, from: 0, action: true, position: cellPoint(CELL.column, 0.026) },
+    { text: "Electrónica digital", callout: 3, step: 5, from: 0, action: true, position: cellPoint(CELL.pcb, 0.03) },
+    { text: "Red hasta la caseta", callout: 4, step: 5, from: 0, action: true, position: [focus.x - 0.08, LEVEL.pier + CELL.gland, focus.z] },
   ];
 }
 

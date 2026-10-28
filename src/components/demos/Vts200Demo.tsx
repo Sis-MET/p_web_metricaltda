@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode, type RefObject } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -12,6 +12,7 @@ import {
   CloudRain,
   Expand,
   FoldHorizontal,
+  Gauge,
   Layers,
   Pause,
   Play,
@@ -23,10 +24,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { TruckReading } from "@/components/three/vts200/Vts200Scene";
-import { labelsFor, layoutFor, type Layout } from "@/components/three/vts200/model";
+import { FOCUS_CELL, labelsFor, layoutFor, type Cell, type Layout } from "@/components/three/vts200/model";
 import {
   DEFAULT_SIZE,
   DEMO_TITLE,
+  LOAD_CELL_NOTE,
+  LOAD_CELL_STEPS,
   PHASES,
   PROJECT_SECTION_ID,
   PROJECT_STEPS,
@@ -52,14 +55,14 @@ const Vts200Scene = dynamic(() => import("@/components/three/scenes").then((m) =
 
 const LAST = PROJECT_STEPS.length - 1;
 
-/** Acción propia de cada paso (el primero elige el largo y el último pesa un camión) */
+/** Acción propia de cada paso (el primero elige el largo; el último, además, pesa un camión) */
 const TOGGLES: ({ label: string; icon: LucideIcon; hint: string } | null)[] = [
   null,
   { label: "Ver estratos del suelo", icon: Layers, hint: "Capas del terreno a la vista en el talud" },
   { label: "Ver armadura", icon: ScanEye, hint: "El hormigón se vuelve transparente" },
   { label: "Simular lluvia", icon: CloudRain, hint: "El agua corre a los sumideros y sale por la cámara" },
   { label: "Ver empuje del suelo", icon: FoldHorizontal, hint: "Crece con la profundidad: los muros lo resisten" },
-  null,
+  { label: "Ver celdas de carga", icon: Gauge, hint: "La plataforma se vuelve transparente y una celda se abre por dentro" },
 ];
 
 /** Imagen fija de cada paso (capturas de la página): el momento que mejor lo muestra */
@@ -68,6 +71,7 @@ const STILL_PROGRESS = [1, 1, 0.76, 0.8, 1, 1];
 const EMPTY_READING: TruckReading = { total: 0, cells: [], axlesOnDeck: 0, displayed: 0, stable: false };
 
 const kg = new Intl.NumberFormat("es-BO", { maximumFractionDigits: 0 });
+const tonnes = new Intl.NumberFormat("es-BO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const toDivision = (value: number) => Math.round(value / VTS200.division) * VTS200.division;
 const width = String(VTS200.width).replace(".", ",");
 
@@ -322,6 +326,34 @@ function Indicator({ readings, progress, capacity }: { readings: Store<TruckRead
   );
 }
 
+/** Lectura de cada celda sobre el modelo (vista de celdas): la escena las posiciona en cada cuadro */
+function CellTags({
+  cells,
+  readings,
+  elements,
+}: {
+  cells: Cell[];
+  readings: Store<TruckReading>;
+  elements: RefObject<(HTMLElement | null)[]>;
+}) {
+  const r = useStore(readings);
+  return cells.map((cell, i) => (
+    <span
+      key={cell.id}
+      ref={(el) => {
+        elements.current[i] = el;
+      }}
+      style={{ opacity: 0, visibility: "hidden" }}
+      className={cn(
+        "absolute left-0 top-0 select-none whitespace-nowrap rounded bg-mt-950/90 px-1.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums ring-1 transition-[opacity,visibility] duration-300",
+        i === FOCUS_CELL ? "text-sun-200 ring-sun-400/60" : "text-white/85 ring-white/15"
+      )}
+    >
+      {cell.id} · {tonnes.format((r.cells[i] ?? 0) / 1000)} t
+    </span>
+  ));
+}
+
 /* ─── Demo ──────────────────────────────────────────────────────────────── */
 
 /**
@@ -336,6 +368,7 @@ function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
   const viewerRef = useRef<HTMLDivElement>(null);
   const { shouldMount, isActive, isReady, onReady } = useDemoActivation(viewerRef);
   const labelElements = useRef<(HTMLElement | null)[]>([]);
+  const cellTagElements = useRef<(HTMLElement | null)[]>([]);
 
   const [step, setStep] = useState(() => Math.min(LAST, Math.max(0, initialStep)));
   const [sizeIndex, setSizeIndex] = useState(DEFAULT_SIZE);
@@ -355,6 +388,8 @@ function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
   const phase = phaseOf(current);
   const toggle = TOGGLES[step];
   const facts = factsFor(step, layout);
+  // Vista de celdas: la acción del último paso
+  const cellView = step === LAST && action;
 
   const goTo = (next: number) => {
     if (next < 0 || next > LAST) return;
@@ -377,6 +412,13 @@ function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
     setWeighing(true);
   };
 
+  // Al abrir las celdas pasa un camión, para verlas trabajar
+  const toggleAction = () => {
+    const next = !action;
+    setAction(next);
+    if (next && step === LAST && !weighing) weigh();
+  };
+
   const prepareQuote = () => {
     formDrafts.set("cotizacion", quoteSummary(size));
     quote.add(TRUCK_SCALE_PRODUCT.slug);
@@ -391,10 +433,13 @@ function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
   const stepAction: ReactNode =
     step === 0 ? (
       <SizeSelector sizeIndex={sizeIndex} onSize={setSizeIndex} />
-    ) : step === LAST ? (
-      <ActionButton icon={Truck} label={weighing ? "Pesando…" : "Pesar un camión"} disabled={weighing} onClick={weigh} />
     ) : (
-      toggle && <ActionButton icon={toggle.icon} label={toggle.label} pressed={action} onClick={() => setAction((a) => !a)} />
+      <>
+        {toggle && <ActionButton icon={toggle.icon} label={toggle.label} pressed={action} onClick={toggleAction} />}
+        {step === LAST && (
+          <ActionButton icon={Truck} label={weighing ? "Pesando…" : "Pesar un camión"} disabled={weighing} onClick={weigh} />
+        )}
+      </>
     );
 
   const quoteLink = (
@@ -429,6 +474,7 @@ function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
             still={still}
             labels={labels}
             labelElements={labelElements}
+            cellTagElements={cellTagElements}
             active={isActive}
             onReady={onReady}
           />
@@ -452,12 +498,27 @@ function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
                   labelElements.current[i] = el;
                 }}
                 style={{ opacity: 0, visibility: "hidden" }}
-                className="absolute left-0 top-0 inline-flex select-none items-center gap-1.5 whitespace-nowrap rounded-md bg-mt-950/90 px-2 py-1 text-[11px] font-semibold text-white ring-1 ring-white/15 transition-[opacity,visibility] duration-300"
+                className={cn(
+                  "absolute left-0 top-0 select-none transition-[opacity,visibility] duration-300",
+                  label.callout
+                    ? "flex size-6 items-center justify-center rounded-full bg-sun-400 text-[11px] font-bold text-ink-950 ring-2 ring-mt-950/80"
+                    : "inline-flex items-center gap-1.5 whitespace-nowrap rounded-md bg-mt-950/90 px-2 py-1 text-[11px] font-semibold text-white ring-1 ring-white/15"
+                )}
               >
-                <span aria-hidden className="size-1.5 rounded-full bg-sun-400" />
-                {label.text}
+                {label.callout ? (
+                  <>
+                    {label.callout}
+                    <span className="sr-only">{label.text}</span>
+                  </>
+                ) : (
+                  <>
+                    <span aria-hidden className="size-1.5 rounded-full bg-sun-400" />
+                    {label.text}
+                  </>
+                )}
               </span>
             ))}
+            <CellTags cells={layout.cells} readings={readings} elements={cellTagElements} />
           </div>
 
           <div className="pointer-events-none relative flex h-full flex-col px-4 pb-4 pt-4 sm:px-6 lg:px-10 lg:pb-6 lg:pt-7">
@@ -484,13 +545,33 @@ function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
                 </span>
               </p>
               <h2 className="mt-2 font-heading text-2xl font-extrabold leading-[1.08] tracking-tight sm:text-3xl lg:text-4xl">
-                {current.title}
+                {cellView ? `Celdas de carga ${VTS200.cells}` : current.title}
               </h2>
-              <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-white/75 lg:line-clamp-none lg:text-base">{current.text}</p>
-              <p className="mt-4 hidden border-l-2 border-sun-400 pl-3 text-sm font-semibold text-white lg:block">
-                <span className="text-mt-200">Resultado:</span> {current.result}
-              </p>
-              {facts.length > 0 && (
+              {cellView ? (
+                // Cómo pesa una celda: cada punto coincide con su número sobre la celda abierta
+                <ol className="mt-3 space-y-2 lg:mt-4 lg:space-y-3">
+                  {LOAD_CELL_STEPS.map((item, i) => (
+                    <li key={item.title} className="flex gap-3">
+                      <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-sun-400 text-[11px] font-bold text-ink-950">
+                        {i + 1}
+                      </span>
+                      <p className="text-sm leading-snug text-white/75">
+                        <span className="font-semibold text-white">{item.title}.</span>{" "}
+                        <span className="hidden lg:inline">{item.text}</span>
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <>
+                  <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-white/75 lg:line-clamp-none lg:text-base">{current.text}</p>
+                  <p className="mt-4 hidden border-l-2 border-sun-400 pl-3 text-sm font-semibold text-white lg:block">
+                    <span className="text-mt-200">Resultado:</span> {current.result}
+                  </p>
+                </>
+              )}
+              {cellView && <p className="mt-4 hidden text-xs leading-relaxed text-white/55 lg:block">{LOAD_CELL_NOTE}</p>}
+              {!cellView && facts.length > 0 && (
                 <ul className="mt-4 hidden flex-wrap gap-2 lg:flex">
                   {facts.map((fact) => (
                     <li key={fact} className="rounded-full border border-white/15 bg-mt-950/60 px-3 py-1 font-mono text-[11px] text-white/80">
@@ -500,7 +581,7 @@ function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
                 </ul>
               )}
               <div className="mt-6 hidden lg:block">
-                {stepAction}
+                <div className="flex flex-wrap gap-2">{stepAction}</div>
                 {toggle && <p className="mt-2 text-xs text-white/50">{toggle.hint}</p>}
               </div>
               <div className="mt-8 hidden lg:block">{quoteLink}</div>
@@ -509,7 +590,8 @@ function Demo({ initialStep, still }: { initialStep: number; still: boolean }) {
             {/* Pie: indicador, acción (móvil), avance y pasos */}
             <div className="mt-auto flex flex-col gap-3">
               {step === LAST && (
-                <div className="pointer-events-auto lg:self-end">
+                // En celulares, la vista de celdas ya muestra cada lectura sobre el modelo
+                <div className={cn("pointer-events-auto lg:self-end", cellView && "max-lg:hidden")}>
                   <Indicator readings={readings} progress={progress} capacity={size.capacity} />
                 </div>
               )}

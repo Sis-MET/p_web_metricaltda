@@ -2,11 +2,23 @@
 
 import { useMemo, useRef, type ComponentRef, type RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Line } from "@react-three/drei";
+import { Edges, Line } from "@react-three/drei";
 import * as THREE from "three";
 import { easeOut, segment, span, useBuild } from "./build";
-import { COLORS, type Materials } from "./materials";
-import { CELL_Z, DECK_THICKNESS, LEVEL, SIDE_WALL, WIDTH, type Box, type Layout, type ScaleReading } from "./model";
+import { COLORS, fadeTo, type Materials } from "./materials";
+import {
+  CELL,
+  CELL_VIEW_DIRECTION,
+  CELL_Z,
+  DECK_THICKNESS,
+  FOCUS_CELL,
+  LEVEL,
+  SIDE_WALL,
+  WIDTH,
+  type Box,
+  type Layout,
+  type ScaleReading,
+} from "./model";
 
 const STEP = 5;
 const MODULES = { from: 0.14, to: 0.7 };
@@ -14,6 +26,29 @@ const LIFT = 7;
 const HOOK = 3.6;
 
 /* ─── Celdas POWERCELL PDX ──────────────────────────────────────────────── */
+
+// Orientación de la celda abierta: le falta el cuarto que mira a la cámara de la vista de celdas
+const OPEN_ANGLE = Math.atan2(CELL_VIEW_DIRECTION.x, CELL_VIEW_DIRECTION.z);
+const BODY_Y = CELL.plate + CELL.cup + CELL.body / 2;
+const TOP_Y = CELL.plate + CELL.cup + CELL.body;
+const GAUGE_RADIUS = 0.0225;
+
+const CELL_GEOMETRY = {
+  plate: new THREE.BoxGeometry(0.3, CELL.plate, 0.3).translate(0, CELL.plate / 2, 0),
+  cup: new THREE.CylinderGeometry(0.065, 0.065, CELL.cup, 28),
+  body: new THREE.CylinderGeometry(CELL.radius, CELL.radius, CELL.body, 32),
+  bodyOpen: new THREE.CylinderGeometry(CELL.radius, CELL.radius, CELL.body, 32, 1, true, OPEN_ANGLE + Math.PI / 4, Math.PI * 1.5),
+  ring: new THREE.TorusGeometry(CELL.radius + 0.002, 0.004, 8, 32).rotateX(Math.PI / 2),
+  top: new THREE.BoxGeometry(0.26, 0.02, 0.26),
+  column: new THREE.CapsuleGeometry(0.022, 0.06, 6, 16),
+  gauge: new THREE.BoxGeometry(0.012, 0.022, 0.003),
+  pcb: new THREE.CylinderGeometry(0.046, 0.046, 0.006, 28),
+  chip: new THREE.BoxGeometry(0.016, 0.005, 0.016),
+  gland: new THREE.CylinderGeometry(0.011, 0.011, 0.03, 12).rotateZ(Math.PI / 2),
+};
+
+/** Carga (kg) con la que se ve la deformación máxima, muy exagerada para que se note */
+const FULL_LOAD = 9000;
 
 function LoadCells({
   layout,
@@ -26,19 +61,22 @@ function LoadCells({
 }) {
   const build = useBuild();
   const groups = useRef<(THREE.Group | null)[]>([]);
+  const column = useRef<THREE.Mesh>(null);
+  const body = useRef<THREE.Mesh>(null);
+  const bodyOpen = useRef<THREE.Mesh>(null);
+  const lamp = useRef<THREE.PointLight>(null);
+  const focus = layout.cells[FOCUS_CELL];
+  // Anillo de estado de cada celda y galgas de la celda abierta: brillan según la carga
   const rings = useMemo(
     () =>
       layout.cells.map(
-        () =>
-          new THREE.MeshStandardMaterial({
-            color: "#2a2a28",
-            emissive: COLORS.signal,
-            emissiveIntensity: 0.2,
-            metalness: 0.3,
-            roughness: 0.4,
-          })
+        () => new THREE.MeshStandardMaterial({ color: "#2a2a28", emissive: COLORS.signal, emissiveIntensity: 0.2, roughness: 0.4 })
       ),
     [layout.cells]
+  );
+  const gauges = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: "#7a5a12", emissive: COLORS.signal, emissiveIntensity: 0.2, roughness: 0.5 }),
+    []
   );
 
   useFrame((_, dt) => {
@@ -49,35 +87,135 @@ function LoadCells({
       const s = span(p, i * 0.008, 0.08 + i * 0.008);
       group.visible = s > 0;
       group.scale.setScalar(Math.max(s, 1e-4));
-      // El anillo de cada celda brilla según la carga que recibe
-      const target = 0.15 + Math.min(1, (loads[i] ?? 0) / 9000) * 3.2;
-      rings[i].emissiveIntensity = THREE.MathUtils.damp(rings[i].emissiveIntensity, target, 8, dt);
+      const load = Math.min(1, (loads[i] ?? 0) / FULL_LOAD);
+      rings[i].emissiveIntensity = THREE.MathUtils.damp(rings[i].emissiveIntensity, 0.15 + load * 1.8, 8, dt);
+      if (i !== FOCUS_CELL) return;
+      gauges.emissiveIntensity = THREE.MathUtils.damp(gauges.emissiveIntensity, 0.2 + load * 4, 8, dt);
+      if (column.current) column.current.scale.y = THREE.MathUtils.damp(column.current.scale.y, 1 - load * 0.08, 8, dt);
     });
+    // La celda se abre en la vista de celdas, con una luz de inspección
+    const open = build.action(STEP);
+    if (body.current) body.current.visible = !open;
+    if (bodyOpen.current) bodyOpen.current.visible = open;
+    if (lamp.current) lamp.current.intensity = THREE.MathUtils.damp(lamp.current.intensity, open ? 0.6 : 0, 6, dt);
   });
 
   return (
     <group>
-      {layout.cells.map((cell, i) => (
-        <group
-          key={cell.id}
-          position={[cell.x, LEVEL.pier, cell.z]}
-          ref={(el) => {
-            groups.current[i] = el;
-          }}
-          visible={false}
-        >
-          <mesh material={materials.plate} position={[0, 0.015, 0]}>
-            <boxGeometry args={[0.36, 0.03, 0.36]} />
-          </mesh>
-          <mesh material={materials.steel} position={[0, 0.06, 0]}>
-            <cylinderGeometry args={[0.07, 0.08, 0.06, 24]} />
-          </mesh>
-          <mesh material={rings[i]} position={[0, 0.065, 0]}>
-            <cylinderGeometry args={[0.088, 0.088, 0.02, 24]} />
-          </mesh>
-          <mesh material={materials.plate} position={[0, 0.1, 0]}>
-            <boxGeometry args={[0.3, 0.02, 0.3]} />
-          </mesh>
+      <pointLight
+        ref={lamp}
+        position={[focus.x + CELL_VIEW_DIRECTION.x * 0.35, LEVEL.pier + 0.2, focus.z + CELL_VIEW_DIRECTION.z * 0.35]}
+        intensity={0}
+        distance={1.5}
+        decay={2}
+        color="#fff6e8"
+      />
+      {layout.cells.map((cell, i) => {
+        const isFocus = i === FOCUS_CELL;
+        return (
+          <group
+            key={cell.id}
+            position={[cell.x, LEVEL.pier, cell.z]}
+            ref={(el) => {
+              groups.current[i] = el;
+            }}
+            visible={false}
+          >
+            <mesh geometry={CELL_GEOMETRY.plate} material={materials.plate} receiveShadow />
+            <mesh geometry={CELL_GEOMETRY.cup} material={materials.steel} position={[0, CELL.plate + CELL.cup / 2, 0]} />
+            <mesh ref={isFocus ? body : undefined} geometry={CELL_GEOMETRY.body} material={materials.stainless} position={[0, BODY_Y, 0]} castShadow />
+            <mesh geometry={CELL_GEOMETRY.ring} material={rings[i]} position={[0, TOP_Y - 0.015, 0]} />
+            <mesh geometry={CELL_GEOMETRY.cup} material={materials.steel} position={[0, TOP_Y + CELL.cup / 2, 0]} />
+            <mesh geometry={CELL_GEOMETRY.top} material={materials.plate} position={[0, TOP_Y + CELL.cup + 0.01, 0]} />
+            <mesh geometry={CELL_GEOMETRY.gland} material={materials.dark} position={[-CELL.radius - 0.012, CELL.gland, 0]} />
+            {isFocus && (
+              <>
+                <mesh ref={bodyOpen} geometry={CELL_GEOMETRY.bodyOpen} material={materials.stainless} position={[0, BODY_Y, 0]} visible={false} />
+                {/* Interior: columna basculante con sus galgas y la electrónica que digitaliza la señal */}
+                <mesh ref={column} geometry={CELL_GEOMETRY.column} material={materials.column} position={[0, CELL.column, 0]} />
+                {[0, 1, 2, 3].map((k) => {
+                  const angle = OPEN_ANGLE + (k * Math.PI) / 2;
+                  return (
+                    <mesh
+                      key={k}
+                      geometry={CELL_GEOMETRY.gauge}
+                      material={gauges}
+                      position={[Math.sin(angle) * GAUGE_RADIUS, CELL.column, Math.cos(angle) * GAUGE_RADIUS]}
+                      rotation-y={angle}
+                    />
+                  );
+                })}
+                <mesh geometry={CELL_GEOMETRY.pcb} material={materials.pcb} position={[0, CELL.pcb, 0]} />
+                <mesh geometry={CELL_GEOMETRY.chip} material={materials.dark} position={[0.012, CELL.pcb + 0.005, -0.01]} />
+              </>
+            )}
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
+/* ─── Red digital bajo la plataforma: las celdas en cadena ──────────────── */
+
+type LineRef = ComponentRef<typeof Line>;
+
+/** Hace avanzar los pulsos de datos de las líneas: más rápido mientras cambia la carga */
+function advancePulses(lines: (LineRef | null)[], dt: number, activity: number) {
+  for (const line of lines) {
+    if (line) (line.material as unknown as { dashOffset: number }).dashOffset -= dt * (0.25 + activity * 1.2);
+  }
+}
+
+function CellNetwork({ layout, active }: { layout: Layout; active: RefObject<number> }) {
+  const build = useBuild();
+  const group = useRef<THREE.Group>(null);
+  const lines = useRef<(LineRef | null)[]>([]);
+  const { cells, supports } = layout;
+
+  // Cada celda baja su cable por el prensaestopas a un tendido junto a ella; al final se unen los dos lados
+  const routes = useMemo(() => {
+    const y = LEVEL.pier + CELL.gland;
+    const gland = (x: number) => x - CELL.radius - 0.03;
+    const sides = [-1, 1].map((side) => {
+      const run = side * (CELL_Z - 0.12);
+      return cells
+        .filter((cell) => Math.sign(cell.z) === side)
+        .flatMap((cell) => [
+          [gland(cell.x), y, cell.z],
+          [gland(cell.x), y, run],
+        ]) as [number, number, number][];
+    });
+    const last = gland(supports[supports.length - 1]);
+    const bridge: [number, number, number][] = [
+      [last, y, -(CELL_Z - 0.12)],
+      [last, y, CELL_Z - 0.12],
+    ];
+    return [...sides, bridge];
+  }, [cells, supports]);
+
+  useFrame((_, dt) => {
+    const visible = build.action(STEP);
+    if (group.current) group.current.visible = visible;
+    if (visible) advancePulses(lines.current, dt, active.current);
+  });
+
+  return (
+    <group ref={group} visible={false}>
+      {routes.map((points, i) => (
+        <group key={i}>
+          <Line points={points} color="#3a3a38" lineWidth={2.4} />
+          <Line
+            ref={(el) => {
+              lines.current[i] = el;
+            }}
+            points={points}
+            color={COLORS.signal}
+            lineWidth={2}
+            dashed
+            dashSize={0.05}
+            gapSize={0.22}
+          />
         </group>
       ))}
     </group>
@@ -86,9 +224,10 @@ function LoadCells({
 
 /* ─── Módulos de acero: bajan uno por uno con la grúa ───────────────────── */
 
-function Modules({ layout, materials }: { layout: Layout; materials: Materials }) {
+function Modules({ layout, materials, xray }: { layout: Layout; materials: Materials; xray: boolean }) {
   const build = useBuild();
   const groups = useRef<(THREE.Group | null)[]>([]);
+  const decks = useRef<(THREE.Mesh | null)[]>([]);
   const rigs = useRef<(THREE.Group | null)[]>([]);
   const n = layout.modules.length;
   const slot = (MODULES.to - MODULES.from) / n;
@@ -99,14 +238,20 @@ function Modules({ layout, materials }: { layout: Layout; materials: Materials }
     [materials]
   );
 
-  useFrame(() => {
+  useFrame((_, dt) => {
     const p = build.stage(STEP);
+    // Vista de celdas: la plataforma se vuelve transparente y deja de dar sombra sobre ellas
+    const clear = build.action(STEP);
+    fadeTo(materials.deckTop, clear ? 0.12 : 1, dt);
+    fadeTo(materials.deckSide, clear ? 0.12 : 1, dt);
     for (let i = 0; i < n; i++) {
       const group = groups.current[i];
       if (!group) continue;
       const t = span(p, MODULES.from + i * slot, MODULES.from + (i + 1) * slot);
       group.visible = t > 0;
       group.position.y = -DECK_THICKNESS / 2 + (1 - easeOut(t)) * LIFT;
+      const deck = decks.current[i];
+      if (deck) deck.castShadow = !clear;
       const rig = rigs.current[i];
       if (rig) rig.visible = t > 0 && t < 1;
     }
@@ -125,8 +270,16 @@ function Modules({ layout, materials }: { layout: Layout; materials: Materials }
             }}
             visible={false}
           >
-            <mesh material={faces} castShadow receiveShadow>
+            <mesh
+              ref={(el) => {
+                decks.current[i] = el;
+              }}
+              material={faces}
+              castShadow
+              receiveShadow
+            >
               <boxGeometry args={[module.length - 0.03, DECK_THICKNESS, WIDTH]} />
+              {xray && <Edges color={COLORS.signal} threshold={15} />}
             </mesh>
             {/* Eslingas de la grúa mientras baja */}
             <group
@@ -243,12 +396,10 @@ function Booth({ layout, materials }: { layout: Layout; materials: Materials }) 
 
 /* ─── Red digital: de las celdas a la caseta ────────────────────────────── */
 
-type LineRef = ComponentRef<typeof Line>;
-
 function Network({ layout, active }: { layout: Layout; active: RefObject<number> }) {
   const build = useBuild();
   const group = useRef<THREE.Group>(null);
-  const pulse = useRef<LineRef>(null);
+  const pulses = useRef<(LineRef | null)[]>([]);
   const { supports, pit, spots } = layout;
   const [bx, , bz] = spots.booth;
 
@@ -268,18 +419,27 @@ function Network({ layout, active }: { layout: Layout; active: RefObject<number>
     ] as [number, number, number][];
   }, [bx, bz, pit.z, supports]);
 
+  // Los datos viajan hacia la caseta
   useFrame((_, dt) => {
     const visible = span(build.stage(STEP), 0.86, 1) > 0;
     if (group.current) group.current.visible = visible;
-    if (!visible || !pulse.current) return;
-    // Los datos viajan hacia la caseta; más rápido mientras se pesa
-    (pulse.current.material as unknown as { dashOffset: number }).dashOffset -= dt * (0.6 + active.current * 2.4);
+    if (visible) advancePulses(pulses.current, dt, active.current);
   });
 
   return (
     <group ref={group} visible={false}>
       <Line points={points} color="#3a3a38" lineWidth={3} />
-      <Line ref={pulse} points={points} color={COLORS.signal} lineWidth={2.4} dashed dashSize={0.18} gapSize={0.9} transparent opacity={0.95} />
+      <Line
+        ref={(el) => {
+          pulses.current[0] = el;
+        }}
+        points={points}
+        color={COLORS.signal}
+        lineWidth={2.4}
+        dashed
+        dashSize={0.18}
+        gapSize={0.9}
+      />
     </group>
   );
 }
@@ -291,17 +451,21 @@ export function Scale({
   materials,
   reading,
   activity,
+  cellView,
 }: {
   layout: Layout;
   materials: Materials;
   reading: RefObject<ScaleReading>;
   /** 0..1: cuánto cambia la carga (acelera los pulsos de datos) */
   activity: RefObject<number>;
+  /** Vista de celdas: plataforma transparente, celda abierta y red entre celdas */
+  cellView: boolean;
 }) {
   return (
     <group>
       <LoadCells layout={layout} materials={materials} reading={reading} />
-      <Modules layout={layout} materials={materials} />
+      <CellNetwork layout={layout} active={activity} />
+      <Modules layout={layout} materials={materials} xray={cellView} />
       <Booth layout={layout} materials={materials} />
       <Network layout={layout} active={activity} />
     </group>

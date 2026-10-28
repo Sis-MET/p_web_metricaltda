@@ -136,9 +136,14 @@ export function useMaterials() {
       signal: standard(COLORS.signal, { emissive: COLORS.signal, emissiveIntensity: 0.4, roughness: 0.5 }),
       steel: standard("#d6d8da", { metalness: 0.75, roughness: 0.3 }),
       plate: standard("#5b6878", { metalness: 0.5, roughness: 0.45 }),
-      deckTop: standard("#ffffff", { map: treadTexture(), metalness: 0.15, roughness: 0.6 }),
-      deckSide: standard("#8e918b", { metalness: 0.2, roughness: 0.6 }),
+      // Plataforma: transparente en la vista de celdas
+      deckTop: standard("#ffffff", { map: treadTexture(), metalness: 0.15, roughness: 0.6, transparent: true }),
+      deckSide: standard("#8e918b", { metalness: 0.2, roughness: 0.6, transparent: true }),
       edge: standard("#6f7378", { metalness: 0.6, roughness: 0.4 }),
+      // Celda POWERCELL PDX: acero inoxidable, columna, galgas y electrónica
+      stainless: standard("#d3d7da", { metalness: 0.6, roughness: 0.3, side: THREE.DoubleSide }),
+      column: standard("#e9ecee", { metalness: 0.6, roughness: 0.25 }),
+      pcb: standard("#1f5c3c", { roughness: 0.5 }),
       cable: standard("#2d2f33", { roughness: 0.7 }),
       boothWall: standard("#eef0f2", { roughness: 0.6 }),
       boothRoof: standard("#4a5563", { roughness: 0.7 }),

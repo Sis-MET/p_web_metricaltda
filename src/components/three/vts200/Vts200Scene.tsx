@@ -15,6 +15,8 @@ import { Landscape, SUN } from "./Landscape";
 import { COLORS, useMaterials } from "./materials";
 import {
   APPROACH_LENGTH,
+  CELL,
+  LEVEL,
   TRUCK_SPAN,
   TRUCK_STOP,
   computeReading,
@@ -57,7 +59,12 @@ export type Vts200SceneProps = SceneLoopProps & {
   labels: Label[];
   /** Etiquetas (DOM) que la escena posiciona sobre el modelo */
   labelElements: RefObject<(HTMLElement | null)[]>;
+  /** Lectura de cada celda en la vista de celdas (DOM) */
+  cellTagElements: RefObject<(HTMLElement | null)[]>;
 };
+
+/** Paso del montaje: su acción es la vista de celdas */
+const MOUNT_STEP = 5;
 
 type Phase = "approach" | "weigh" | "exit";
 
@@ -75,6 +82,7 @@ function World({
   still = false,
   labels,
   labelElements,
+  cellTagElements,
   castShadows,
 }: Omit<Vts200SceneProps, keyof SceneLoopProps> & { castShadows: boolean }) {
   const materials = useMaterials();
@@ -99,11 +107,13 @@ function World({
   /* Cámara */
   const views = useMemo(() => viewsFor(layout), [layout]);
   const { distance } = useResponsiveFraming(controls, shift);
+  const cellView = step === MOUNT_STEP && action;
 
   useEffect(() => {
-    const view = overview ? views.overview : (views.steps[step] ?? views.overview);
-    controls.current?.setLookAt(...scaleView(view, distance), !still);
-  }, [distance, overview, step, still, views]);
+    // La vista de celdas va dentro del foso: no se aleja en pantallas angostas
+    const view = overview ? views.overview : cellView ? views.cell : (views.steps[step] ?? views.overview);
+    controls.current?.setLookAt(...scaleView(view, cellView && !overview ? 1 : distance), !still);
+  }, [cellView, distance, overview, step, still, views]);
 
   /* Camión: entra, se detiene centrado, se pesa y sale */
   const truckRef = useRef<THREE.Group>(null);
@@ -188,8 +198,17 @@ function World({
     const label = labels[i];
     if (still || label.step !== live.current.step) return false;
     const p = build.stage(label.step);
-    return p >= label.from && (label.until === undefined || p < label.until) && (!label.action || live.current.action);
+    return (
+      p >= label.from &&
+      (label.until === undefined || p < label.until) &&
+      (label.action === undefined || label.action === live.current.action)
+    );
   };
+  const cellPoints = useMemo(
+    () => layout.cells.map((cell) => [cell.x, LEVEL.pier + CELL.plate + CELL.cup * 2 + CELL.body + 0.05, cell.z] as [number, number, number]),
+    [layout.cells]
+  );
+  const inCellView = () => !still && live.current.step === MOUNT_STEP && live.current.action;
 
   return (
     <BuildContext.Provider value={build}>
@@ -220,15 +239,16 @@ function World({
       <Foundation layout={layout} materials={materials} />
       <Drainage layout={layout} materials={materials} />
       <Walls layout={layout} materials={materials} />
-      <Scale layout={layout} materials={materials} reading={reading} activity={activity} />
+      <Scale layout={layout} materials={materials} reading={reading} activity={activity} cellView={cellView} />
       <Truck truckRef={truckRef} spinRef={spin} materials={materials} />
 
       <ScreenAnchors points={points} elements={labelElements} isVisible={labelVisible} />
+      <ScreenAnchors points={cellPoints} elements={cellTagElements} isVisible={inCellView} />
 
       <CameraControls
         ref={controls}
         makeDefault
-        minDistance={3}
+        minDistance={cellView ? 0.2 : 3}
         maxDistance={60 * distance}
         maxPolarAngle={Math.PI / 2.1}
         smoothTime={0.6}

@@ -116,6 +116,29 @@ export const PROJECT_STEPS: ProjectStep[] = [
   },
 ];
 
+/** Cómo pesa una celda POWERCELL PDX, en el orden de los puntos numerados del demo */
+export const LOAD_CELL_STEPS = [
+  {
+    title: "Columna de acero",
+    text: "El peso de cada eje comprime una columna de acero inoxidable apenas unas micras. Al ser basculante, vuelve sola a la vertical cuando la plataforma se mueve.",
+  },
+  {
+    title: "Galgas extensométricas",
+    text: "Pegadas a la columna, cambian su resistencia eléctrica en proporción exacta a esa deformación.",
+  },
+  {
+    title: "Electrónica digital",
+    text: "La propia celda convierte la señal a digital y la compensa por temperatura y linealidad: sin cajas de conexión analógicas.",
+  },
+  {
+    title: "Red hasta la caseta",
+    text: "Las celdas se conectan en cadena y envían su lectura al indicador, que suma todas y vigila el estado de cada una.",
+  },
+];
+
+export const LOAD_CELL_NOTE =
+  "Si una celda falla o se sobrecarga, el indicador lo avisa antes de que afecte la medición.";
+
 export const phaseOf = (step: ProjectStep) => {
   const index = PHASES.findIndex((phase) => phase.id === step.phase);
   return { ...PHASES[index], number: index + 1 };
