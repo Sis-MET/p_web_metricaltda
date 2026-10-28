@@ -74,7 +74,8 @@ function World({
   still = false,
   labels,
   labelElements,
-}: Omit<Vts200SceneProps, keyof SceneLoopProps>) {
+  castShadows,
+}: Omit<Vts200SceneProps, keyof SceneLoopProps> & { castShadows: boolean }) {
   const materials = useMaterials();
   const controls = useRef<CameraControls>(null);
   const { half } = layout;
@@ -198,7 +199,9 @@ function World({
       <directionalLight
         position={[-14, 22, 12]}
         intensity={2.6}
-        castShadow
+        // Apagar las sombras de la luz (y no del renderizador) obliga a recompilar los materiales:
+        // si no, seguirían mostrando la última sombra calculada (la de otro paso)
+        castShadow={castShadows}
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0004}
         shadow-normalBias={0.02}
@@ -240,7 +243,7 @@ export default function Vts200Scene({ active, onReady, ...props }: Vts200ScenePr
   return (
     <Canvas
       // PCF explícito: con `true` r3f pide PCFSoft y three recompila los shaders al dibujar la primera sombra
-      shadows={shadows && "percentage"}
+      shadows="percentage"
       dpr={props.still ? 1 : [1, dpr]}
       frameloop={frameloop}
       onCreated={onCreated}
@@ -263,7 +266,7 @@ export default function Vts200Scene({ active, onReady, ...props }: Vts200ScenePr
           }}
         />
       )}
-      <World {...props} />
+      <World {...props} castShadows={shadows} />
     </Canvas>
   );
 }

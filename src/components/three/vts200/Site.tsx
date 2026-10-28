@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Line } from "@react-three/drei";
 import * as THREE from "three";
@@ -34,6 +34,10 @@ function Scatter({ items, geometry, material }: { items: Item[]; geometry: THREE
   const build = useBuild();
   const mesh = useRef<THREE.InstancedMesh>(null);
   const last = useRef(Number.NaN);
+  // Otro largo de báscula mueve las instancias: hay que volver a ubicarlas
+  useEffect(() => {
+    last.current = Number.NaN;
+  }, [items]);
 
   useFrame(() => {
     const m = mesh.current;

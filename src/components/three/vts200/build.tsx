@@ -100,7 +100,9 @@ export function Blocks({
       last[i] = t;
       changed = true;
       dummy.position.set(b.x, b.y, b.z);
-      dummy.scale.set(b.w, Math.max(b.h * t, 1e-4), b.d);
+      // Oculta: tamaño nulo en las tres medidas (aplanada seguiría proyectando la sombra de su base)
+      if (t > 0) dummy.scale.set(b.w, b.h * t, b.d);
+      else dummy.scale.setScalar(1e-5);
       dummy.updateMatrix();
       m.setMatrixAt(i, dummy.matrix);
     });
