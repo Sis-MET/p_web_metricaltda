@@ -140,7 +140,7 @@ export function Walls({ layout, materials }: { layout: Layout; materials: Materi
       <Blocks boxes={parts.edges} material={materials.edge} grow={() => span(p(), 0.5, 0.6)} />
       <Blocks boxes={parts.backfill} material={materials.fill} grow={() => span(p(), 0.5, 0.8)} receiveShadow />
       <Blocks boxes={parts.approaches} material={materials.concrete} grow={() => span(p(), 0.75, 1)} castShadow receiveShadow />
-      <Blocks boxes={parts.roads} material={materials.asphalt} grow={() => (p() >= 0.95 ? 1 : 0)} receiveShadow />
+      <Blocks boxes={parts.roads} material={materials.road} grow={() => (p() >= 0.95 ? 1 : 0)} receiveShadow />
       <EarthPressure layout={layout} materials={materials} />
     </group>
   );

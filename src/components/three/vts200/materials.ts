@@ -1,15 +1,13 @@
 import { useMemo } from "react";
 import * as THREE from "three";
 
-// Entorno azul METTLER (mt-900 / mt-800) con la obra en tonos de tierra y hormigón;
-// amarillo Métrica solo en datos, replanteo y señales. Sin mapa de entorno (su filtro congelaba
-// la página al montar la escena): los metales llevan poca metalicidad para no verse negros.
+// Mina en el altiplano: pastizal seco, ripio, roca y hormigón bajo un cielo con bruma;
+// amarillo Métrica solo en datos, replanteo y señales. Los reflejos salen de un mapa del cielo (Landscape).
 export const COLORS = {
-  background: "#001f44",
-  ground: "#002a5a",
-  gridLine: "#0d4280",
-  natural: new THREE.Color("#7a7448"),
-  cleared: new THREE.Color("#b09772"),
+  /** Bruma del horizonte: también es el color de la niebla */
+  haze: "#d3dbe0",
+  natural: new THREE.Color("#9b8a5b"),
+  cleared: new THREE.Color("#b49f7c"),
   signal: "#e3b300",
   water: "#5cb8ff",
 };
@@ -92,20 +90,6 @@ function treadTexture() {
   return texture;
 }
 
-/** Retícula de plano técnico del suelo que rodea la obra (celdas de 2 m) */
-function gridTexture() {
-  const texture = canvasTexture(128, 128, (ctx) => {
-    ctx.fillStyle = COLORS.ground;
-    ctx.fillRect(0, 0, 128, 128);
-    ctx.fillStyle = COLORS.gridLine;
-    ctx.fillRect(0, 0, 128, 2);
-    ctx.fillRect(0, 0, 2, 128);
-  });
-  // Las coordenadas de textura del suelo están en metros
-  texture.repeat.set(0.5, 0.5);
-  return texture;
-}
-
 /** Mira topográfica: franjas rojas y blancas */
 function rodTexture() {
   return canvasTexture(8, 64, (ctx) => {
@@ -123,7 +107,9 @@ export function useMaterials() {
 
     const soil = soilTexture();
     return {
-      ground: standard("#ffffff", { map: gridTexture(), roughness: 1 }),
+      // Patio de ripio alrededor de la obra y cerros (color por vértice)
+      ground: standard("#a5977a", { map: soil, roughness: 1 }),
+      mountains: new THREE.MeshBasicMaterial({ vertexColors: true }),
       terrain: standard(COLORS.natural.clone(), { map: soil, roughness: 1 }),
       // Área de trabajo: del terreno natural al limpio y compactado
       site: standard(COLORS.natural.clone(), { map: soil, roughness: 1 }),
@@ -132,7 +118,7 @@ export function useMaterials() {
       // Transparente para mostrar el empuje del suelo sobre los muros
       fill: standard("#a08b6b", { roughness: 1, transparent: true }),
       pile: standard("#7d5b3d", { roughness: 1 }),
-      grass: standard("#5d7638"),
+      grass: standard("#c4a75f", { roughness: 1 }),
       rock: standard("#8a847a"),
       wood: standard("#c49a62", { roughness: 0.8 }),
       formwork: standard("#a86f38", { roughness: 0.75 }),
@@ -140,33 +126,43 @@ export function useMaterials() {
       // Hormigón de la cimentación: transparente en la vista de armadura
       footing: standard("#aeb1b3", { transparent: true }),
       concrete: standard("#b7babb"),
-      asphalt: standard("#45505e", { roughness: 0.95 }),
+      // Camino de ripio compactado de la mina
+      road: standard("#8d8475", { map: soil, roughness: 1 }),
       pvc: standard("#eceef0", { roughness: 0.4 }),
       grate: standard("#2b2d30", { metalness: 0.3, roughness: 0.5 }),
       instrument: standard("#f2c200", { roughness: 0.45 }),
       tripod: standard("#d6d6d2", { metalness: 0.3, roughness: 0.4 }),
       rod: standard("#ffffff", { map: rodTexture(), roughness: 0.6 }),
       signal: standard(COLORS.signal, { emissive: COLORS.signal, emissiveIntensity: 0.4, roughness: 0.5 }),
-      steel: standard("#d6d8da", { metalness: 0.4, roughness: 0.3 }),
-      plate: standard("#5b6878", { metalness: 0.3, roughness: 0.45 }),
-      deckTop: standard("#ffffff", { map: treadTexture(), metalness: 0.1, roughness: 0.6 }),
-      deckSide: standard("#8e918b", { metalness: 0.15, roughness: 0.6 }),
-      edge: standard("#6f7378", { metalness: 0.35, roughness: 0.4 }),
+      steel: standard("#d6d8da", { metalness: 0.75, roughness: 0.3 }),
+      plate: standard("#5b6878", { metalness: 0.5, roughness: 0.45 }),
+      deckTop: standard("#ffffff", { map: treadTexture(), metalness: 0.15, roughness: 0.6 }),
+      deckSide: standard("#8e918b", { metalness: 0.2, roughness: 0.6 }),
+      edge: standard("#6f7378", { metalness: 0.6, roughness: 0.4 }),
       cable: standard("#2d2f33", { roughness: 0.7 }),
       boothWall: standard("#eef0f2", { roughness: 0.6 }),
       boothRoof: standard("#4a5563", { roughness: 0.7 }),
-      glass: standard("#a9cbea", { transparent: true, opacity: 0.35, roughness: 0.1, depthWrite: false }),
+      glass: standard("#a9cbea", { transparent: true, opacity: 0.35, roughness: 0.05, metalness: 0.2, depthWrite: false }),
       dark: standard("#1e1f21", { roughness: 0.6 }),
       screen: standard("#141414", { emissive: COLORS.signal, emissiveIntensity: 0.9 }),
-      // Camión
-      cab: standard("#f6f6f4", { metalness: 0.1, roughness: 0.35 }),
-      cargo: standard("#eeede9", { metalness: 0.05, roughness: 0.5 }),
+      // Volqueta con mineral
+      cab: standard("#ecebe7", { metalness: 0.3, roughness: 0.3 }),
+      tub: standard("#d5d7d8", { metalness: 0.5, roughness: 0.4 }),
       brand: standard("#f9e300", { metalness: 0.1, roughness: 0.45 }),
-      chassis: standard("#1e1f21", { metalness: 0.2, roughness: 0.6 }),
+      chassis: standard("#1e1f21", { metalness: 0.3, roughness: 0.6 }),
       tire: standard("#151515"),
-      hub: standard("#aeb8c3", { metalness: 0.4, roughness: 0.3 }),
-      window: standard("#1c1d1f", { metalness: 0.3, roughness: 0.1 }),
+      hub: standard("#aeb8c3", { metalness: 0.7, roughness: 0.3 }),
+      window: standard("#1c1d1f", { metalness: 0.5, roughness: 0.08 }),
       light: standard("#ffffff", { emissive: "#dfeeff", emissiveIntensity: 1.6 }),
+      // Mina
+      ore: standard("#8b7d6c", { map: soil, roughness: 1 }),
+      oreDark: standard("#5f574e", { map: soil, roughness: 1 }),
+      headframe: standard("#8a3d2c", { metalness: 0.4, roughness: 0.6 }),
+      shed: standard("#c5c9cc", { metalness: 0.4, roughness: 0.5 }),
+      roof: standard("#7b8793", { metalness: 0.5, roughness: 0.45 }),
+      silo: standard("#d9dcdd", { metalness: 0.6, roughness: 0.35 }),
+      conveyor: standard("#58616b", { metalness: 0.5, roughness: 0.5 }),
+      container: standard("#c06a33", { metalness: 0.4, roughness: 0.55 }),
     };
   }, []);
 }

@@ -95,14 +95,14 @@ export function layoutFor(size: ScaleSize): Layout {
 
 export function viewsFor({ half }: Layout): { overview: View; steps: View[] } {
   return {
-    overview: { position: [-half - 17, 20, 26], target: [0, -0.5, 0] },
+    overview: { position: [-half - 28, 9, 36], target: [6, 2, -8] },
     steps: [
-      { position: [-half - 13, 17, 22], target: [0, 0, 0] },
-      { position: [-half - 12, 10.5, 16], target: [-half * 0.3, -0.8, 0.6] },
-      { position: [-half - 6.5, 9.5, 11.5], target: [-half * 0.35, -1.1, 0] },
-      { position: [half + 9, 8.5, 12.5], target: [half * 0.25, -0.7, 0.6] },
-      { position: [-half - 6.5, 6.5, 9.5], target: [-half + 4, -0.4, 0] },
-      { position: [-half - 14, 11.5, 19], target: [2, 0, -1.5] },
+      { position: [-half - 15, 10, 23], target: [1, 0.5, -2] },
+      { position: [-half - 13, 7, 17], target: [-half * 0.3, -0.3, -0.5] },
+      { position: [-half - 7, 6.5, 12.5], target: [-half * 0.35, -0.8, -1] },
+      { position: [half + 10, 6, 14], target: [half * 0.2, -0.3, -1] },
+      { position: [-half - 7.5, 4.5, 10.5], target: [-half + 4, 0, -1] },
+      { position: [-half - 15, 7, 20], target: [2, 1.5, -3] },
     ],
   };
 }

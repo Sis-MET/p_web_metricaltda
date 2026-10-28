@@ -3,7 +3,9 @@
 import { createContext, useContext, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { Box } from "./model";
+import type { Vec3 } from "../useResponsiveFraming";
 
 /**
  * Avance de la obra. Cada pieza de la escena se construye según el avance (0 a 1) del paso al que
@@ -39,6 +41,22 @@ export function random(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
+/** Mata de paja brava (ichu): hojas finas abiertas en abanico */
+function tuftGeometry() {
+  const blades = Array.from({ length: 9 }, (_, i) => {
+    const height = 0.62 - (i % 3) * 0.12;
+    const angle = (i / 9) * Math.PI * 2;
+    return new THREE.ConeGeometry(0.03, height, 4)
+      .translate(0, height / 2, 0)
+      .rotateZ(0.22 + (i % 3) * 0.1)
+      .rotateY(angle)
+      .translate(Math.cos(angle) * 0.05, 0, Math.sin(angle) * 0.05);
+  });
+  return mergeGeometries(blades);
+}
+
+export const TUFT = tuftGeometry();
 
 /* ─── Cajas instanciadas ────────────────────────────────────────────────── */
 
@@ -122,6 +140,22 @@ export function Blocks({
       dispose={null}
     />
   );
+}
+
+const UP = new THREE.Vector3(0, 1, 0);
+
+/**
+ * Posición, giro y largo de una pieza alargada (cilindro o caja a lo largo de y) entre dos puntos:
+ * patas, cables y estructuras reticuladas.
+ */
+export function segment(from: Vec3, to: Vec3) {
+  const a = new THREE.Vector3(...from);
+  const b = new THREE.Vector3(...to);
+  return {
+    position: a.clone().add(b).multiplyScalar(0.5),
+    quaternion: new THREE.Quaternion().setFromUnitVectors(UP, b.clone().sub(a).normalize()),
+    length: a.distanceTo(b),
+  };
 }
 
 /**

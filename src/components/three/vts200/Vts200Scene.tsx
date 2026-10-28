@@ -11,6 +11,7 @@ import { useSceneLoop, type SceneLoopProps } from "../useSceneLoop";
 import { BuildContext, type Build } from "./build";
 import { Drainage } from "./Drainage";
 import { Foundation } from "./Foundation";
+import { Landscape, SUN } from "./Landscape";
 import { COLORS, useMaterials } from "./materials";
 import {
   APPROACH_LENGTH,
@@ -192,13 +193,15 @@ function World({
 
   return (
     <BuildContext.Provider value={build}>
-      <color attach="background" args={[COLORS.background]} />
-      <fog attach="fog" args={[COLORS.background, 42 * distance, 110 * distance]} />
+      <color attach="background" args={[COLORS.haze]} />
+      {/* Bruma de altura: los cerros se desvanecen hacia el horizonte */}
+      <fog attach="fog" args={[COLORS.haze, 90, 1900]} />
 
-      <hemisphereLight args={["#dbe7f5", "#3a3326", 0.95]} />
+      <hemisphereLight args={["#cfe0f1", "#8a7a5e", 0.55]} />
       <directionalLight
-        position={[-14, 22, 12]}
-        intensity={2.6}
+        position={SUN}
+        intensity={3.1}
+        color="#fff4e2"
         // Apagar las sombras de la luz (y no del renderizador) obliga a recompilar los materiales:
         // si no, seguirían mostrando la última sombra calculada (la de otro paso)
         castShadow={castShadows}
@@ -210,8 +213,9 @@ function World({
         shadow-camera-top={18}
         shadow-camera-bottom={-18}
       />
-      <directionalLight position={[16, 8, -10]} intensity={0.5} color="#b1cae6" />
+      <directionalLight position={[16, 8, -10]} intensity={0.35} color="#b1cae6" />
 
+      <Landscape layout={layout} materials={materials} />
       <Site layout={layout} materials={materials} />
       <Foundation layout={layout} materials={materials} />
       <Drainage layout={layout} materials={materials} />
@@ -247,7 +251,7 @@ export default function Vts200Scene({ active, onReady, ...props }: Vts200ScenePr
       dpr={props.still ? 1 : [1, dpr]}
       frameloop={frameloop}
       onCreated={onCreated}
-      camera={{ position: initial.position, fov: 38, near: 0.1, far: 260 }}
+      camera={{ position: initial.position, fov: 42, near: 0.05, far: 6000 }}
       gl={{ antialias: true, powerPreference: "high-performance", stencil: false }}
       aria-label="Modelo 3D interactivo de la instalación de una báscula camionera VTS200"
       fallback={

@@ -4,7 +4,7 @@ import { useMemo, useRef, type ComponentRef, type RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Line } from "@react-three/drei";
 import * as THREE from "three";
-import { easeOut, span, useBuild } from "./build";
+import { easeOut, segment, span, useBuild } from "./build";
 import { COLORS, type Materials } from "./materials";
 import { CELL_Z, DECK_THICKNESS, LEVEL, SIDE_WALL, WIDTH, type Box, type Layout, type ScaleReading } from "./model";
 
@@ -135,16 +135,10 @@ function Modules({ layout, materials }: { layout: Layout; materials: Materials }
               }}
             >
               {corners.map(([x, z]) => {
-                const from = new THREE.Vector3(x, DECK_THICKNESS / 2, z);
-                const to = new THREE.Vector3(0, HOOK, 0);
-                const mid = from.clone().add(to).multiplyScalar(0.5);
-                const quaternion = new THREE.Quaternion().setFromUnitVectors(
-                  new THREE.Vector3(0, 1, 0),
-                  to.clone().sub(from).normalize()
-                );
+                const sling = segment([x, DECK_THICKNESS / 2, z], [0, HOOK, 0]);
                 return (
-                  <mesh key={`${x}${z}`} material={materials.cable} position={mid} quaternion={quaternion}>
-                    <cylinderGeometry args={[0.015, 0.015, from.distanceTo(to), 6]} />
+                  <mesh key={`${x}${z}`} material={materials.cable} position={sling.position} quaternion={sling.quaternion}>
+                    <cylinderGeometry args={[0.015, 0.015, sling.length, 6]} />
                   </mesh>
                 );
               })}

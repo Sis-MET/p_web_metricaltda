@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Line } from "@react-three/drei";
 import * as THREE from "three";
-import { Blocks, random, span, useBuild } from "./build";
+import { Blocks, TUFT, random, segment, span, useBuild } from "./build";
 import { COLORS, type Materials } from "./materials";
 import { LEVEL, WIDTH, type Box, type Layout } from "./model";
 
@@ -59,7 +59,7 @@ function Scatter({ items, geometry, material }: { items: Item[]; geometry: THREE
 }
 
 const GEOMETRIES = {
-  grass: new THREE.ConeGeometry(0.16, 0.36, 5).translate(0, 0.18, 0),
+  grass: TUFT,
   rock: new THREE.DodecahedronGeometry(0.2),
   mound: new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
 };
@@ -204,10 +204,7 @@ function Survey({ layout, materials }: { layout: Layout; materials: Materials })
       [0, 1, 2].map((i) => {
         const angle = (i / 3) * Math.PI * 2;
         const foot = new THREE.Vector3(Math.cos(angle) * 0.45, 0, Math.sin(angle) * 0.45);
-        const top = new THREE.Vector3(0, 1.25, 0);
-        const mid = foot.clone().add(top).multiplyScalar(0.5);
-        const quaternion = new THREE.Quaternion().setFromUnitVectors(UP, top.clone().sub(foot).normalize());
-        return { mid, quaternion, length: top.distanceTo(foot) };
+        return segment([foot.x, 0, foot.z], [0, 1.25, 0]);
       }),
     []
   );
@@ -236,7 +233,7 @@ function Survey({ layout, materials }: { layout: Layout; materials: Materials })
     <group ref={group} visible={false}>
       <group position={[lx, 0, lz]}>
         {legs.map((leg, i) => (
-          <mesh key={i} material={materials.tripod} position={leg.mid} quaternion={leg.quaternion} castShadow>
+          <mesh key={i} material={materials.tripod} position={leg.position} quaternion={leg.quaternion} castShadow>
             <cylinderGeometry args={[0.02, 0.025, leg.length, 6]} />
           </mesh>
         ))}
@@ -327,12 +324,12 @@ export function Site({ layout, materials }: { layout: Layout; materials: Materia
   const build = useBuild();
   const { site, work, dig } = layout;
 
-  // Entorno con el terreno recortado, terreno con el área de trabajo recortada y esta con el foso
+  // Patio con el terreno recortado, terreno con el área de trabajo recortada y esta con el foso
   const geometries = useMemo(() => {
     const plot = { x0: -site.x, x1: site.x, z0: site.z0, z1: site.z1 };
     const area = { x0: -work.x, x1: work.x, z0: work.z0, z1: work.z1 };
     return {
-      ground: plane({ x0: -120, x1: 120, z0: -120, z1: 120 }, plot),
+      ground: plane({ x0: -400, x1: 400, z0: -400, z1: 400 }, plot),
       plot: plane(plot, area),
       work: plane(area, { x0: -dig.x, x1: dig.x, z0: -dig.z, z1: dig.z }),
     };
