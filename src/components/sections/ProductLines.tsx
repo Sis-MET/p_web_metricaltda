@@ -3,11 +3,12 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/animations/Reveal";
-import { CategoryCard } from "@/components/products/CategoryCard";
-import { CATEGORIES } from "@/content/categories";
+import { CategoryGrid } from "@/components/products/CategoryGrid";
+import { getCatalog } from "@/lib/catalog";
 
 /** Las líneas de producto, cada una hacia su página. */
-export function ProductLines() {
+export async function ProductLines() {
+  const catalog = await getCatalog();
   return (
     <section id="productos" className="bg-bone-100 py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -28,15 +29,9 @@ export function ProductLines() {
           </Reveal>
         </div>
 
-        <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {CATEGORIES.map((category, i) => (
-            <li key={category.slug} className={i === 2 ? "sm:col-span-2 lg:col-span-1" : undefined}>
-              <Reveal delay={i * 0.06} className="h-full">
-                <CategoryCard category={category} />
-              </Reveal>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-12">
+          <CategoryGrid catalog={catalog} />
+        </div>
       </div>
     </section>
   );

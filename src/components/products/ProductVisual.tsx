@@ -1,4 +1,5 @@
-import Image, { type StaticImageData } from "next/image";
+import Image from "next/image";
+import type { CatalogImage } from "@/content/catalog";
 import { cn } from "@/lib/utils";
 
 /** Imagen de producto recortada sobre un foco de luz, para las cabeceras oscuras. */
@@ -8,7 +9,7 @@ export function ProductVisual({
   preload,
   className,
 }: {
-  image: StaticImageData;
+  image: CatalogImage;
   alt: string;
   preload?: boolean;
   className?: string;
@@ -18,7 +19,7 @@ export function ProductVisual({
       <div aria-hidden className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.14),transparent_68%)]" />
       <div aria-hidden className="absolute inset-x-[18%] bottom-[8%] h-[10%] rounded-[50%] bg-black/60 blur-2xl" />
       <Image
-        src={image}
+        src={image.src}
         alt={alt}
         fill
         preload={preload}

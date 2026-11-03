@@ -1,34 +1,36 @@
-import { ENVIRONMENTS, FAMILIES, formatCapacity, productHref, productTitle } from "@/content/catalog";
-import { CATEGORIES, categoryHref } from "@/content/categories";
+import { ENVIRONMENTS, categoryHref, formatCapacity, productHref, productTitle } from "@/content/catalog";
 import { ACCREDITATION, BRANDS, COMPANY, INDUSTRIES, OFFICES, SALES_PHONE } from "@/content/company";
-import { PRODUCTS } from "@/content/products";
 import { SERVICES } from "@/content/services";
 import { PROJECT_STEPS, SCALE_SIZES, VTS200, sizeLabel } from "@/content/truckScaleProject";
+import type { Catalog } from "@/lib/catalog";
 import { compact } from "@/lib/utils";
 
 /**
- * Instrucciones del Asistente de Métrica, armadas con el contenido del sitio: si cambia el catálogo
- * o un servicio, el asesor lo sabe sin tocar este texto. La parte fija va primero y es idéntica
- * en cada consulta (la caché implícita de Gemini la cobra con descuento); el contexto de la
- * página, al final.
+ * Instrucciones del Asistente de Métrica, armadas con el contenido del sitio: si el área comercial
+ * cambia el catálogo o cambia un servicio, el asesor lo sabe sin tocar este texto. La parte fija va
+ * primero y es idéntica en cada consulta mientras no cambie el catálogo (la caché implícita de
+ * Gemini la cobra con descuento); el contexto de la página, al final.
  */
 
-const CATALOG = PRODUCTS.map((product) =>
-  compact([
-    `### ${productTitle(product)} — slug: ${product.slug}`,
-    compact([CATEGORIES.find((category) => category.slug === product.category)?.name, product.family && FAMILIES[product.family]]).join(" · "),
-    product.capacity && `Capacidad: ${formatCapacity(product.capacity)}`,
-    product.protection && `Protección: ${product.protection}`,
-    product.environments.length > 0 && `Ambientes: ${product.environments.map((env) => ENVIRONMENTS[env]).join("; ")}`,
-    product.summary,
-    `Características: ${product.features.join("; ")}`,
-    `Datos técnicos: ${product.specs.map(({ label, value }) => `${label}: ${value}`).join("; ")}`,
-  ]).join("\n")
-).join("\n\n");
+const catalogText = ({ categories, products }: Catalog) =>
+  products
+    .map((product) =>
+      compact([
+        `### ${productTitle(product)} — slug: ${product.slug}`,
+        compact([categories.find((category) => category.slug === product.category)?.name, product.line?.name]).join(" · "),
+        product.capacity && `Capacidad: ${formatCapacity(product.capacity)}`,
+        product.protection && `Protección: ${product.protection}`,
+        product.environments.length > 0 && `Ambientes: ${product.environments.map((env) => ENVIRONMENTS[env]).join("; ")}`,
+        product.summary,
+        `Características: ${product.features.join("; ")}`,
+        `Datos técnicos: ${product.specs.map(({ label, value }) => `${label}: ${value}`).join("; ")}`,
+      ]).join("\n")
+    )
+    .join("\n\n");
 
-const SOFTWARE = CATEGORIES.find((category) => category.slug === "software");
-
-const INSTRUCTIONS = `Eres el Asistente de Métrica, el asistente virtual del sitio web de ${COMPANY.name} (Bolivia). ${COMPANY.description}
+function instructions(catalog: Catalog) {
+  const software = catalog.categories.find((category) => category.slug === "software");
+  return `Eres el Asistente de Métrica, el asistente virtual del sitio web de ${COMPANY.name} (Bolivia). ${COMPANY.description}
 Ayudas a los visitantes a elegir la balanza o báscula adecuada para su proceso y a entender cómo la calibración y el soporte técnico de Métrica ayudan a su empresa.
 
 ## Cómo conversar
@@ -51,7 +53,7 @@ Ayudas a los visitantes a elegir la balanza o báscula adecuada para su proceso 
 - Si nada del catálogo encaja (balanzas de laboratorio, controladoras de peso automáticas, pesaje de tanques…), no inventes modelos: explica que Métrica representa todo el portafolio de ${BRANDS.exclusive.name} y las marcas ${BRANDS.authorized.map((brand) => brand.name).join(", ")}, y que un asesor buscará la opción adecuada; luego usa siguiente_paso.
 - Para pesar vehículos o grandes volúmenes a granel, la opción es la báscula de camiones ${VTS200.name} con celdas digitales ${VTS200.cells}: de 4 a 48 m de largo, 28 t por eje tándem doble; su capacidad y dimensiones se definen en el proyecto con un asesor.
 - Métrica ejecuta el proyecto completo de una báscula camionera ${VTS200.name} (${SCALE_SIZES.map(sizeLabel).join(", ")}): ${PROJECT_STEPS.map((step) => step.title.toLowerCase()).join("; ")}. El cliente puede recorrerlo en el demo 3D del inicio.
-- Si el cliente necesita registrar pesajes, emitir tickets o integrarse con su ERP, menciona el ${SOFTWARE?.name.toLowerCase()} de Métrica (${SOFTWARE?.short.toLowerCase()}); un asesor le detallará las opciones.
+- Si el cliente necesita registrar pesajes, emitir tickets o integrarse con su ERP, menciona ${software ? `el ${software.name.toLowerCase()} de Métrica (${software.short.toLowerCase()})` : "el software de pesaje de Métrica"}; un asesor le detallará las opciones.
 - Al recomendar equipos, menciona en una frase que pueden incluir instalación y calibración acreditada.
 
 ## Servicios
@@ -77,20 +79,22 @@ Ayudas a los visitantes a elegir la balanza o báscula adecuada para su proceso 
 - Rubros que atiende: ${INDUSTRIES.map((industry) => industry.label.toLowerCase()).join(", ")}, entre otros.
 
 ## Catálogo
-${CATALOG}`;
+${catalogText(catalog)}`;
+}
 
 /** Página que el cliente está viendo, para entender "esta balanza" o "este servicio" */
-function pageContext(path: unknown) {
+function pageContext(path: unknown, { categories, products }: Catalog) {
   if (typeof path !== "string") return undefined;
-  const product = PRODUCTS.find((candidate) => productHref(candidate) === path);
+  const product = products.find((candidate) => productHref(candidate) === path);
   if (product) return `la ficha de ${productTitle(product)} (slug: ${product.slug})`;
-  const category = CATEGORIES.find((candidate) => categoryHref(candidate.slug) === path);
+  const category = categories.find((candidate) => categoryHref(candidate.slug) === path);
   if (category) return `la categoría ${category.name}`;
   const service = Object.values(SERVICES).find((candidate) => candidate.href === path);
   return service && `la página de ${service.name.toLowerCase()}`;
 }
 
-export function assistantInstructions(path: unknown) {
-  const page = pageContext(path);
-  return page ? `${INSTRUCTIONS}\n\n## Contexto\nEl cliente está viendo ${page}.` : INSTRUCTIONS;
+export function assistantInstructions(path: unknown, catalog: Catalog) {
+  const text = instructions(catalog);
+  const page = pageContext(path, catalog);
+  return page ? `${text}\n\n## Contexto\nEl cliente está viendo ${page}.` : text;
 }

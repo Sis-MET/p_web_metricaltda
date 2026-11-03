@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ProductCard } from "./ProductCard";
-import { ENVIRONMENTS, FAMILIES, type Environment, type Family, type ProductSummary } from "@/content/catalog";
+import { ENVIRONMENTS, type Environment, type Line, type ProductSummary } from "@/content/catalog";
 import { cn } from "@/lib/utils";
 
 type Filter<K extends string> = { param: string; label: string; options: Record<K, string> };
 
-const FAMILY_FILTER: Filter<Family> = { param: "tipo", label: "Tipo de equipo", options: FAMILIES };
 const ENVIRONMENT_FILTER: Filter<Environment> = { param: "entorno", label: "Entorno de trabajo", options: ENVIRONMENTS };
 
 export function ProductGrid({ products }: { products: ProductSummary[] }) {
@@ -63,18 +62,22 @@ function Chips<K extends string>({
   );
 }
 
-const uniq = <T,>(values: (T | undefined)[]) => [...new Set(values.filter((v): v is T => v !== undefined))];
-
 /**
  * Catálogo filtrable. Los filtros viven en la URL (?tipo=…&entorno=…) para que un asesor
  * pueda compartir, por ejemplo, "plataformas para lavado intensivo" con un solo enlace.
+ * `lines`: las líneas de la categoría, en su orden (el filtro de tipo de equipo).
  */
-export function ProductBrowser({ products }: { products: ProductSummary[] }) {
+export function ProductBrowser({ products, lines }: { products: ProductSummary[]; lines: Line[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
 
-  const families = uniq(products.map((p) => p.family));
+  const lineFilter: Filter<string> = {
+    param: "tipo",
+    label: "Tipo de equipo",
+    options: Object.fromEntries(lines.map((line) => [line.slug, line.name])),
+  };
+  const lineSlugs = lines.filter((line) => products.some((p) => p.line?.slug === line.slug)).map((line) => line.slug);
   const environments = (Object.keys(ENVIRONMENTS) as Environment[]).filter((env) =>
     products.some((p) => p.environments.includes(env))
   );
@@ -83,7 +86,7 @@ export function ProductBrowser({ products }: { products: ProductSummary[] }) {
     const value = params.get(filter.param) as K | null;
     return value && available.includes(value) ? value : null;
   };
-  const family = read(FAMILY_FILTER, families);
+  const line = read(lineFilter, lineSlugs);
   const environment = read(ENVIRONMENT_FILTER, environments);
 
   const setParam = (param: string, value: string | null) => {
@@ -95,15 +98,15 @@ export function ProductBrowser({ products }: { products: ProductSummary[] }) {
   };
 
   const visible = products.filter(
-    (p) => (!family || p.family === family) && (!environment || p.environments.includes(environment))
+    (p) => (!line || p.line?.slug === line) && (!environment || p.environments.includes(environment))
   );
 
   return (
     <div>
-      {(families.length > 1 || environments.length > 1) && (
+      {(lineSlugs.length > 1 || environments.length > 1) && (
         <div className="mb-8 flex flex-col gap-3 border-b border-neutral-200 pb-6">
-          {families.length > 1 && (
-            <Chips filter={FAMILY_FILTER} available={families} value={family} onChange={(v) => setParam(FAMILY_FILTER.param, v)} />
+          {lineSlugs.length > 1 && (
+            <Chips filter={lineFilter} available={lineSlugs} value={line} onChange={(v) => setParam(lineFilter.param, v)} />
           )}
           {environments.length > 1 && (
             <Chips

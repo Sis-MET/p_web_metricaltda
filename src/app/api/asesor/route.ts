@@ -11,7 +11,8 @@ import {
 import { assistantInstructions } from "@/lib/assistant/instructions";
 import { takeQuota, visitorOf } from "@/lib/assistant/limits";
 import { MAX_MESSAGE_LENGTH, MAX_MESSAGES, type AssistantFailure } from "@/lib/assistant/shared";
-import { assistantTools, type AssistantMessage } from "@/lib/assistant/tools";
+import { assistantToolsFor, type AssistantMessage } from "@/lib/assistant/tools";
+import { getCatalog } from "@/lib/catalog";
 
 /**
  * API del Asistente de Métrica: recibe la conversación desde el chat del sitio (el servidor no guarda
@@ -59,16 +60,18 @@ export async function POST(request: Request) {
 
   const body: unknown = await request.json().catch(() => null);
   const { messages, page } = (body && typeof body === "object" ? body : {}) as { messages?: unknown; page?: unknown };
-  const validated = await safeValidateUIMessages<AssistantMessage>({ messages, tools: assistantTools });
+  const catalog = await getCatalog();
+  const tools = assistantToolsFor(catalog.products);
+  const validated = await safeValidateUIMessages<AssistantMessage>({ messages, tools });
   if (!validated.success || !withinLimits(validated.data)) return fail(400, "invalido");
 
   if (!takeQuota(visitorOf(request))) return fail(429, "limite");
 
   const result = streamText({
     model: google(MODEL),
-    instructions: assistantInstructions(page),
-    messages: await convertToModelMessages(validated.data, { tools: assistantTools }),
-    tools: assistantTools,
+    instructions: assistantInstructions(page, catalog),
+    messages: await convertToModelMessages(validated.data, { tools }),
+    tools,
     // Las herramientas solo muestran tarjetas: si el modelo ya escribió su respuesta junto con ellas,
     // no hace falta otra vuelta (cada vuelta es una consulta más a la cuota)
     stopWhen: [isStepCount(3), ({ steps }) => Boolean(steps.at(-1)?.text.trim())],

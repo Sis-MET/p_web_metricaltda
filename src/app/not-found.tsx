@@ -2,10 +2,13 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { SiteChrome } from "@/components/layout/SiteChrome";
 import { NAV } from "@/lib/routes";
 
+/** Dirección inexistente (en cualquier parte del sitio): se muestra con el marco del sitio público */
 export default function NotFound() {
   return (
+    <SiteChrome>
     <main>
       <PageHeader
         trail={[{ label: "Página no encontrada", href: "/404" }]}
@@ -28,5 +31,6 @@ export default function NotFound() {
         }
       />
     </main>
+    </SiteChrome>
   );
 }

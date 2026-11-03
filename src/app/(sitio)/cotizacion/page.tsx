@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { QuoteRequest } from "@/components/quote/QuoteRequest";
 import { toSummary } from "@/content/catalog";
-import { PRODUCTS } from "@/content/products";
+import { getCatalog } from "@/lib/catalog";
 import { QUOTE_HREF } from "@/lib/routes";
 
 export const metadata: Metadata = {
@@ -13,7 +13,8 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default function QuotePage() {
+export default async function QuotePage() {
+  const { products } = await getCatalog();
   return (
     <main>
       <PageHeader
@@ -24,7 +25,7 @@ export default function QuotePage() {
       />
       <div className="bg-neutral-50 py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <QuoteRequest products={PRODUCTS.map(toSummary)} />
+          <QuoteRequest products={products.map(toSummary)} />
         </div>
       </div>
     </main>

@@ -9,7 +9,7 @@ import { ArrowRight, ChevronDown, ClipboardList, Menu, MessageCircle, Phone, X }
 import { Button } from "@/components/ui/Button";
 import { ShimmerText } from "@/components/ui/ShimmerText";
 import { loadingMessage, useNavigationStatus } from "@/lib/navigation";
-import { NAV, QUOTE_HREF, isActivePath, type NavItem } from "@/lib/routes";
+import { QUOTE_HREF, isActivePath, withProducts, type NavItem, type NavLink } from "@/lib/routes";
 import { useQuoteItems } from "@/lib/quote-store";
 import { SALES_PHONE, whatsappUrl } from "@/content/company";
 import { EASE_OUT } from "@/lib/motion";
@@ -223,7 +223,7 @@ function DropdownPanel({ item }: { item: NavItem }) {
                 {image ? (
                   <span className="relative mb-3 block aspect-[16/9] overflow-hidden rounded-lg bg-gradient-to-b from-neutral-100 to-white">
                     <Image
-                      src={image}
+                      src={image.src}
                       alt=""
                       fill
                       sizes="260px"
@@ -265,7 +265,9 @@ function DropdownPanel({ item }: { item: NavItem }) {
   );
 }
 
-export function Header() {
+/** `productLinks`: las categorías publicadas, para el menú de Productos */
+export function Header({ productLinks }: { productLinks: NavLink[] }) {
+  const nav = withProducts(productLinks);
   const pathname = usePathname();
   // La sección pedida se marca apenas se hace clic, sin esperar a que llegue la página
   const { pendingPath, slowPath } = useNavigationStatus();
@@ -283,7 +285,7 @@ export function Header() {
     dropdown.close();
   }
 
-  const openItem = NAV.find((item) => item.href === dropdown.open);
+  const openItem = nav.find((item) => item.href === dropdown.open);
   const isDark = tone === "dark" && !mobileOpen && !openItem;
 
   useEffect(() => {
@@ -296,7 +298,7 @@ export function Header() {
   const toggleMobile = () => {
     setMobileOpen((open) => !open);
     // El acordeón abre la sección de la página actual
-    setExpanded(NAV.find((item) => item.children && isActivePath(pathname, item.href))?.href ?? null);
+    setExpanded(nav.find((item) => item.children && isActivePath(pathname, item.href))?.href ?? null);
   };
 
   return (
@@ -346,7 +348,7 @@ export function Header() {
           {/* Navegación de escritorio */}
           <nav aria-label="Principal" className="hidden lg:block">
             <ul className="flex items-center gap-0.5">
-              {NAV.map((item) => {
+              {nav.map((item) => {
                 const isActive = isActivePath(activePath, item.href);
                 const isOpen = dropdown.open === item.href;
                 const textCls = isDark
@@ -490,7 +492,7 @@ export function Header() {
             className="mx-auto mt-2 max-h-[calc(100svh-6.5rem)] max-w-7xl origin-top overflow-y-auto rounded-2xl border border-ink-950/[0.06] bg-white p-2 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.35)] lg:hidden"
           >
             <ul className="flex flex-col">
-              {NAV.map((item) => {
+              {nav.map((item) => {
                 const isActive = isActivePath(pathname, item.href);
                 const isExpanded = expanded === item.href;
                 const linkCls = cn(

@@ -2,13 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Spotlight } from "@/components/animations/Spotlight";
-import { categoryHref, type Category, type CategorySlug } from "@/content/categories";
-import { productsIn } from "@/content/products";
+import { categoryHref, type Category } from "@/content/catalog";
 
-/** Tarjeta de un tipo de producto (inicio y catálogo). `preload`: su imagen es la principal de la página. */
-export function CategoryCard({ category, preload }: { category: Category & { slug: CategorySlug }; preload?: boolean }) {
-  const count = productsIn(category.slug).length;
-
+/**
+ * Tarjeta de un tipo de producto (inicio y catálogo). `count`: modelos publicados.
+ * `preload`: su imagen es la principal de la página.
+ */
+export function CategoryCard({ category, count, preload }: { category: Category; count: number; preload?: boolean }) {
   return (
     <Spotlight className="h-full rounded-3xl transition-transform duration-500 ease-out-expo hover:-translate-y-1">
       <Link
@@ -18,7 +18,7 @@ export function CategoryCard({ category, preload }: { category: Category & { slu
         <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-b from-neutral-100 to-white">
           <div aria-hidden className="absolute inset-x-10 bottom-5 h-10 rounded-[50%] bg-ink-950/10 blur-xl" />
           <Image
-            src={category.image}
+            src={category.image.src}
             alt=""
             fill
             sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"

@@ -1,5 +1,5 @@
 import { productTitle } from "@/content/catalog";
-import { PRODUCTS } from "@/content/products";
+import { readCatalog } from "@/lib/catalog";
 import { bitrix24Config, createLead } from "@/lib/integrations/bitrix24";
 import { mailConfig, recipientsFor, sendMail } from "@/lib/integrations/mail";
 import type { QuoteItem } from "@/lib/quote";
@@ -21,25 +21,28 @@ const textOf = (values: FormValues, name: string) => (typeof values[name] === "s
 const attachmentsOf = ({ form, values }: Submission) =>
   form.fields.flatMap((field) => (field.type === "file" ? (values[field.name] as File[]) : []));
 
-/** Equipos de la lista de cotización con su nombre comercial */
-function quotedProducts({ form, values }: Submission) {
+type QuotedProduct = { model: string; name: string; quantity: number };
+
+/** Equipos de la lista de cotización con su nombre comercial (los que siguen en el catálogo) */
+async function quotedProducts({ form, values }: Submission): Promise<QuotedProduct[]> {
   const field = form.fields.find((candidate) => candidate.type === "quote");
   if (!field) return [];
+  const { products } = await readCatalog();
   return (values[field.name] as QuoteItem[]).flatMap(({ slug, qty }) => {
-    const product = PRODUCTS.find((candidate) => candidate.slug === slug);
+    const product = products.find((candidate) => candidate.slug === slug);
     return product ? [{ model: product.model, name: `${productTitle(product)} METTLER TOLEDO`, quantity: qty }] : [];
   });
 }
 
 /** Valor de un campo tal como lo leerá el equipo de Métrica */
-function display(field: FieldDef, value: FormValue, submission: Submission): string {
+function display(field: FieldDef, value: FormValue, quoted: QuotedProduct[]): string {
   switch (field.type) {
     case "file":
       return (value as File[]).map((file) => file.name).join(", ");
     case "checkbox":
       return (value as string[]).join(", ");
     case "quote":
-      return quotedProducts(submission)
+      return quoted
         .map((product) => `${product.quantity} × ${product.name}`)
         .join("\n");
     default:
@@ -97,12 +100,11 @@ async function byEmail(submission: Submission, rows: Row[]) {
 // Estos datos van en campos propios del prospecto; el resto, en su comentario
 const CONTACT_FIELDS = new Set<string>(Object.values(CONTACT));
 
-async function asLead(submission: Submission, rows: Row[], fieldRows: Map<string, Row>) {
+async function asLead(submission: Submission, rows: Row[], fieldRows: Map<string, Row>, products: QuotedProduct[]) {
   const { form, values, reference } = submission;
   const config = bitrix24Config();
   if (!config) return notConfigured("Bitrix24", submission, rows);
 
-  const products = quotedProducts(submission);
   const models = products.map((product) => product.model).join(", ");
   const company = textOf(values, CONTACT.company);
   const title = [`${form.subject} web`, company, models].filter(Boolean).join(" · ").slice(0, 250);
@@ -132,15 +134,16 @@ async function asLead(submission: Submission, rows: Row[], fieldRows: Map<string
 
 export async function deliver(submission: Submission): Promise<void> {
   const { form, values, reference } = submission;
+  const quoted = await quotedProducts(submission);
   const fieldRows = new Map(
     form.fields
-      .map((field) => [field.name, { label: field.label, value: display(field, values[field.name], submission) }] as const)
+      .map((field) => [field.name, { label: field.label, value: display(field, values[field.name], quoted) }] as const)
       .filter(([, row]) => row.value)
   );
   const rows = [...fieldRows.values()];
 
   const channels: [string, () => Promise<string>][] = [["correo", () => byEmail(submission, rows)]];
-  if (form.crm) channels.push(["Bitrix24", () => asLead(submission, rows, fieldRows)]);
+  if (form.crm) channels.push(["Bitrix24", () => asLead(submission, rows, fieldRows, quoted)]);
 
   const results = await Promise.allSettled(channels.map(([, run]) => run()));
   results.forEach((result, i) => {

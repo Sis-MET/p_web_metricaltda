@@ -10,21 +10,14 @@ import { CtaBand } from "@/components/layout/CtaBand";
 import { Reveal } from "@/components/animations/Reveal";
 import { ProductBrowser, ProductGrid } from "@/components/products/ProductBrowser";
 import { ProductVisual } from "@/components/products/ProductVisual";
-import { CATEGORIES, categoryHref, getCategory } from "@/content/categories";
-import { toSummary } from "@/content/catalog";
-import { productsIn } from "@/content/products";
-import { trailFor } from "@/lib/routes";
+import { categoryHref, toSummary } from "@/content/catalog";
+import { findCategory, getCatalog, productsIn } from "@/lib/catalog";
+import { PRODUCTS_HREF, categoryLink, trailFor } from "@/lib/routes";
 
 type Props = { params: Promise<{ categoria: string }> };
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return CATEGORIES.map((category) => ({ categoria: category.slug }));
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const category = getCategory((await params).categoria);
+  const category = findCategory(await getCatalog(), (await params).categoria);
   if (!category) return {};
   return {
     title: `${category.name} en Bolivia`,
@@ -35,20 +28,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function CategoryPage({ params }: Props) {
-  const category = getCategory((await params).categoria);
+  const catalog = await getCatalog();
+  const category = findCategory(catalog, (await params).categoria);
   if (!category) notFound();
 
-  const products = productsIn(category.slug).map(toSummary);
+  const products = productsIn(catalog, category.slug).map(toSummary);
 
   return (
     <main>
       <PageHeader
-        trail={trailFor(categoryHref(category.slug))}
+        trail={[...trailFor(PRODUCTS_HREF), categoryLink(category)]}
         eyebrow="Productos"
         title={category.name}
         description={category.description}
         aside={<ProductVisual image={category.image} alt="" preload className="mx-auto max-w-md" />}
-        nav={<SubNav section="/productos" label="Tipos de producto" />}
+        nav={<SubNav links={catalog.categories.map(categoryLink)} label="Tipos de producto" />}
       />
 
       <section className="border-b border-neutral-200 bg-white py-12">
@@ -87,7 +81,7 @@ export default async function CategoryPage({ params }: Props) {
           {products.length > 1 ? (
             // El explorador lee los filtros de la URL; mientras tanto se muestra el catálogo completo
             <Suspense fallback={<ProductGrid products={products} />}>
-              <ProductBrowser products={products} />
+              <ProductBrowser products={products} lines={category.lines} />
             </Suspense>
           ) : products.length === 1 ? (
             <ProductGrid products={products} />
@@ -95,8 +89,8 @@ export default async function CategoryPage({ params }: Props) {
             <Reveal className="rounded-3xl border border-neutral-200 bg-white px-6 py-12 text-center sm:px-12">
               <h2 className="font-heading text-2xl font-bold text-ink-950">Soluciones a la medida de su operación</h2>
               <p className="mx-auto mt-3 max-w-xl text-neutral-600">
-                Configuramos el software según sus equipos y procesos. Cuéntenos qué datos de pesaje necesita registrar,
-                reportar o integrar y le proponemos la solución adecuada.
+                Configuramos cada solución según sus equipos y procesos. Cuéntenos qué necesita y le proponemos la
+                adecuada.
               </p>
               <Button asChild className="mt-7">
                 <Link href="/contacto">

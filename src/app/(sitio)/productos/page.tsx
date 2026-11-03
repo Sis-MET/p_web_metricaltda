@@ -3,10 +3,9 @@ import { ClipboardList, PackageCheck, ShieldCheck, Wrench } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SubNav } from "@/components/layout/SubNav";
 import { CtaBand } from "@/components/layout/CtaBand";
-import { Reveal } from "@/components/animations/Reveal";
-import { CategoryCard } from "@/components/products/CategoryCard";
-import { CATEGORIES } from "@/content/categories";
-import { trailFor } from "@/lib/routes";
+import { CategoryGrid } from "@/components/products/CategoryGrid";
+import { getCatalog } from "@/lib/catalog";
+import { PRODUCTS_HREF, categoryLink, trailFor } from "@/lib/routes";
 
 export const metadata: Metadata = {
   title: "Productos",
@@ -22,29 +21,22 @@ const ASSURANCES = [
   { icon: ClipboardList, title: "Una sola cotización", text: "Arme su lista con varios equipos y reciba una propuesta completa." },
 ];
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const catalog = await getCatalog();
   return (
     <main>
       <PageHeader
-        trail={trailFor("/productos")}
+        trail={trailFor(PRODUCTS_HREF)}
         eyebrow="Catálogo"
         title="Productos METTLER TOLEDO"
         description="Tecnología de pesaje de vanguardia adaptada a los procesos más exigentes, con el respaldo local de Métrica en cada etapa."
-        nav={<SubNav section="/productos" label="Tipos de producto" />}
+        nav={<SubNav links={catalog.categories.map(categoryLink)} label="Tipos de producto" />}
       />
 
       <section className="bg-bone-100 py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {CATEGORIES.map((category, i) => (
-              <li key={category.slug} className={i === 2 ? "sm:col-span-2 lg:col-span-1" : undefined}>
-                <Reveal delay={i * 0.06} className="h-full">
-                  {/* La primera tarjeta es lo más grande en pantalla al llegar (sobre todo en el celular) */}
-                  <CategoryCard category={category} preload={i === 0} />
-                </Reveal>
-              </li>
-            ))}
-          </ul>
+          {/* La primera tarjeta es lo más grande en pantalla al llegar (sobre todo en el celular) */}
+          <CategoryGrid catalog={catalog} preloadFirst />
 
           <ul className="mt-16 grid gap-8 border-t border-bone-300 pt-12 sm:grid-cols-2 lg:grid-cols-4">
             {ASSURANCES.map(({ icon: Icon, title, text }) => (

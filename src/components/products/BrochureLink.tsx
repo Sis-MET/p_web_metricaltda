@@ -1,17 +1,11 @@
-import { statSync } from "node:fs";
-import { join } from "node:path";
 import { ArrowUpRight, FileDown } from "lucide-react";
 import type { Brochure } from "@/content/catalog";
 import { cn } from "@/lib/utils";
 
 const megabytes = new Intl.NumberFormat("es-BO", { maximumFractionDigits: 1 });
 
-/**
- * "PDF · 0,4 MB · en inglés". El tamaño se lee del archivo en /public al generar la página;
- * si falta el PDF, el build falla en lugar de publicar un enlace roto.
- */
-function describe({ href, language }: Brochure) {
-  const { size } = statSync(join(process.cwd(), "public", href));
+/** "PDF · 0,4 MB · en inglés" (el tamaño se guarda al subir la ficha) */
+function describe({ size, language }: Brochure) {
   return ["PDF", `${megabytes.format(size / 1024 / 1024)} MB`, language === "en" && "en inglés"].filter(Boolean).join(" · ");
 }
 

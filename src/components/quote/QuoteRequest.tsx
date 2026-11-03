@@ -77,7 +77,7 @@ export function QuoteRequest({ products }: { products: ProductSummary[] }) {
                       href={productHref(product)}
                       className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-gradient-to-b from-neutral-100 to-white"
                     >
-                      <Image src={product.image} alt="" fill sizes="64px" className="object-contain p-1.5" />
+                      <Image src={product.image.src} alt="" fill sizes="64px" className="object-contain p-1.5" />
                     </Link>
                     <div className="min-w-0 flex-1">
                       <Link href={productHref(product)} className="block truncate font-heading text-sm font-bold text-ink-950 hover:underline">

@@ -13,29 +13,24 @@ import { ProductGrid } from "@/components/products/ProductBrowser";
 import { BrochureLink } from "@/components/products/BrochureLink";
 import { AccreditationSeal } from "@/components/services/Accreditation";
 import { BenchScaleDemo } from "@/components/demos/BenchScaleDemo";
-import { getCategory, categoryHref } from "@/content/categories";
-import { ENVIRONMENTS, FAMILIES, formatCapacity, productHref, productTitle, toSummary } from "@/content/catalog";
-import { PRODUCTS, getProduct, relatedProducts } from "@/content/products";
+import { ENVIRONMENTS, categoryHref, formatCapacity, productHref, productTitle, toSummary } from "@/content/catalog";
+import { findCategory, findProduct, getCatalog, relatedProducts } from "@/lib/catalog";
 import { SERVICES } from "@/content/services";
 import { SITE_URL, whatsappUrl } from "@/content/company";
-import { trailFor } from "@/lib/routes";
+import { PRODUCTS_HREF, categoryLink, trailFor } from "@/lib/routes";
 import { cn, compact } from "@/lib/utils";
 
 type Props = { params: Promise<{ categoria: string; producto: string }> };
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return PRODUCTS.map((product) => ({ categoria: product.category, producto: product.slug }));
-}
-
 async function load(params: Props["params"]) {
   const { categoria, producto } = await params;
-  return getProduct(categoria, producto);
+  const catalog = await getCatalog();
+  const product = findProduct(catalog, categoria, producto);
+  return { catalog, product, category: product && findCategory(catalog, product.category) };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const product = await load(params);
+  const { product } = await load(params);
   if (!product) return {};
   return {
     title: `${productTitle(product)} METTLER TOLEDO`,
@@ -52,19 +47,18 @@ const ASSURANCES = [
 ];
 
 export default async function ProductPage({ params }: Props) {
-  const product = await load(params);
-  const category = product && getCategory(product.category);
+  const { catalog, product, category } = await load(params);
   if (!product || !category) notFound();
 
   const title = productTitle(product);
-  const trail = [...trailFor(categoryHref(category.slug)), { label: product.model, href: productHref(product) }];
-  const related = relatedProducts(product).map(toSummary);
+  const trail = [...trailFor(PRODUCTS_HREF), categoryLink(category), { label: product.model, href: productHref(product) }];
+  const related = relatedProducts(catalog, product).map(toSummary);
   const whatsappMessage = `Hola, quisiera una cotización de la ${title}.`;
 
   const facts = compact([
     product.capacity && { label: "Capacidad", value: formatCapacity(product.capacity) },
     product.protection && { label: "Protección", value: product.protection },
-    product.family && { label: "Línea", value: FAMILIES[product.family] },
+    product.line && { label: "Línea", value: product.line.name },
   ]);
 
   return (
@@ -78,7 +72,7 @@ export default async function ProductPage({ params }: Props) {
             <div className="relative aspect-square overflow-hidden rounded-[2rem] border border-neutral-200/80 bg-gradient-to-b from-white to-neutral-100 sm:aspect-[4/3] lg:aspect-square">
               <div aria-hidden className="absolute inset-x-[20%] bottom-[10%] h-[8%] rounded-[50%] bg-ink-950/15 blur-2xl" />
               <Image
-                src={product.image}
+                src={product.image.src}
                 alt={title}
                 fill
                 preload
@@ -230,7 +224,7 @@ export default async function ProductPage({ params }: Props) {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
               <h2 className="font-heading text-2xl font-bold text-ink-950 sm:text-3xl">
-                Otros modelos{product.family ? `: ${FAMILIES[product.family].toLowerCase()}` : ""}
+                Otros modelos{product.line ? `: ${product.line.name.toLowerCase()}` : ""}
               </h2>
               <Link
                 href={categoryHref(category.slug)}

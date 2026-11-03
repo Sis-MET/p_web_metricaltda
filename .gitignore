@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Archivos subidos desde el panel (en Plesk van fuera de la aplicación: UPLOADS_DIR)
+/storage

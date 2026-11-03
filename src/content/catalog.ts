@@ -1,17 +1,12 @@
-import type { StaticImageData } from "next/image";
-import type { CategorySlug } from "./categories";
+import { DEMO_HREF } from "./truckScaleProject";
 
 /**
- * Tipos y utilidades del catálogo, sin datos: los componentes de cliente los importan
- * sin arrastrar el catálogo completo a su bundle.
+ * Tipos y utilidades del catálogo, sin datos: el catálogo vive en la base (lo administra el área
+ * comercial desde /panel) y se lee en el servidor con getCatalog(). Este archivo también lo usan
+ * componentes de cliente.
  */
 
 /* ─── Filtros del catálogo ──────────────────────────────────────────────── */
-
-export const FAMILIES = {
-  sobremesa: "Sobremesa y compactas",
-  plataformas: "Plataformas de pesaje",
-} as const;
 
 export const ENVIRONMENTS = {
   seco: "Ambientes secos o con polvo",
@@ -20,19 +15,61 @@ export const ENVIRONMENTS = {
   atex: "Zonas peligrosas (ATEX)",
 } as const;
 
-export type Family = keyof typeof FAMILIES;
 export type Environment = keyof typeof ENVIRONMENTS;
+
+export const isEnvironment = (value: string): value is Environment => value in ENVIRONMENTS;
+
+/* ─── Demos 3D programados ──────────────────────────────────────────────── */
+
+/** Demos que una categoría puede enlazar (se abren encima de la página) */
+export const CATEGORY_DEMOS = {
+  vts200: {
+    href: DEMO_HREF,
+    label: "Vea en 3D cómo instalamos una báscula camionera VTS200, de la excavación al montaje",
+  },
+} as const;
+
+/** Demos que se muestran dentro de la ficha de un producto */
+export const PRODUCT_DEMOS = {
+  bpa121: "Báscula de sobremesa BPA121: pesaje y desarmado para limpieza",
+} as const;
+
+export type CategoryDemoKey = keyof typeof CATEGORY_DEMOS;
+export type ProductDemoKey = keyof typeof PRODUCT_DEMOS;
 
 /* ─── Modelo ────────────────────────────────────────────────────────────── */
 
+/** Imagen subida: dirección pública y medidas originales */
+export type CatalogImage = { src: string; width: number; height: number };
+
+export type Line = { slug: string; name: string };
+
+export type Category = {
+  slug: string;
+  name: string;
+  /** Una línea para menús y tarjetas */
+  short: string;
+  description: string;
+  image: CatalogImage;
+  /** Por qué elegir esta categoría: se muestra en su página */
+  highlights: { title: string; text: string }[];
+  /** Demo 3D enlazado desde la página de la categoría */
+  demo?: { href: string; label: string };
+  lines: Line[];
+};
+
+/** Ficha técnica en PDF: tamaño en bytes; `language` solo cuando no está en español */
+export type Brochure = { href: string; size: number; language?: "en" };
+
 export type Product = {
   slug: string;
-  category: CategorySlug;
-  family?: Family;
+  /** Slug de su categoría */
+  category: string;
+  line?: Line;
   model: string;
   /** Tipo de equipo: "Báscula compacta", "Plataforma de pesaje"… */
   type: string;
-  image: StaticImageData;
+  image: CatalogImage;
   /** Una o dos líneas: tarjetas, buscadores y vista previa al compartir */
   summary: string;
   description: string;
@@ -42,14 +79,12 @@ export type Product = {
   environments: Environment[];
   features: string[];
   specs: { label: string; value: string }[];
-  /** Ficha técnica del fabricante (PDF) */
   brochure?: Brochure;
   /** Demo 3D en la ficha del producto */
-  demo?: "bpa121";
+  demo?: ProductDemoKey;
 };
 
-/** Ficha técnica en PDF; `language` solo cuando no está en español */
-export type Brochure = { href: string; language?: "en" };
+export const categoryHref = (slug: string) => `/productos/${slug}`;
 
 export const productHref = (product: Pick<Product, "category" | "slug">) =>
   `/productos/${product.category}/${product.slug}`;
@@ -66,7 +101,7 @@ export function formatCapacity({ min, max }: { min: number; max: number }) {
 }
 
 /** Lo mínimo para tarjetas y la lista de cotización: es lo que viaja a los componentes de cliente */
-const SUMMARY_KEYS = ["slug", "category", "family", "model", "type", "image", "summary", "capacity", "protection", "environments"] as const;
+const SUMMARY_KEYS = ["slug", "category", "line", "model", "type", "image", "summary", "capacity", "protection", "environments"] as const;
 
 export type ProductSummary = Pick<Product, (typeof SUMMARY_KEYS)[number]>;
 

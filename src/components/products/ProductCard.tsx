@@ -14,7 +14,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
       <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-b from-neutral-100 to-white">
         <div aria-hidden className="absolute inset-x-10 bottom-5 h-8 rounded-[50%] bg-ink-950/10 blur-xl" />
         <Image
-          src={product.image}
+          src={product.image.src}
           alt={`${product.type} ${product.model}`}
           fill
           sizes="(min-width: 1280px) 300px, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"

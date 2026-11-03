@@ -1,37 +1,126 @@
-import type { CategorySlug } from "./categories";
-import type { Brochure, Product } from "./catalog";
-import { SCALE_SIZES, TRUCK_SCALE_PRODUCT, VTS200 } from "./truckScaleProject";
+import type { CategoryDemoKey, Environment, ProductDemoKey } from "@/content/catalog";
+import { SCALE_SIZES, TRUCK_SCALE_PRODUCT, VTS200 } from "@/content/truckScaleProject";
 
-import bba211 from "@/assets/products/bba211.png";
-import bba231 from "@/assets/products/bba231.png";
-import bba236 from "@/assets/products/bba236.png";
-import bba256x from "@/assets/products/bba256x.png";
-import bpa121 from "@/assets/products/bpa121.png";
-import ics226 from "@/assets/products/ics226.png";
-import ics241 from "@/assets/products/ics241.png";
-import pba220 from "@/assets/products/pba220.png";
-import pba436 from "@/assets/products/pba436.png";
-import pba439 from "@/assets/products/pba439.png";
-import pba757 from "@/assets/products/pba757.png";
-import pbd655 from "@/assets/products/pbd655.png";
-import pbd659pba639 from "@/assets/products/pbd659-pba639.png";
-import pbd769 from "@/assets/products/pbd769.png";
-import pbk785pbd555 from "@/assets/products/pbk785-pbd555.png";
-import pbk9pfk9 from "@/assets/products/pbk9-pfk9.png";
-import powercellPdx from "@/assets/products/powercell-pdx.png";
+/**
+ * Catálogo inicial: el que tenía el sitio antes del panel. Se carga solo una vez, con la base vacía
+ * (src/lib/db/seed/index.ts); desde entonces lo administra el área comercial. Las imágenes y las
+ * fichas están en seed/archivos.
+ */
 
-/** Fichas técnicas METTLER TOLEDO, servidas desde public/fichas-tecnicas */
-const brochure = (file: string, language?: Brochure["language"]): Brochure => ({
-  href: `/fichas-tecnicas/${file}.pdf`,
-  ...(language && { language }),
-});
+type SeedCategory = {
+  slug: string;
+  name: string;
+  short: string;
+  description: string;
+  /** Archivo dentro de seed/archivos */
+  image: string;
+  highlights: readonly { title: string; text: string }[];
+  demo?: CategoryDemoKey;
+  lines?: readonly { slug: string; name: string }[];
+};
+
+type SeedProduct = {
+  slug: string;
+  category: string;
+  /** Línea de su categoría */
+  family?: string;
+  model: string;
+  type: string;
+  image: string;
+  brochure?: { file: string; language?: "en" };
+  summary: string;
+  description: string;
+  capacity?: { min: number; max: number };
+  protection?: string;
+  environments: Environment[];
+  features: string[];
+  specs: { label: string; value: string }[];
+  demo?: ProductDemoKey;
+};
+
+/** Fichas técnicas METTLER TOLEDO */
+const brochure = (file: string, language?: "en") => ({ file: `fichas/${file}.pdf`, ...(language && { language }) });
+
+export const SEED_CATEGORIES: SeedCategory[] = [
+  {
+    slug: "balanzas-industriales",
+    name: "Balanzas industriales",
+    short: "Básculas de sobremesa, compactas y plataformas de pesaje",
+    description:
+      "Robustez, confiabilidad, precisión y ergonomía: balanzas METTLER TOLEDO diseñadas para los procesos de pesaje más exigentes, desde el mostrador hasta las áreas de lavado intensivo y las zonas peligrosas.",
+    image: "categorias/balanzas-industriales.png",
+    lines: [
+      { slug: "sobremesa", name: "Sobremesa y compactas" },
+      { slug: "plataformas", name: "Plataformas de pesaje" },
+    ],
+    highlights: [
+      {
+        title: "Para cada entorno",
+        text: "Equipos para ambientes secos, húmedos, de lavado intensivo y zonas con riesgo de explosión.",
+      },
+      {
+        title: "Exactitud homologada",
+        text: "Modelos con aprobación OIML y NTEP, listos para aplicaciones con uso legal.",
+      },
+      {
+        title: "Calibración acreditada",
+        text: "Su balanza puede salir calibrada por nuestro laboratorio acreditado por IBMETRO.",
+      },
+    ],
+  },
+  {
+    slug: "basculas-de-camiones",
+    name: "Básculas de camiones",
+    short: "Báscula VTS200 de acero con celdas digitales POWERCELL PDX",
+    description:
+      "La báscula de camiones VTS200 de METTLER TOLEDO une un puente de acero ortotrópico, diseñado para durar, con celdas digitales POWERCELL PDX: pesa camiones en tráfico medio a pesado con exactitud y bajo costo de mantenimiento.",
+    image: "productos/powercell-pdx.png",
+    demo: "vts200",
+    highlights: [
+      {
+        title: "Diseñada para durar",
+        text: "Probada en fábrica con 3,1 millones de ciclos: el equivalente a 20 años con 250 camiones cargados por día.",
+      },
+      {
+        title: "Celdas digitales",
+        text: "Cada celda convierte su señal a digital y avisa ante una anomalía antes de que afecte la medición.",
+      },
+      {
+        title: "Proyecto llave en mano",
+        text: "Hacemos la obra civil, montamos la báscula y la caseta, y la calibramos y mantenemos con técnicos locales.",
+      },
+    ],
+  },
+  {
+    slug: "software",
+    name: "Software especializado",
+    short: "Gestión, trazabilidad e integración de sus datos de pesaje",
+    description:
+      "Lleve los datos de sus balanzas y básculas a donde se toman las decisiones: registros, tickets, reportes e integración con sus sistemas de gestión.",
+    image: "categorias/software.svg",
+    highlights: [
+      {
+        title: "Registro de pesajes",
+        text: "Cada pesaje queda guardado con fecha, operador y producto o vehículo.",
+      },
+      {
+        title: "Tickets y reportes",
+        text: "Emisión de tickets de pesaje y reportes listos para auditorías.",
+      },
+      {
+        title: "Integración",
+        text: "Conexión de sus equipos de pesaje con su ERP u otros sistemas de la planta.",
+      },
+    ],
+  },
+];
 
 const SHARED_DIGITAL =
   "Plataformas precalibradas y robustas, aptas para entornos hostiles con protección IP65 opcional, nivelación ergonómica, protección contra sobrecargas e interfaz digital SICSpro para conectar y pesar.";
 
 const SHARED_HYGIENIC = "Fabricada en acero inoxidable AISI 304 con protección IP68/IP69K, es fácil de limpiar y mantener.";
 
-export const PRODUCTS: Product[] = [
+export const SEED_PRODUCTS: SeedProduct[] = [
   /* Sobremesa y compactas */
   {
     slug: "bpa121",
@@ -39,7 +128,7 @@ export const PRODUCTS: Product[] = [
     family: "sobremesa",
     model: "BPA121",
     type: "Báscula compacta",
-    image: bpa121,
+    image: "productos/bpa121.png",
     brochure: brochure("bpa121"),
     summary: "Báscula de sobremesa portátil para pesar de forma eficiente y fiable en entornos húmedos y de procesamiento de alimentos.",
     description:
@@ -70,7 +159,7 @@ export const PRODUCTS: Product[] = [
     family: "sobremesa",
     model: "ICS226",
     type: "Báscula compacta",
-    image: ics226,
+    image: "productos/ics226.png",
     brochure: brochure("ics226"),
     summary: "Báscula portátil de acero inoxidable para pesaje y porcionado en producción de alimentos y envasado.",
     description:
@@ -98,7 +187,7 @@ export const PRODUCTS: Product[] = [
     family: "sobremesa",
     model: "ICS241",
     type: "Báscula compacta",
-    image: ics241,
+    image: "productos/ics241.png",
     brochure: brochure("ics241"),
     summary: "Pesaje y recuento con registro de datos en tarjeta SD para producción, logística y control de calidad.",
     description:
@@ -125,7 +214,7 @@ export const PRODUCTS: Product[] = [
     family: "sobremesa",
     model: "BBA211",
     type: "Báscula de sobremesa",
-    image: bba211,
+    image: "productos/bba211.png",
     brochure: brochure("bba211", "en"),
     summary: "Pesaje simple y control de peso para paquetes, envíos y recepción de mercancías.",
     description:
@@ -153,7 +242,7 @@ export const PRODUCTS: Product[] = [
     family: "sobremesa",
     model: "BBA231",
     type: "Báscula de sobremesa",
-    image: bba231,
+    image: "productos/bba231.png",
     brochure: brochure("bba231"),
     summary: "Báscula versátil, económica y robusta para el pesaje rutinario en ambientes secos o con polvo.",
     description:
@@ -181,7 +270,7 @@ export const PRODUCTS: Product[] = [
     family: "sobremesa",
     model: "BBA236",
     type: "Báscula de sobremesa",
-    image: bba236,
+    image: "productos/bba236.png",
     brochure: brochure("bba236"),
     summary: "Báscula robusta de acero inoxidable para ambientes secos o con salpicaduras de líquidos.",
     description:
@@ -209,7 +298,7 @@ export const PRODUCTS: Product[] = [
     family: "sobremesa",
     model: "BBA256x",
     type: "Báscula intrínsecamente segura",
-    image: bba256x,
+    image: "productos/bba256x.png",
     brochure: brochure("bba256x"),
     summary: "Pesaje seguro en zonas con riesgo de explosión, con homologaciones ATEX e IECEx.",
     description:
@@ -239,7 +328,7 @@ export const PRODUCTS: Product[] = [
     family: "plataformas",
     model: "PBA220",
     type: "Plataforma de pesaje",
-    image: pba220,
+    image: "productos/pba220.png",
     brochure: brochure("pba220"),
     summary: "Plataforma económica y robusta para inventarios, envíos y recepción de mercancías en ambientes secos.",
     description:
@@ -267,7 +356,7 @@ export const PRODUCTS: Product[] = [
     family: "plataformas",
     model: "PBD555",
     type: "Plataforma digital de pesaje",
-    image: pbk785pbd555,
+    image: "productos/pbk785-pbd555.png",
     brochure: brochure("pbk785-pbd555"),
     summary: "Plataforma digital precalibrada con celda de galgas METTLER TOLEDO y resolución aprobada de hasta 7500e.",
     description: `La PBD555 utiliza la celda de carga de galgas extensométricas de METTLER TOLEDO, con una resolución aprobada de hasta 7500e. ${SHARED_DIGITAL}`,
@@ -293,7 +382,7 @@ export const PRODUCTS: Product[] = [
     family: "plataformas",
     model: "PBK785",
     type: "Plataforma digital de alta precisión",
-    image: pbk785pbd555,
+    image: "productos/pbk785-pbd555.png",
     brochure: brochure("pbk785-pbd555"),
     summary: "Tecnología de compensación de fuerza MonoBloc® con resolución aprobada de hasta 61 000e.",
     description: `La PBK785 utiliza la tecnología de compensación de fuerza MonoBloc®, con una resolución aprobada de hasta 61 000e (OIML). ${SHARED_DIGITAL}`,
@@ -319,7 +408,7 @@ export const PRODUCTS: Product[] = [
     family: "plataformas",
     model: "PBD655",
     type: "Plataforma digital de pesaje",
-    image: pbd655,
+    image: "productos/pbd655.png",
     brochure: brochure("pbd655"),
     summary: "Plataforma digital robusta y económica, con resolución certificable de 6000e para entornos duros y con polvo.",
     description:
@@ -346,7 +435,7 @@ export const PRODUCTS: Product[] = [
     family: "plataformas",
     model: "PBD659",
     type: "Plataforma higiénica",
-    image: pbd659pba639,
+    image: "productos/pbd659-pba639.png",
     brochure: brochure("pbd659-pba639"),
     summary: "Plataforma de acero inoxidable IP68/IP69K para áreas húmedas y de lavado frecuente.",
     description: `La PBD659 está diseñada para entornos húmedos y de lavado frecuente, ideal para aplicaciones con estándares de higiene elevados. ${SHARED_HYGIENIC}`,
@@ -370,7 +459,7 @@ export const PRODUCTS: Product[] = [
     family: "plataformas",
     model: "PBA639",
     type: "Plataforma higiénica",
-    image: pbd659pba639,
+    image: "productos/pbd659-pba639.png",
     brochure: brochure("pbd659-pba639"),
     summary: "Plataforma higiénica para ambientes húmedos con requisitos de limpieza rigurosos.",
     description: `La PBA639 está diseñada para ambientes húmedos con requisitos de higiene rigurosos y procesos que exigen alta confiabilidad y durabilidad. ${SHARED_HYGIENIC}`,
@@ -395,7 +484,7 @@ export const PRODUCTS: Product[] = [
     family: "plataformas",
     model: "PBA757",
     type: "Plataforma de pesaje",
-    image: pba757,
+    image: "productos/pba757.png",
     brochure: brochure("pba757"),
     summary: "Plataforma rígida para pesaje estático y dinámico: recuento, control de peso y verificación de envases.",
     description:
@@ -423,7 +512,7 @@ export const PRODUCTS: Product[] = [
     family: "plataformas",
     model: "PBA436",
     type: "Plataforma de pesaje",
-    image: pba436,
+    image: "productos/pba436.png",
     brochure: brochure("pba436"),
     summary: "Plataforma de acero inoxidable con diseño higiénico abierto para entornos de lavado suave.",
     description:
@@ -451,7 +540,7 @@ export const PRODUCTS: Product[] = [
     family: "plataformas",
     model: "PBA439",
     type: "Plataforma higiénica",
-    image: pba439,
+    image: "productos/pba439.png",
     brochure: brochure("pba439"),
     summary: "Plataforma de acero inoxidable IP68/IP69K para lavado intensivo y altos estándares de limpieza.",
     description:
@@ -479,7 +568,7 @@ export const PRODUCTS: Product[] = [
     family: "plataformas",
     model: "PBD769",
     type: "Plataforma higiénica",
-    image: pbd769,
+    image: "productos/pbd769.png",
     brochure: brochure("pbd769"),
     summary: "Plataforma higiénica de alta resolución para pesaje dinámico en ambientes húmedos y de lavado.",
     description:
@@ -506,7 +595,7 @@ export const PRODUCTS: Product[] = [
     family: "plataformas",
     model: "PBK9 / PFK9",
     type: "Plataformas de pesaje",
-    image: pbk9pfk9,
+    image: "productos/pbk9-pfk9.png",
     brochure: brochure("pbk9-pfk9"),
     summary: "Plataformas de alta resolución para áreas húmedas, polvorientas y peligrosas, de 0,6 kg a 3 t.",
     description:
@@ -534,7 +623,7 @@ export const PRODUCTS: Product[] = [
     category: TRUCK_SCALE_PRODUCT.category,
     model: "VTS200",
     type: "Báscula de camiones",
-    image: powercellPdx,
+    image: "productos/powercell-pdx.png",
     summary: `Báscula de camiones de acero ortotrópico con celdas digitales ${VTS200.cells}: pesa camiones en tráfico medio a pesado con exactitud y bajo costo de mantenimiento.`,
     description: `La VTS200 de METTLER TOLEDO es una báscula de camiones multimódulo de acero, diseñada para pesar con exactitud camiones de ruta en tráfico medio a pesado y reducir sus costos de servicio a largo plazo. Su puente ortotrópico, el mismo principio de construcción de grandes puentes como el Golden Gate, aprovecha cada kilogramo de acero: nervaduras soldadas en continuo por robot en lugar de vigas «I». Se configura de 4 a 48 m con módulos estándar y pesa con celdas digitales ${VTS200.cells} que avisan ante cualquier error de pesaje. Métrica ejecuta el proyecto completo: obra civil, montaje, caseta de control, calibración y mantenimiento.`,
     capacity: { min: SCALE_SIZES[0].capacity, max: SCALE_SIZES[SCALE_SIZES.length - 1].capacity },
@@ -576,22 +665,3 @@ export const PRODUCTS: Product[] = [
     ],
   },
 ];
-
-/* ─── Consultas ─────────────────────────────────────────────────────────── */
-
-export function getProduct(category: string, slug: string): Product | undefined {
-  return PRODUCTS.find((product) => product.category === category && product.slug === slug);
-}
-
-export const productsIn = (category: CategorySlug) => PRODUCTS.filter((product) => product.category === category);
-
-/** Otros modelos de la misma familia (o categoría), para la ficha del producto */
-export function relatedProducts(product: Product, limit = 4) {
-  return PRODUCTS.filter(
-    (other) =>
-      other.slug !== product.slug &&
-      other.category === product.category &&
-      (product.family ? other.family === product.family : true)
-  ).slice(0, limit);
-}
-

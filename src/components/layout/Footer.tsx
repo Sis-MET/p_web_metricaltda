@@ -2,17 +2,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { Facebook, Instagram, Linkedin, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { ACCREDITATION, COMPANY, EMAILS, OFFICES, SOCIAL_LINKS, mapsUrl, whatsappUrl } from "@/content/company";
-import { NAV } from "@/lib/routes";
+import { withProducts, type NavLink } from "@/lib/routes";
 
 const SOCIAL_ICONS = { Facebook, Instagram, LinkedIn: Linkedin };
 
 const linkCls = "transition-colors duration-200 hover:text-white";
 const headingCls = "font-heading text-xs font-bold uppercase tracking-[0.18em] text-sun-400";
 
-// Columnas del mapa del sitio: las secciones con subpáginas
-const SITEMAP = NAV.filter((item) => item.children);
+export function Footer({ productLinks }: { productLinks: NavLink[] }) {
+  // Columnas del mapa del sitio: las secciones con subpáginas
+  const sitemap = withProducts(productLinks).filter((item) => item.children?.length);
 
-export function Footer() {
   return (
     <footer data-header-theme="dark" className="bg-ink-950 text-white">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -84,7 +84,7 @@ export function Footer() {
 
           {/* ── Mapa del sitio ── */}
           <nav aria-label="Mapa del sitio" className="grid gap-10 sm:grid-cols-3 lg:col-span-7 lg:pl-10">
-            {SITEMAP.map((item) => (
+            {sitemap.map((item) => (
               <div key={item.href} className="flex flex-col gap-4">
                 <h3 className={headingCls}>
                   <Link href={item.href} className={linkCls}>

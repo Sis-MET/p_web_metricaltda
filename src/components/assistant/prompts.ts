@@ -1,4 +1,4 @@
-import { categoryHref } from "@/content/categories";
+import { categoryHref } from "@/content/catalog";
 import { SERVICES } from "@/content/services";
 import { QUOTE_HREF } from "@/lib/routes";
 
