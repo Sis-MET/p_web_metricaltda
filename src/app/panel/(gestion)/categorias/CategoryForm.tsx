@@ -3,6 +3,7 @@
 import { useActionState, useState, useTransition, type FormEvent } from "react";
 import { Save } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/forms/Select";
 import { controlCls } from "@/components/forms/styles";
 import { Field, Notice } from "@/components/panel/Field";
 import { ImageField } from "@/components/panel/ImageField";
@@ -119,14 +120,13 @@ export function CategoryForm({
 
       <section className="grid gap-5 rounded-2xl border border-neutral-200 bg-white p-5 sm:grid-cols-2 sm:p-6">
         <Field label="Demo 3D" htmlFor="demo" hint="Enlace a un demo programado, en la página de la categoría.">
-          <select id="demo" name="demo" defaultValue={initial.demo ?? ""} className={controlCls()}>
-            <option value="">Ninguno</option>
-            {Object.entries(CATEGORY_DEMOS).map(([key, demo]) => (
-              <option key={key} value={key}>
-                {demo.label}
-              </option>
-            ))}
-          </select>
+          <Select
+            id="demo"
+            name="demo"
+            defaultValue={initial.demo ?? ""}
+            options={[{ value: "", label: "Ninguno" }, ...Object.entries(CATEGORY_DEMOS).map(([value, demo]) => ({ value, label: demo.label }))]}
+            className={controlCls()}
+          />
         </Field>
         <label className="flex items-start gap-3 self-end rounded-xl border border-neutral-200 p-4">
           <input type="checkbox" name="published" defaultChecked={initial.published} className="mt-0.5 size-5 accent-ink-900" />

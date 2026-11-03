@@ -6,23 +6,30 @@ import { Check, ChevronDown } from "lucide-react";
 import { EASE_OUT } from "@/lib/motion";
 import type { Option } from "@/lib/forms/schema";
 import { cn } from "@/lib/utils";
+import { listboxCls, normalize, optionCls } from "./styles";
 
 type SelectProps = {
   /** Del botón: lo usa la etiqueta del campo */
   id: string;
   name: string;
   options: Option[];
-  placeholder: string;
+  /** Texto sin selección (si ninguna opción tiene valor vacío) */
+  placeholder?: string;
   className?: string;
   describedBy?: string;
-  invalid: boolean;
+  invalid?: boolean;
+  /** Valor inicial */
+  defaultValue?: string;
+  /** Avisa cada elección (por ejemplo, para cambiar otras listas del formulario) */
+  onChange?: (value: string) => void;
+  disabled?: boolean;
+  /** Nombre accesible cuando no hay etiqueta visible */
+  label?: string;
 };
 
 /** Alto que necesita la lista para abrirse hacia abajo; si no cabe, se abre hacia arriba */
 const LIST_SPACE_PX = 280;
 const TYPEAHEAD_MS = 600;
-
-const normalize = (text: string) => text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
 /**
  * Lista desplegable con el estilo del sitio, con el patrón de WAI-ARIA "combobox de solo selección":
@@ -30,8 +37,20 @@ const normalize = (text: string) => text.normalize("NFD").replace(/\p{Diacritic}
  * Escape y escribir para saltar a una opción). El valor viaja en un <select> nativo oculto: el
  * formulario lo lee, lo valida y limpia su error como el de cualquier otro campo.
  */
-export function Select({ id, name, options, placeholder, className, describedBy, invalid }: SelectProps) {
-  const [value, setValue] = useState("");
+export function Select({
+  id,
+  name,
+  options,
+  placeholder = "",
+  className,
+  describedBy,
+  invalid = false,
+  defaultValue = "",
+  onChange,
+  disabled = false,
+  label,
+}: SelectProps) {
+  const [value, setValue] = useState(defaultValue);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const [upward, setUpward] = useState(false);
@@ -62,6 +81,7 @@ export function Select({ id, name, options, placeholder, className, describedBy,
     setOpen(false);
     if (!option || option.value === value) return;
     setValue(option.value);
+    onChange?.(option.value);
     // El cambio llega al formulario como el de un campo nativo
     if (native.current) {
       native.current.value = option.value;
@@ -135,6 +155,8 @@ export function Select({ id, name, options, placeholder, className, describedBy,
         aria-activedescendant={open ? optionId(active) : undefined}
         aria-invalid={invalid || undefined}
         aria-describedby={describedBy}
+        aria-label={label}
+        disabled={disabled}
         onClick={() => (open ? setOpen(false) : show())}
         onKeyDown={handleKeyDown}
         onBlur={() => setOpen(false)}
@@ -163,10 +185,7 @@ export function Select({ id, name, options, placeholder, className, describedBy,
             style={{ transformOrigin: upward ? "bottom" : "top" }}
             // El foco se queda en el botón: elegir con el mouse no debe quitárselo
             onMouseDown={(event) => event.preventDefault()}
-            className={cn(
-              "absolute inset-x-0 z-30 max-h-64 overflow-y-auto overscroll-contain rounded-xl border border-neutral-200 bg-white p-1.5 shadow-[0_24px_48px_-20px_rgba(0,0,0,0.35)]",
-              upward ? "bottom-full mb-1.5" : "top-full mt-1.5"
-            )}
+            className={listboxCls(upward)}
           >
             {options.map((option, index) => {
               const isSelected = index === selectedIndex;
@@ -178,11 +197,7 @@ export function Select({ id, name, options, placeholder, className, describedBy,
                   aria-selected={isSelected}
                   onMouseEnter={() => setActive(index)}
                   onClick={() => choose(index)}
-                  className={cn(
-                    "flex cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 text-[15px] transition-colors",
-                    index === active ? "bg-mt-50 text-ink-950" : "text-ink-800",
-                    isSelected && "font-semibold"
-                  )}
+                  className={optionCls(index === active, isSelected)}
                 >
                   {option.label}
                   {isSelected && <Check className="size-4 shrink-0 text-mt-700" aria-hidden />}
@@ -197,13 +212,14 @@ export function Select({ id, name, options, placeholder, className, describedBy,
       <select
         ref={native}
         name={name}
-        defaultValue=""
+        defaultValue={defaultValue}
+        disabled={disabled}
         tabIndex={-1}
         aria-hidden
         onFocus={() => button.current?.focus()}
         className="sr-only"
       >
-        <option value="" />
+        {!options.some((option) => option.value === "") && <option value="" />}
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

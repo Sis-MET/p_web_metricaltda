@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PackagePlus, Pencil, Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/forms/Select";
 import { controlCls } from "@/components/forms/styles";
 import { Notice } from "@/components/panel/Field";
 import { PanelHeader, StatusBadge } from "@/components/panel/PanelHeader";
@@ -80,11 +81,20 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         </nav>
         <form className="flex gap-2" action="/panel/productos">
           {categoryId && <input type="hidden" name="categoria" value={categoryId} />}
-          <select name="estado" defaultValue={filters.estado ?? ""} aria-label="Estado" className={cn(controlCls(), "h-10 w-36")}>
-            <option value="">Todos</option>
-            <option value="publicados">Publicados</option>
-            <option value="borradores">Borradores</option>
-          </select>
+          <div className="w-40">
+            <Select
+              id="estado"
+              name="estado"
+              label="Estado"
+              defaultValue={filters.estado ?? ""}
+              options={[
+                { value: "", label: "Todos" },
+                { value: "publicados", label: "Publicados" },
+                { value: "borradores", label: "Borradores" },
+              ]}
+              className={cn(controlCls(), "h-10")}
+            />
+          </div>
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400" aria-hidden />
             <input name="q" defaultValue={filters.q} placeholder="Buscar modelo" aria-label="Buscar modelo" className={cn(controlCls(), "h-10 w-48 pl-9")} />

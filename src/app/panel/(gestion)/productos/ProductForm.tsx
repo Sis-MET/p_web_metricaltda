@@ -3,6 +3,8 @@
 import { useActionState, useState, useTransition, type FormEvent, type ReactNode } from "react";
 import { FileText, Save } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/forms/Select";
+import { SuggestInput } from "@/components/forms/SuggestInput";
 import { controlCls } from "@/components/forms/styles";
 import { Field, Notice } from "@/components/panel/Field";
 import { ImageField } from "@/components/panel/ImageField";
@@ -83,36 +85,28 @@ export function ProductForm({
 
       <Section title="Identificación" className="grid gap-5 sm:grid-cols-2">
         <Field label="Categoría" htmlFor="categoryId" required error={errors.categoryId}>
-          <select
+          <Select
             id="categoryId"
             name="categoryId"
-            value={categoryId}
-            onChange={(event) => setCategoryId(Number(event.target.value))}
+            defaultValue={String(categoryId)}
+            onChange={(value) => setCategoryId(Number(value))}
+            options={categories.map((category) => ({ value: String(category.id), label: category.name }))}
+            invalid={Boolean(errors.categoryId)}
             className={controlCls(Boolean(errors.categoryId))}
-          >
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+          />
         </Field>
         <Field label="Línea" htmlFor="lineId" error={errors.lineId} hint={lines.length ? undefined : "Esta categoría no tiene líneas."}>
-          <select
+          {/* Otra categoría, otras líneas: la lista vuelve a empezar */}
+          <Select
             key={categoryId}
             id="lineId"
             name="lineId"
-            defaultValue={initial.categoryId === categoryId ? (initial.lineId ?? "") : ""}
+            defaultValue={initial.categoryId === categoryId && initial.lineId ? String(initial.lineId) : ""}
             disabled={!lines.length}
+            options={[{ value: "", label: "Sin línea" }, ...lines.map((line) => ({ value: String(line.id), label: line.name }))]}
+            invalid={Boolean(errors.lineId)}
             className={controlCls(Boolean(errors.lineId))}
-          >
-            <option value="">Sin línea</option>
-            {lines.map((line) => (
-              <option key={line.id} value={line.id}>
-                {line.name}
-              </option>
-            ))}
-          </select>
+          />
         </Field>
         <Field label="Modelo" htmlFor="model" required error={errors.model} hint="El título de la ficha: PBA439, VTS200…">
           <input
@@ -125,12 +119,15 @@ export function ProductForm({
           />
         </Field>
         <Field label="Tipo de equipo" htmlFor="type" required error={errors.type} hint="Báscula compacta, plataforma de pesaje…">
-          <input id="type" name="type" required list="product-types" defaultValue={initial.type} className={controlCls(Boolean(errors.type))} />
-          <datalist id="product-types">
-            {typeOptions.map((type) => (
-              <option key={type} value={type} />
-            ))}
-          </datalist>
+          <SuggestInput
+            id="type"
+            name="type"
+            required
+            maxLength={120}
+            suggestions={typeOptions}
+            defaultValue={initial.type}
+            className={controlCls(Boolean(errors.type))}
+          />
         </Field>
         <Field
           label="Dirección"
@@ -206,19 +203,23 @@ export function ProductForm({
               defaultValue={initial.capacity.max}
               className={controlCls(Boolean(errors.capacityMax))}
             />
-            <select name="capacityUnit" aria-label="Unidad" defaultValue={initial.capacity.unit} className={cn(controlCls(), "w-24 shrink-0")}>
-              <option value="kg">kg</option>
-              <option value="t">t</option>
-            </select>
+            <div className="w-24 shrink-0">
+              <Select
+                id="capacityUnit"
+                name="capacityUnit"
+                label="Unidad"
+                defaultValue={initial.capacity.unit}
+                options={[
+                  { value: "kg", label: "kg" },
+                  { value: "t", label: "t" },
+                ]}
+                className={controlCls()}
+              />
+            </div>
           </div>
         </Field>
         <Field label="Protección" htmlFor="protection" error={errors.protection} hint="Grado IP: IP65, IP68 / IP69K…">
-          <input id="protection" name="protection" list="protections" defaultValue={initial.protection} className={controlCls()} />
-          <datalist id="protections">
-            {PROTECTIONS.map((value) => (
-              <option key={value} value={value} />
-            ))}
-          </datalist>
+          <SuggestInput id="protection" name="protection" maxLength={60} suggestions={PROTECTIONS} defaultValue={initial.protection} className={controlCls()} />
         </Field>
         <fieldset className="sm:col-span-2">
           <legend className="mb-2 text-sm font-medium text-ink-950">Ambientes de trabajo</legend>
@@ -280,24 +281,29 @@ export function ProductForm({
             />
           </Field>
           <Field label="Idioma" htmlFor="brochureLanguage">
-            <select id="brochureLanguage" name="brochureLanguage" defaultValue={initial.brochure?.language ?? "es"} className={controlCls()}>
-              <option value="es">Español</option>
-              <option value="en">Inglés</option>
-            </select>
+            <Select
+              id="brochureLanguage"
+              name="brochureLanguage"
+              defaultValue={initial.brochure?.language ?? "es"}
+              options={[
+                { value: "es", label: "Español" },
+                { value: "en", label: "Inglés" },
+              ]}
+              className={controlCls()}
+            />
           </Field>
         </div>
       </Section>
 
       <Section title="Publicación" className="grid gap-5 sm:grid-cols-2">
         <Field label="Demo 3D" htmlFor="demo" hint="Un demo programado que se muestra dentro de la ficha.">
-          <select id="demo" name="demo" defaultValue={initial.demo ?? ""} className={controlCls()}>
-            <option value="">Ninguno</option>
-            {Object.entries(PRODUCT_DEMOS).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <Select
+            id="demo"
+            name="demo"
+            defaultValue={initial.demo ?? ""}
+            options={[{ value: "", label: "Ninguno" }, ...Object.entries(PRODUCT_DEMOS).map(([value, label]) => ({ value, label }))]}
+            className={controlCls()}
+          />
         </Field>
         <label className="flex items-start gap-3 self-end rounded-xl border border-neutral-200 p-4">
           <input type="checkbox" name="published" defaultChecked={initial.published} className="mt-0.5 size-5 accent-ink-900" />

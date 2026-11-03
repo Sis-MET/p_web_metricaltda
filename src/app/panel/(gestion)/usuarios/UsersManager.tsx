@@ -4,6 +4,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { KeyRound, Trash2, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/forms/Select";
 import { controlCls } from "@/components/forms/styles";
 import { Field, Notice } from "@/components/panel/Field";
 import { authClient, authErrorMessage } from "@/lib/auth-client";
@@ -12,6 +13,8 @@ import { cn } from "@/lib/utils";
 
 type User = { id: string; name: string; email: string; role: Role; active: boolean; createdAt: string };
 
+const ROLE_OPTIONS = Object.entries(ROLES).map(([value, role]) => ({ value, label: role.label }));
+
 const date = new Intl.DateTimeFormat("es-BO", { dateStyle: "medium", timeZone: "America/La_Paz" });
 
 /** Cuentas del panel: crear, rol, activar/desactivar, contraseña nueva y eliminar (API de administración) */
@@ -19,11 +22,14 @@ export function UsersManager({ users, meId }: { users: User[]; meId: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
+  // Tras cada operación las listas de rol se rearman con lo guardado (si un cambio falla, vuelven atrás)
+  const [version, setVersion] = useState(0);
 
   /** Ejecuta una operación y refresca la lista */
   const run = (operation: () => Promise<{ error: unknown }>, done: string) =>
     start(async () => {
       const { error } = await operation();
+      setVersion((v) => v + 1);
       if (error) setMessage({ tone: "error", text: authErrorMessage(error as Parameters<typeof authErrorMessage>[0]) });
       else {
         setMessage({ tone: "ok", text: done });
@@ -75,24 +81,24 @@ export function UsersManager({ users, meId }: { users: User[]; meId: string }) {
                   {user.email} · desde {date.format(new Date(user.createdAt))}
                 </p>
               </div>
-              <select
-                value={user.role}
-                disabled={me || pending}
-                aria-label={`Rol de ${user.name}`}
-                onChange={(event) =>
-                  run(
-                    () => authClient.admin.setRole({ userId: user.id, role: event.target.value as Role }),
-                    `${user.name} ahora es ${ROLES[event.target.value as Role].label.toLowerCase()}.`
-                  )
-                }
-                className={cn(controlCls(), "h-9 w-40 text-sm")}
-              >
-                {Object.entries(ROLES).map(([key, role]) => (
-                  <option key={key} value={key}>
-                    {role.label}
-                  </option>
-                ))}
-              </select>
+              <div className="w-44">
+                <Select
+                  key={`${user.role}-${version}`}
+                  id={`rol-${user.id}`}
+                  name={`rol-${user.id}`}
+                  label={`Rol de ${user.name}`}
+                  defaultValue={user.role}
+                  disabled={me || pending}
+                  options={ROLE_OPTIONS}
+                  onChange={(role) =>
+                    run(
+                      () => authClient.admin.setRole({ userId: user.id, role: role as Role }),
+                      `${user.name} ahora es ${ROLES[role as Role].label.toLowerCase()}.`
+                    )
+                  }
+                  className={cn(controlCls(), "h-9 text-sm")}
+                />
+              </div>
               {!me && (
                 <div className="flex items-center gap-1">
                   <button
@@ -151,13 +157,13 @@ export function UsersManager({ users, meId }: { users: User[]; meId: string }) {
             <input id="new-password" name="password" type="text" required minLength={10} autoComplete="off" className={controlCls()} />
           </Field>
           <Field label="Rol" htmlFor="new-role" required>
-            <select id="new-role" name="role" defaultValue="comercial" className={controlCls()}>
-              {Object.entries(ROLES).map(([key, role]) => (
-                <option key={key} value={key}>
-                  {role.label} — {role.description}
-                </option>
-              ))}
-            </select>
+            <Select
+              id="new-role"
+              name="role"
+              defaultValue="comercial"
+              options={Object.entries(ROLES).map(([value, role]) => ({ value, label: `${role.label} — ${role.description}` }))}
+              className={controlCls()}
+            />
           </Field>
           <div className="sm:col-span-2">
             <Button type="submit" disabled={pending}>
