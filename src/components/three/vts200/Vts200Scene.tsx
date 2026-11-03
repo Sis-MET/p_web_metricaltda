@@ -152,7 +152,7 @@ function World({
       <Walls layout={layout} materials={materials} />
       <Scale layout={layout} materials={materials} reading={reading} activity={activity} cellView={cellView} />
       <Truck truckRef={truckRef} spinRef={spin} materials={materials} />
-      <ProviderSign distance={21} />
+      <ProviderSign distance={21} facing={views.overview.position} />
 
       <ScreenAnchors points={points} elements={labelElements} isVisible={labelVisible} />
       <ScreenAnchors points={cellPoints} elements={cellTagElements} isVisible={inCellView} />

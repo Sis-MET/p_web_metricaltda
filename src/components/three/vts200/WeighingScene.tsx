@@ -178,7 +178,7 @@ function World({
       <Walls layout={layout} materials={materials} />
       <Scale layout={layout} materials={materials} reading={reading} activity={activity} cellView={xray} />
       <Truck truckRef={truckRef} spinRef={spin} materials={materials} />
-      <ProviderSign distance={19} />
+      <ProviderSign distance={19} facing={views.overview.position} />
 
       <ScreenAnchors points={cellPoints} elements={cellTagElements} isVisible={() => live.current.xray} />
 

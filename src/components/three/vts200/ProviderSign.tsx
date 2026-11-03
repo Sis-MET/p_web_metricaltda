@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
+import type { Vec3 } from "../useResponsiveFraming";
 
-/** Letrero (m): panel sobre un mástil, alto para que los camiones pasen por debajo */
+/** Letrero (m): panel sobre dos postes, alto para que se vea por encima de la báscula y el camión */
 const SIGN = { width: 12, height: 4.8, depth: 0.3, clearance: 4.6, frame: 0.12, pole: 0.2 };
 /** Franja del camino de los camiones (|z|): el mástil nunca queda sobre ella */
 const ROAD = 3.6;
@@ -56,13 +56,11 @@ function drawFace(logo: HTMLImageElement | null) {
 }
 
 /**
- * Letrero "Balanza provista por" con el logo de Métrica. Se ubica siempre detrás de la báscula
- * (en el origen) mirando a la cámara: se lee desde cualquier ángulo y nunca tapa la báscula. Si
- * quedaría sobre el camino, se corre al costado. `distance`: desde el centro de la báscula (m).
+ * Letrero "Balanza provista por" con el logo de Métrica, de dos caras sobre dos postes. Está fijo
+ * detrás de la báscula (en el origen), del lado opuesto a la vista general (`facing`) y mirándola,
+ * fuera del camino de los camiones. `distance`: desde el centro de la báscula (m).
  */
-export function ProviderSign({ distance }: { distance: number }) {
-  const group = useRef<THREE.Group>(null);
-  const placed = useRef(false);
+export function ProviderSign({ distance, facing }: { distance: number; facing: Vec3 }) {
   // Hasta que cargan el logo y la fuente, la cara va en blanco (mismo shader: no recompila)
   const blank = useMemo(() => drawFace(null), []);
   const [face, setFace] = useState<THREE.Texture | null>(null);
@@ -87,34 +85,30 @@ export function ProviderSign({ distance }: { distance: number }) {
   /** Altura del centro del panel: hasta ahí llega el mástil */
   const middle = SIGN.clearance + SIGN.height / 2;
 
-  useFrame(({ camera }, dt) => {
-    const g = group.current;
-    if (!g) return;
-    const { x: cx, z: cz } = camera.position;
-    const length = Math.hypot(cx, cz) || 1;
-    // Al lado opuesto de la cámara, fuera de la franja del camino
-    const x = (-cx / length) * distance;
-    let z = (-cz / length) * distance;
-    if (Math.abs(z) < ROAD) z = z > 0 ? ROAD : -ROAD;
-    // Se desliza (no salta) cuando la cámara cruza el eje del camino
-    const k = placed.current ? 1 - Math.exp(-6 * dt) : 1;
-    placed.current = true;
-    g.position.set(g.position.x + (x - g.position.x) * k, 0, g.position.z + (z - g.position.z) * k);
-    g.rotation.y = Math.atan2(cx - g.position.x, cz - g.position.z);
-  });
+  // Al lado opuesto de la vista general, fuera de la franja del camino
+  const [fx, , fz] = facing;
+  const length = Math.hypot(fx, fz) || 1;
+  const x = (-fx / length) * distance;
+  let z = (-fz / length) * distance;
+  if (Math.abs(z) < ROAD) z = z > 0 ? ROAD : -ROAD;
 
   return (
-    <group ref={group}>
-      <mesh material={frame} position={[0, middle / 2, -SIGN.depth / 2 - SIGN.pole]}>
-        <cylinderGeometry args={[SIGN.pole, SIGN.pole * 1.2, middle, 16]} />
-      </mesh>
+    <group position={[x, 0, z]} rotation-y={Math.atan2(fx - x, fz - z)}>
+      {[-1, 1].map((side) => (
+        <mesh key={`poste${side}`} material={frame} position={[side * SIGN.width * 0.3, SIGN.clearance / 2, 0]}>
+          <cylinderGeometry args={[SIGN.pole, SIGN.pole * 1.2, SIGN.clearance, 16]} />
+        </mesh>
+      ))}
       <mesh material={frame} position={[0, middle, 0]}>
         <boxGeometry args={[SIGN.width + SIGN.frame * 2, SIGN.height + SIGN.frame * 2, SIGN.depth]} />
       </mesh>
-      <mesh position={[0, middle, SIGN.depth / 2 + 0.005]}>
-        <planeGeometry args={[SIGN.width, SIGN.height]} />
-        <meshBasicMaterial map={face ?? blank} toneMapped={false} />
-      </mesh>
+      {/* Una cara de cada lado: se lee también al rodear la escena */}
+      {[1, -1].map((side) => (
+        <mesh key={`cara${side}`} position={[0, middle, side * (SIGN.depth / 2 + 0.005)]} rotation-y={side < 0 ? Math.PI : 0}>
+          <planeGeometry args={[SIGN.width, SIGN.height]} />
+          <meshBasicMaterial map={face ?? blank} toneMapped={false} />
+        </mesh>
+      ))}
     </group>
   );
 }
