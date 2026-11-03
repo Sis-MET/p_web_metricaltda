@@ -7,5 +7,7 @@ overrides:
   tmp: ^0.2.4
 
 allowBuilds:
+  # Solo instala el binario de su plataforma; lo usa drizzle-kit (pnpm db:generate)
+  esbuild: true
   sharp: true
   unrs-resolver: true
