@@ -11,6 +11,20 @@ on:
 jobs:
   paquete:
     runs-on: ubuntu-latest
+    # Base de prueba para precalentar las imágenes: el paquete arranca, aplica las migraciones y carga
+    # el catálogo inicial como lo hará en el hosting (misma versión de MariaDB)
+    services:
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_DATABASE: metrica
+          MARIADB_USER: metrica
+          MARIADB_PASSWORD: metrica
+          MARIADB_RANDOM_ROOT_PASSWORD: "1"
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=24
     steps:
       - uses: actions/checkout@v7
 
@@ -38,6 +52,9 @@ jobs:
           out=.next/standalone
           cp -r .next/static "$out/.next/static"
           rm -rf "$out/public" && cp -r public "$out/public"
+          # Migraciones de la base y catálogo inicial: se aplican solos al arrancar (src/instrumentation.ts)
+          cp -r drizzle "$out/drizzle"
+          cp -r seed "$out/seed"
           # sharp (optimización de imágenes) completo, con sus librerías nativas de Linux:
           # el trazado de Next.js no las copia todas
           for module in sharp @img detect-libc semver; do
@@ -48,7 +65,14 @@ jobs:
       # Arranca el paquete y deja en su caché las imágenes ya optimizadas: así ningún visitante espera
       # su primera codificación. Si el servidor del paquete no arranca, falla aquí y no en el hosting.
       - name: Precalentar las imágenes
-        run: pnpm images:warm .next/standalone
+        env:
+          DATABASE_URL: mysql://metrica:metrica@127.0.0.1:3306/metrica
+          # Fuera del paquete: los archivos de esta base de prueba no viajan en el zip
+          UPLOADS_DIR: ${{ runner.temp }}/archivos
+        run: |
+          pnpm images:warm .next/standalone
+          # Solo viajan las imágenes optimizadas: los datos en caché son de la base de prueba
+          find .next/standalone/.next/cache -mindepth 1 -maxdepth 1 ! -name images -exec rm -rf {} +
 
       - name: Comprimir
         run: cd .next/standalone && zip -qr "$GITHUB_WORKSPACE/metrica-web.zip" .
