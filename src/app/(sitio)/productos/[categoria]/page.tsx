@@ -9,7 +9,7 @@ import { SubNav } from "@/components/layout/SubNav";
 import { CtaBand } from "@/components/layout/CtaBand";
 import { Reveal } from "@/components/animations/Reveal";
 import { ProductBrowser, ProductGrid } from "@/components/products/ProductBrowser";
-import { ProductVisual } from "@/components/products/ProductVisual";
+import { CategoryVisual } from "@/components/products/CategoryVisual";
 import { categoryHref, toSummary } from "@/content/catalog";
 import { findCategory, getCatalog, productsIn } from "@/lib/catalog";
 import { PRODUCTS_HREF, categoryLink, trailFor } from "@/lib/routes";
@@ -41,7 +41,7 @@ export default async function CategoryPage({ params }: Props) {
         eyebrow="Productos"
         title={category.name}
         description={category.description}
-        aside={<ProductVisual image={category.image} alt="" preload className="mx-auto max-w-md" />}
+        aside={<CategoryVisual image={category.image} />}
         nav={<SubNav links={catalog.categories.map(categoryLink)} label="Tipos de producto" />}
       />
 
