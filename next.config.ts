@@ -8,8 +8,9 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   experimental: {
-    // Formularios con adjuntos (hoja de vida, fotos): el límite propio de cada envío es de 4 MB
-    serverActions: { bodySizeLimit: "5mb" },
+    // Formularios con adjuntos: cada formulario del sitio limita sus archivos a 4 MB; el panel sube
+    // imágenes de hasta 8 MB y fichas técnicas en PDF de hasta 20 MB
+    serverActions: { bodySizeLimit: "30mb" },
   },
   async redirects() {
     // Direcciones del sitio anterior: conservan los enlaces guardados y el posicionamiento en buscadores
