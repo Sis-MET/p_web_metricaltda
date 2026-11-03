@@ -1,8 +1,20 @@
-import { boolean, customType, double, int, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
+import {
+  boolean,
+  customType,
+  datetime,
+  double,
+  int,
+  mysqlTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  varchar,
+} from "drizzle-orm/mysql-core";
 
 /*
  * Catálogo de productos. Lo administra el área comercial desde /panel; el sitio lo lee publicado.
- * Compatible con MariaDB (el servidor de Plesk) y MySQL.
+ * Compatible con MariaDB desde la 10.3 (la del servidor de Plesk) y MySQL. Todas las fechas, en UTC
+ * (ver src/lib/db/index.ts).
  */
 
 /**
@@ -22,6 +34,12 @@ const json = <T>(name: string) =>
  */
 export type StoredImage = { key: string; width: number; height: number; opaque?: boolean };
 export type StoredFile = { key: string; size: number; language?: "en" };
+
+/**
+ * Fecha que fija la aplicación (vencimientos). DATETIME y no TIMESTAMP: en MariaDB 10.3 un TIMESTAMP
+ * sin valor por defecto se crea NOT NULL y la base lo reescribe con la hora actual en cada UPDATE.
+ */
+const moment = (name: string) => datetime(name, { mode: "date" });
 
 /** Quién y cuándo: cada fila guarda su último cambio */
 const audit = {
@@ -114,7 +132,7 @@ export const users = mysqlTable("users", {
   role: varchar("role", { length: 20 }),
   banned: boolean("banned").default(false),
   banReason: text("ban_reason"),
-  banExpires: timestamp("ban_expires"),
+  banExpires: moment("ban_expires"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 });
@@ -125,7 +143,7 @@ export const sessions = mysqlTable("sessions", {
   userId: varchar("user_id", { length: 36 })
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  expiresAt: timestamp("expires_at").notNull(),
+  expiresAt: moment("expires_at").notNull(),
   ipAddress: varchar("ip_address", { length: 64 }),
   userAgent: text("user_agent"),
   impersonatedBy: varchar("impersonated_by", { length: 36 }),
@@ -144,8 +162,8 @@ export const accounts = mysqlTable("accounts", {
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),
-  accessTokenExpiresAt: timestamp("access_token_expires_at"),
-  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+  accessTokenExpiresAt: moment("access_token_expires_at"),
+  refreshTokenExpiresAt: moment("refresh_token_expires_at"),
   scope: text("scope"),
   password: text("password"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -157,7 +175,7 @@ export const verifications = mysqlTable("verifications", {
   id: varchar("id", { length: 36 }).primaryKey(),
   identifier: varchar("identifier", { length: 255 }).notNull(),
   value: text("value").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
+  expiresAt: moment("expires_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 });
