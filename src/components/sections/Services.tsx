@@ -87,11 +87,12 @@ export function Services({ heading = true }: { heading?: boolean }) {
       <GridPattern tone="light" size={48} className="[mask-image:linear-gradient(to_bottom,transparent,black_12%,black_80%,transparent)]" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Título de la sección por debajo del de cada servicio: los servicios son los protagonistas */}
         {heading && (
-          <div className="mb-16 flex flex-col gap-4 lg:mb-20 lg:flex-row lg:items-end lg:justify-between">
+          <div className="mb-12 flex flex-col gap-4 lg:mb-14 lg:flex-row lg:items-end lg:justify-between">
             <Reveal>
               <Eyebrow>Servicios</Eyebrow>
-              <h2 className="mt-4 font-heading text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl">
+              <h2 className="mt-4 font-heading text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl">
                 Servicios especializados
               </h2>
             </Reveal>
