@@ -11,7 +11,8 @@
     "start": "next start",
     "lint": "eslint",
     "mail:check": "node --env-file-if-exists=.env.local scripts/mail-check.ts",
-    "images:warm": "node scripts/warm-images.ts"
+    "images:warm": "node scripts/warm-images.ts",
+    "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.94",
@@ -20,14 +21,19 @@
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "ai": "^7.0.138",
+    "better-auth": "^1.7.14",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "drizzle-orm": "^0.45.4",
     "framer-motion": "^12.34.0",
     "lucide-react": "^0.564.0",
+    "mysql2": "^3.24.6",
     "next": "16.1.6",
     "nodemailer": "^10.1.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "server-only": "^0.0.1",
+    "sharp": "0.34.5",
     "tailwind-merge": "^3.4.0",
     "three": "^0.183.0",
     "zod": "^4.6.6"
@@ -39,6 +45,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "~0.183.1",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
