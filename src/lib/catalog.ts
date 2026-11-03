@@ -27,7 +27,7 @@ export const CATALOG_TAG = "catalogo";
 export type Catalog = { categories: Category[]; products: Product[] };
 
 const toImage = (stored: StoredImage | null): CatalogImage | null =>
-  stored && { src: fileUrl(stored.key), width: stored.width, height: stored.height };
+  stored && { src: fileUrl(stored.key), width: stored.width, height: stored.height, photo: stored.opaque === true };
 
 async function loadCatalog(): Promise<Catalog> {
   const { categories, productLines, products } = schema;

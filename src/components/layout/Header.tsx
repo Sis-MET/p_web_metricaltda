@@ -13,6 +13,7 @@ import { QUOTE_HREF, isActivePath, withProducts, type NavItem, type NavLink } fr
 import { useQuoteItems } from "@/lib/quote-store";
 import { SALES_PHONE, whatsappUrl } from "@/content/company";
 import { EASE_OUT } from "@/lib/motion";
+import { fitClass } from "@/components/products/fit";
 import { cn } from "@/lib/utils";
 
 // Alturas (px desde arriba) donde se mide qué sección hay detrás: la barra y el aviso de carga bajo ella
@@ -227,7 +228,7 @@ function DropdownPanel({ item }: { item: NavItem }) {
                       alt=""
                       fill
                       sizes="260px"
-                      className="object-contain p-3 transition-transform duration-300 ease-out group-hover:scale-105"
+                      className={cn(fitClass(image, "p-3"), "transition-transform duration-300 ease-out group-hover:scale-105")}
                     />
                   </span>
                 ) : (

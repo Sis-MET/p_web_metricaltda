@@ -44,15 +44,19 @@ async function save(folder: FileFolder, name: string, extension: string, data: B
   return key;
 }
 
-/** Imagen subida: se reduce a 1600 px como máximo y pasa a WebP, con su transparencia */
+/**
+ * Imagen subida: se reduce a 1600 px como máximo y pasa a WebP, con su transparencia. Se anota si es
+ * opaca (una foto): el sitio la muestra llenando su marco, y un recorte, entero sobre un fondo.
+ */
 export async function saveImage(folder: "categorias" | "productos", name: string, input: Buffer): Promise<StoredImage> {
   const { default: sharp } = await import("sharp");
+  const { isOpaque } = await sharp(input, { density: 300 }).stats();
   const { data, info } = await sharp(input, { density: 300 })
     .rotate()
     .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
     .webp({ quality: 86, alphaQuality: 90 })
     .toBuffer({ resolveWithObject: true });
-  return { key: await save(folder, name, "webp", data), width: info.width, height: info.height };
+  return { key: await save(folder, name, "webp", data), width: info.width, height: info.height, opaque: isOpaque };
 }
 
 /** Ficha técnica en PDF */

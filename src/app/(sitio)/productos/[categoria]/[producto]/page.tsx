@@ -18,6 +18,7 @@ import { findCategory, findProduct, getCatalog, relatedProducts } from "@/lib/ca
 import { SERVICES } from "@/content/services";
 import { SITE_URL, whatsappUrl } from "@/content/company";
 import { PRODUCTS_HREF, categoryLink, trailFor } from "@/lib/routes";
+import { fitClass } from "@/components/products/fit";
 import { cn, compact } from "@/lib/utils";
 
 type Props = { params: Promise<{ categoria: string; producto: string }> };
@@ -70,14 +71,16 @@ export default async function ProductPage({ params }: Props) {
 
           <div className="mt-8 grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
             <div className="relative aspect-square overflow-hidden rounded-[2rem] border border-neutral-200/80 bg-gradient-to-b from-white to-neutral-100 sm:aspect-[4/3] lg:aspect-square">
-              <div aria-hidden className="absolute inset-x-[20%] bottom-[10%] h-[8%] rounded-[50%] bg-ink-950/15 blur-2xl" />
+              {!product.image.photo && (
+                <div aria-hidden className="absolute inset-x-[20%] bottom-[10%] h-[8%] rounded-[50%] bg-ink-950/15 blur-2xl" />
+              )}
               <Image
                 src={product.image.src}
                 alt={title}
                 fill
                 preload
                 sizes="(min-width: 1024px) 600px, 100vw"
-                className="object-contain p-10 sm:p-14"
+                className={fitClass(product.image, "p-10 sm:p-14")}
               />
             </div>
 

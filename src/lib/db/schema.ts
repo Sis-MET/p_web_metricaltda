@@ -16,8 +16,11 @@ const json = <T>(name: string) =>
     fromDriver: (value) => (typeof value === "string" ? JSON.parse(value) : value) as T,
   })(name);
 
-/** Archivo subido: su clave dentro de la carpeta de archivos (UPLOADS_DIR) */
-export type StoredImage = { key: string; width: number; height: number };
+/**
+ * Archivo subido: su clave dentro de la carpeta de archivos (UPLOADS_DIR). En una imagen, `opaque`
+ * indica que no tiene transparencia (una foto); un equipo recortado sobre fondo transparente no lo es.
+ */
+export type StoredImage = { key: string; width: number; height: number; opaque?: boolean };
 export type StoredFile = { key: string; size: number; language?: "en" };
 
 /** Quién y cuándo: cada fila guarda su último cambio */

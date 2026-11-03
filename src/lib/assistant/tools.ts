@@ -19,7 +19,7 @@ const productCard = (product: Product) => ({
   model: product.model,
   title: productTitle(product),
   href: productHref(product),
-  image: { src: product.image.src, width: product.image.width, height: product.image.height },
+  image: { src: product.image.src, width: product.image.width, height: product.image.height, photo: product.image.photo },
   specs: compact([product.capacity && formatCapacity(product.capacity), product.protection]).join(" · "),
 });
 

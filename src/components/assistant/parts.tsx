@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { AddToQuoteButton } from "@/components/products/AddToQuoteButton";
+import { fitClass } from "@/components/products/fit";
 import { whatsappUrl } from "@/content/company";
 import type { AssistantHandoff, AssistantSuggestion } from "@/lib/assistant/tools";
 import { formDrafts } from "@/lib/form-drafts";
@@ -93,7 +94,7 @@ export function ProductSuggestions({ products }: { products: AssistantSuggestion
             aria-hidden
             className="relative size-[4.5rem] shrink-0 overflow-hidden rounded-xl bg-gradient-to-b from-neutral-100 to-white"
           >
-            <Image src={product.image.src} alt="" fill sizes="72px" className="object-contain p-1.5" />
+            <Image src={product.image.src} alt="" fill sizes="72px" className={fitClass(product.image, "p-1.5")} />
           </Link>
           <div className="min-w-0 flex-1">
             <Link href={product.href} className="font-heading text-sm font-bold text-ink-950 hover:underline">

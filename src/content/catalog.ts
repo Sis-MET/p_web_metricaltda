@@ -39,8 +39,11 @@ export type ProductDemoKey = keyof typeof PRODUCT_DEMOS;
 
 /* ─── Modelo ────────────────────────────────────────────────────────────── */
 
-/** Imagen subida: dirección pública y medidas originales */
-export type CatalogImage = { src: string; width: number; height: number };
+/**
+ * Imagen subida: dirección pública y medidas. `photo`: una foto (sin transparencia), que llena su
+ * marco; si no, es un equipo recortado sobre fondo transparente y se muestra entero.
+ */
+export type CatalogImage = { src: string; width: number; height: number; photo: boolean };
 
 export type Line = { slug: string; name: string };
 
