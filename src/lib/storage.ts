@@ -9,7 +9,12 @@ import type { StoredFile, StoredImage } from "@/lib/db/schema";
  * los backups); en desarrollo, ./storage. El sitio las sirve en /archivos/<clave>.
  */
 
-export const uploadsDir = () => path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), "storage"));
+// Datos de tiempo de ejecución, fuera del paquete: el compilador no debe rastrear estas rutas (sin la
+// marca, empaqueta en el servidor todo el proyecto y la carpeta de desarrollo)
+export const uploadsDir = () =>
+  path.resolve(
+    /*turbopackIgnore: true*/ process.env.UPLOADS_DIR || path.join(/*turbopackIgnore: true*/ process.cwd(), "storage")
+  );
 
 export const FILES_ROUTE = "/archivos";
 export const fileUrl = (key: string) => `${FILES_ROUTE}/${key}`;
@@ -19,7 +24,7 @@ export type FileFolder = "categorias" | "productos" | "fichas";
 /** Ruta en disco de una clave; null si intentaría salir de la carpeta de archivos */
 export function resolveKey(key: string) {
   const root = uploadsDir();
-  const full = path.resolve(root, key);
+  const full = path.resolve(/*turbopackIgnore: true*/ root, key);
   return full.startsWith(root + path.sep) ? full : null;
 }
 
