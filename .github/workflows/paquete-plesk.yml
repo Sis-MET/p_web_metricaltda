@@ -12,29 +12,30 @@ jobs:
   paquete:
     runs-on: ubuntu-latest
     # Base de prueba para precalentar las imágenes: el paquete arranca, aplica las migraciones y carga
-    # el catálogo inicial como lo hará en el hosting (misma versión de MariaDB)
+    # el catálogo inicial como lo hará en el hosting (la misma versión de MariaDB que el servidor)
     services:
       mariadb:
-        image: mariadb:11.4
+        image: mariadb:10.3.39
         env:
           MARIADB_DATABASE: metrica
           MARIADB_USER: metrica
           MARIADB_PASSWORD: metrica
           MARIADB_RANDOM_ROOT_PASSWORD: "1"
         ports: ["3306:3306"]
+        # Por TCP: responde recién cuando terminó de inicializarse
         options: >-
-          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u metrica -pmetrica --silent"
           --health-interval=5s --health-timeout=5s --health-retries=24
     steps:
       - uses: actions/checkout@v7
 
-      # La misma versión que el hosting
+      # La misma versión que el hosting (Plesk no ofrece la 22 ni la 24)
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 26
 
-      # pnpm en la versión fijada en package.json (packageManager)
-      - run: corepack enable
+      # pnpm en la versión fijada en package.json (packageManager); Node 26 ya no trae corepack
+      - uses: pnpm/action-setup@v6
 
       # Dependencias como carpetas reales: el Administrador de archivos de Plesk no conserva los
       # enlaces simbólicos que pnpm crea por defecto
