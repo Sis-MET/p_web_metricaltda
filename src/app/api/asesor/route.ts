@@ -85,6 +85,9 @@ export async function POST(request: Request) {
   });
 
   return createUIMessageStreamResponse({
+    // En Plesk, nginx atiende delante del sitio y guarda la respuesta completa antes de enviarla: así
+    // la respuesta del asesor llega a medida que se escribe
+    headers: { "X-Accel-Buffering": "no" },
     stream: toUIMessageStream({
       stream: result.stream,
       // El razonamiento interno del modelo no se muestra al cliente
