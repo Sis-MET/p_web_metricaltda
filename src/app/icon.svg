@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- El dial de la «C» del logo de Métrica (balanza de reloj), sobre el amarillo de la marca -->
+  <rect width="64" height="64" rx="14" fill="#f9e300"/>
+  <g transform="translate(32 33) scale(0.84) translate(-32 -33)" fill="none" stroke="#0d0d0c">
+    <path stroke-width="5.5" d="M49 36A17 17 0 1 1 36.4 19.6"/>
+    <path stroke-width="5" d="M10 36h10M44 36h10M32 13v7M32 52v7M24.5 59.5h15"/>
+    <path stroke-width="4.5" d="M32 36l7.4-7.4"/>
+    <circle cx="32" cy="9" r="5.5" fill="#0d0d0c" stroke="none"/>
+    <path fill="#0d0d0c" stroke="none" d="M44.2 23.8l-2.3 8.2-5.9-5.9z"/>
+  </g>
+</svg>
