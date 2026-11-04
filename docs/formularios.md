@@ -88,7 +88,8 @@ nginx, PHP 8.3); ahí es la extensión *Node.js* de la suscripción, ya activa e
 panel se cargan las mismas variables de `.env.example` con sus valores reales. La instalación paso
 a paso está en [despliegue.md](despliegue.md).
 
-**Conexiones salientes:** MegaLink las bloquea salvo que se pidan. Sin ellas no llega nada: hay
-que solicitar HTTPS (443) hacia `b24-nxcf6f.bitrix24.es`, SMTP con TLS (465) hacia
-`mail.metrica.com.bo` y, para el Asistente de Métrica, HTTPS (443) hacia
-`generativelanguage.googleapis.com`.
+**Conexiones salientes:** el sitio necesita HTTPS (443) hacia `b24-nxcf6f.bitrix24.es`, SMTP con
+TLS (465) hacia `mail.metrica.com.bo` y, para el Asistente de Métrica, HTTPS (443) hacia
+`generativelanguage.googleapis.com`. Estaban abiertas al instalar (noviembre de 2026); cómo
+comprobarlas, y qué pedirle a MegaLink si alguna se cierra, está en
+[despliegue.md](despliegue.md#6-conexiones-salientes).
